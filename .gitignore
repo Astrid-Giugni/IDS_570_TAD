@@ -1,0 +1,9 @@
+# Quarto rendered output
+*.html
+_site/
+
+# RStudio / R
+.Rproj.user
+.Rhistory
+.RData
+
