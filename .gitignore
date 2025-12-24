@@ -2,8 +2,3 @@
 *.html
 _site/
 
-# RStudio / R
-.Rproj.user
-.Rhistory
-.RData
-
