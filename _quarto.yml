@@ -1,0 +1,9 @@
+project:
+  type: website
+
+website:
+  title: "“Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts”"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
