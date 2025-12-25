@@ -1,0 +1,28 @@
+---
+title: "Lesson 02: Comparing Two Texts (Words + Bigrams)"
+format: html
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+## 
+
+## What you will learn
+
+In this lesson, we compare two early modern economic texts by examining word frequencies and bigrams.
+
+## What you need in your project folder
+
+-   Two plain-text files
+-   The tidyverse and tidytext packages
+-   A consistent folder structure
+
+## Step-by-step: from raw texts to comparison plots
+
+## 
+
+## Full script (reference)
+
+\`\`\`text PASTE YOUR SCRIPT HERE
