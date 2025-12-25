@@ -1,26 +1,12 @@
 ---
 title: "IDS 570: “Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts”"
 format: html
-editor: visual
+execute:
+  echo: true
+  warning: false
+  message: false
 ---
 
-## Quarto
+## Course description:
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-1 + 1
-```
-
-You can add options to executable code like this
-
-```{r}
-#| echo: false
-2 * 2
-```
-
-The `echo: false` option disables the printing of code (only output is displayed).
+With the recent explosion in availability of digitized historical and literary texts and the availability of powerful language models, researchers are increasingly turning to computational tools for the analysis of text as data. But not all text is equally amenable to computational approaches. Historical texts often require specialized approaches to bridge the gap between the books as originally produced and analysis-ready data. In this course, students will learn to prepare and analyze historical and literary texts for natural language processing. We will also consider questions of interpretation and the ethics of corpus construction.Our corpora will derive from economic documents and travel narratives from the 17th century. These texts are challenging and require careful curation and cleaning, and they will force you to learn meticulous practices and work-flows in text analysis. Whether working with contemporary or historical texts, most textual data is messy and requires careful preprocessing. By focusing on these Early Modern documents, you will learn how to approach *quantitative* text analysis with *qualitative* study of the cultural, economic, and political context that produced the data you are analyzing.
