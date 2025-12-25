@@ -2,8 +2,14 @@ project:
   type: website
 
 website:
-  title: "“Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts”"
+  title: "Text as Data: NLP with R"
   navbar:
     left:
       - href: index.qmd
         text: Home
+      - href: lesson-01-tokenization.qmd
+        text: Tokenization
+      - href: lesson-02-bigrams.qmd
+        text: Bigrams
+      - href: lesson-03-regex.qmd
+        text: Regex
