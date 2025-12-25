@@ -11,6 +11,9 @@ execute:
 
 Welcome to IDS 570, "Text as Data." For each week of the course, you will find code and notes to match the in-class lecture. For the first few weeks of the semester, we will be working in R. As the term goes on, we will introduce Python concepts and methodologies.
 
+[This repository is a work in progress]{.underline}: I will update it (and the pull-down menu will grow) as the semester progresses and as I add or subtract materials for the course.
+
 ## Instruction for this week:
 
-For each week of the course, you will find code and notes to match the in-class lecture. [For this week]{.underline}: you need to become familiar with RStudio and learn how to organize directories and projects.
+For each week of the course, you will find code and notes to match the in-class lecture. [For this week]{.underline}: you need to become familiar with RStudio and learn how to organize directories and projects. [You can find a friendly introduction to R at]{.underline} <https://rladiessydney.org/courses/01-basicbasics-0>. Complete the three
+BasicBasics lessons. The goal is to feel comfortable with RStudio, installing packages, and reading data into RStudio.

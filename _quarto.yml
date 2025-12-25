@@ -13,7 +13,5 @@ website:
             text: "Week 01: Introduction"
           - href: week-02-basics.qmd
             text: "Week 02: Basics"
-          - href: lesson-02-bigrams.qmd
-            text: "Lesson 02: Bigrams"
-          - href: lesson-03-regex.qmd
-            text: "Lesson 03: regex"
+          - href: week-03-dictionaries.qmd
+            text: "Week 03: Dictionaries"
