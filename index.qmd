@@ -1,5 +1,5 @@
 ---
-title: "IDS 570 Test"
+title: "IDS 570: “Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts”"
 format: html
 editor: visual
 ---
