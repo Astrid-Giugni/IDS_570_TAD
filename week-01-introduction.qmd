@@ -13,4 +13,4 @@ Welcome to IDS 570, "Text as Data." For each week of the course, you will find c
 
 ## Instruction for this week:
 
-For each week of the course, you will find code and notes to match the in-class lecture. For this week:
+For each week of the course, you will find code and notes to match the in-class lecture. [For this week]{.underline}: you need to become familiar with RStudio and learn how to organize directories and projects.

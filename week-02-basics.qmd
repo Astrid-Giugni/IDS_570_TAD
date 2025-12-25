@@ -13,18 +13,19 @@ execute:
 
 This week, we compare two early modern economic texts by examining word frequencies and bigrams. The goal for you to become familiar with how to start implementing NLP workflows in RStudio. The two texts that we are going to be using are available on Canvas, under **files** in the folder named **Week 2**. Note: this will be the standard set up going forward. Sample code will be here and files will be on Canvas, unless otherwise specified.
 
-## What you need in your project folder
+## What you need: 
 
--   Two plain-text files
--   The tidyverse and tidytext packages
--   A consistent folder structure
+I am assuming that you will be working inside an RStudio Project (recommended). We will read two plain-text files, tidy the tokens/bigrams, and compare frequency patterns.
+
+-   A project folder that contains all of your files (try to have a consistent folder organization throughout the semester):
+    -   The plain-text files on Canvas
+-   We will be working with tidyverse and tidytext packages
 
 ## Step-by-step: from raw texts to comparison plots
 
 ## Setup
 
-This lesson assumes you are working inside an RStudio Project (recommended).\
-We will read two plain-text files, tidy the tokens/bigrams, and compare frequency patterns.
+At the beginning of each R file, you will want to call all the packages needed. This will look like:
 
 ```{r}
 library(readr)
@@ -48,7 +49,7 @@ Create a folder named `texts/` inside your project. Put these files inside it:
 (We will refer to them by these exact filenames in the code below.)
 
 ```{r}
-# Define file paths (relative to the Quarto project root)
+# You will need the correct file paths if you don't follow my naming conventions:
 file_a <- "texts/A07594__Circle_of_Commerce.txt"
 file_b <- "texts/B14801__Free_Trade.txt"
 
