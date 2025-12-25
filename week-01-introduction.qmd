@@ -13,6 +13,10 @@ Welcome to IDS 570, "Text as Data." For each week of the course, you will find c
 
 [This repository is a work in progress]{.underline}: I will update it (and the pull-down menu will grow) as the semester progresses and as I add or subtract materials for the course.
 
+##### Importantly:
+
+This site is generated from Quarto source files and updated regularly–expect things to change and if you notice a typo, please let me or the TA's know. Code examples are illustrative and meant to be adapted.
+
 ## Instruction for this week:
 
 For each week of the course, you will find code and notes to match the in-class lecture. [For this week]{.underline}: you need to become familiar with RStudio and learn how to organize directories and projects. [You can find a friendly introduction to R at]{.underline} <https://rladiessydney.org/courses/01-basicbasics-0>. Complete the three

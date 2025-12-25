@@ -1,17 +1,33 @@
 project:
   type: website
 
+format:
+  html:
+    theme: sandstone
+
 website:
   title: "Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts"
+
   navbar:
+    title: "Text as Data"
     left:
       - href: index.qmd
         text: Home
-      - text: Weeks
-        menu:
+
+  sidebar:
+    style: docked
+    search: true
+    contents:
+      - section: "Course"
+        contents:
+          - index.qmd
+
+      - section: "Weeks"
+        contents:
           - href: week-01-introduction.qmd
             text: "Week 01: Introduction"
           - href: week-02-basics.qmd
             text: "Week 02: Basics"
           - href: week-03-dictionaries.qmd
             text: "Week 03: Dictionaries"
+

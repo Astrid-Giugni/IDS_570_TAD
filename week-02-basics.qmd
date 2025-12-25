@@ -17,7 +17,7 @@ This week, we compare two early modern economic texts by examining word frequenc
 
 -   Our guiding questions will be: how does Misselden's language about trade change between 1622 and 1623? This is obviously an artificially simplistic question at this stage, but it will help us explore some useful NLP methods. To *begin* answering this question, we will compare word frequency between two of his works: *Free Trade* (London, 1622) and *The Circle of Commerce* (London, 1623). We will also look at bigram frequencies as a preview of the longer discussion of N-grams next week.
 
-## What you need: 
+## What you need:
 
 I am assuming that you will be working inside an RStudio Project (recommended). We will read two plain-text files, tidy the tokens/bigrams, and compare frequency patterns. You will need:
 
@@ -99,7 +99,7 @@ all_stopwords %>% slice(1:10)
 
 Next we are going to create a function that tokenizes the texts, removes both standard and custom stopwords, and then counts which words appear most frequently in each document. As you look over this section, you will want to become familiar with the [pipe in R](https://tidyverse.org/blog/2023/04/base-vs-magrittr-pipe/) (`%>%`).
 
--    `texts` is a `tibble` where each row corresponds to a document;
+-   `texts` is a `tibble` where each row corresponds to a document;
 
 -   `unnest_tokens(word, text)`: splits the `text` column into individual word tokens, creates a new column called `word`, and expands the tibble so each row is now *one word occurrence*
 
@@ -137,7 +137,7 @@ The goal of this visualization is a [side-by-side comparison plot]{.underline} s
 
     -   `arrange(desc(max_n)` sorts the words from most to least frequent based on `max_n`.
 
-####  Stop and regroup:
+#### Stop and regroup:
 
 I have just implicitly (sneakily) introduced some new things and you might find it helpful to take a look at this introduction to [**data structures**](https://dcl-prog.stanford.edu/data-structure-basics.html). We will reinforce this topic as we go so don't panic if this is new to you!
 
@@ -278,7 +278,7 @@ Next, we are going to contrast the bigrams in the two texts by identifying which
 
 -   normalized them within each document
 
-We now want to know which bigram is most characteristic of "Text A" (*The Circle of Commerce*) *reliative to* "Text B" (*Free Trade*).
+We now want to know which bigram is most characteristic of "Text A" (*The Circle of Commerce*) [relative to]{.underline} "Text B" (*Free Trade*).
 
 ```{r}
 bigram_diff <- bigram_wide %>%
