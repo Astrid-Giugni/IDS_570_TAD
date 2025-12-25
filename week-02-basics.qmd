@@ -9,9 +9,9 @@ execute:
 
 ## 
 
-## What you will learn
+## Week's Goals:
 
-In this lesson, we compare two early modern economic texts by examining word frequencies and bigrams.
+This week, we compare two early modern economic texts by examining word frequencies and bigrams. The goal for you to become familiar with how to start implementing NLP workflows in RStudio. The two texts that we are going to be using are available on Canvas, under **files** in the folder named **Week 2**. Note: this will be the standard set up going forward. Sample code will be here and files will be on Canvas, unless otherwise specified.
 
 ## What you need in your project folder
 

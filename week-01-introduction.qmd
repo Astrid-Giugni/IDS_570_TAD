@@ -4,4 +4,10 @@ format: html
 editor: visual
 ---
 
-## 
+## Course description:
+
+With the recent explosion in availability of digitized historical and literary texts and the availability of powerful language models, researchers are increasingly turning to computational tools for the analysis of text as data. But not all text is equally amenable to computational approaches. Historical texts often require specialized approaches to bridge the gap between the books as originally produced and analysis-ready data. In this course, students will learn to prepare and analyze historical and literary texts for natural language processing. We will also consider questions of interpretation and the ethics of corpus construction.Our corpora will derive from economic documents and travel narratives from the 17th century. These texts are challenging and require careful curation and cleaning, and they will force you to learn meticulous practices and work-flows in text analysis. Whether working with contemporary or historical texts, most textual data is messy and requires careful preprocessing. By focusing on these Early Modern documents, you will learn how to approach *quantitative* text analysis with *qualitative* study of the cultural, economic, and political context that produced the data you are analyzing. 
+
+## Welcome:
+
+Welcome to IDS 570, "Text as Data." For each week of the course, you will find code and notes to match the in-class lecture.
