@@ -2,14 +2,15 @@ project:
   type: website
 
 website:
-  title: "Text as Data: NLP with R"
   navbar:
     left:
       - href: index.qmd
         text: Home
-      - href: lesson-01-tokenization.qmd
-        text: Tokenization
-      - href: lesson-02-bigrams.qmd
-        text: Bigrams
-      - href: lesson-03-regex.qmd
-        text: Regex
+      - text: Lessons
+        menu:
+          - href: lesson-01-tokenization.qmd
+            text: Lesson 01: Tokenization
+          - href: lesson-02-bigrams.qmd
+            text: Lesson 02: Bigrams
+          - href: lesson-03-tfidf.qmd
+            text: Lesson 03: TF–IDF
