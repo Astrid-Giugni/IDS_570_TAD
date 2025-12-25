@@ -2,6 +2,7 @@ project:
   type: website
 
 website:
+  title: "Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts"
   navbar:
     left:
       - href: index.qmd
@@ -12,5 +13,5 @@ website:
             text: Lesson 01: Tokenization
           - href: lesson-02-bigrams.qmd
             text: Lesson 02: Bigrams
-          - href: lesson-03-tfidf.qmd
-            text: Lesson 03: TF–IDF
+          - href: lesson-03-regex.qmd
+            text: Lesson 03: regex
