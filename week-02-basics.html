@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Week 02: Basics – Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-991b1886d3c685c7aa2b62b80640c7af.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weeks" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Weeks</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-weeks">    
+        <li>
+    <a class="dropdown-item" href="./week-01-introduction.html">
+ <span class="dropdown-text">Week 01: Introduction</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./week-02-basics.html">
+ <span class="dropdown-text">Week 02: Basics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./week-03-dictionaries.html">
+ <span class="dropdown-text">Week 03: Dictionaries</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Week 02: Basics</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="section" class="level2">
+<h2 class="anchored" data-anchor-id="section"></h2>
+</section>
+<section id="weeks-goals" class="level2">
+<h2 class="anchored" data-anchor-id="weeks-goals">Week’s Goals:</h2>
+<p>This week, we compare two early modern economic texts by examining word frequencies and bigrams. Our two texts are by Edward Misselden, one of the major <a href="https://plato.stanford.edu/entries/economics-early-modern/">Early Modern mercantilists</a> whose work we will be analyzing. The goal is for you to become familiar with how to start implementing NLP workflows in RStudio. The two texts are available on Canvas, under <strong>files</strong> in the folder named <strong>Week 2</strong>.</p>
+<p><u>Note:</u> this will be the standard set up going forward. Sample code will be here and files will be on Canvas, unless otherwise specified.</p>
+<ul>
+<li>Our guiding questions will be: how does Misselden’s language about trade change between 1622 and 1623? This is obviously an artificially simplistic question at this stage, but it will help us explore some useful NLP methods. To <em>begin</em> answering this question, we will compare word frequency between two of his works: <em>Free Trade</em> (London, 1622) and <em>The Circle of Commerce</em> (London, 1623). We will also look at bigram frequencies as a preview of the longer discussion of N-grams next week.</li>
+</ul>
+</section>
+<section id="what-you-need" class="level2">
+<h2 class="anchored" data-anchor-id="what-you-need">What you need:</h2>
+<p>I am assuming that you will be working inside an RStudio Project (recommended). We will read two plain-text files, tidy the tokens/bigrams, and compare frequency patterns. You will need:</p>
+<ul>
+<li>A project folder that contains all of your files (try to have a consistent folder organization throughout the semester).</li>
+<li>The plain-text files on Canvas.</li>
+</ul>
+</section>
+<section id="a-word-of-warning-about-training-wheels" class="level2">
+<h2 class="anchored" data-anchor-id="a-word-of-warning-about-training-wheels">A word of warning about training wheels:</h2>
+<p>Because this class doesn’t assume familiarity with R, I am giving <strong>extended</strong> explanations of the code during this first session (including tips on how to set up your directories and extensive links to R documentation). As the semester proceeds, I will assume that you are gaining confidence and familiarity with R and Rstudio, and the training wheels will slowly come off. Take advantage of the slower pace at the start of the semester to set yourself up for the harder weeks to come!</p>
+<p>This week I will also show the results of each step of code by printing after each step. This will make (a bit more) explicit how each chunk of code modifies our data. You will be expected to do this more and more on your own starting next week.</p>
+</section>
+<section id="step-by-step-from-raw-texts-to-comparison-plots" class="level2">
+<h2 class="anchored" data-anchor-id="step-by-step-from-raw-texts-to-comparison-plots">Step-by-step: from raw texts to comparison plots</h2>
+</section>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<p>At the beginning of each R file, you will want to call all the packages needed. This will look like:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidytext)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forcats)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(scales)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>I am storing my text files in a directory named <code>texts/</code> inside my project: I strongly suggest doing the same to make your life easier.</p>
+<p>The next section of code demonstrates how to read the files and to organize them into a type of dataframe that is well suited for Tidy work: a <a href="https://tibble.tidyverse.org/">tibble</a>. For this week, I am using generic “file_a” and “file_b” names to simplify the rather complex original file names. We will discuss the naming conventions of these files as well as how to deal with XML files (the original format of Misselden’s texts) in the next few weeks, but for now, I want you to focus on getting them into the appropriate format for analysis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># You will need the correct file paths if you don't follow my naming conventions:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>file_a <span class="ot">&lt;-</span> <span class="st">"texts/A07594__Circle_of_Commerce.txt"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>file_b <span class="ot">&lt;-</span> <span class="st">"texts/B14801__Free_Trade.txt"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Read the raw text files into R</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>text_a <span class="ot">&lt;-</span> <span class="fu">read_file</span>(file_a)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>text_b <span class="ot">&lt;-</span> <span class="fu">read_file</span>(file_b)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine into a tibble for tidytext workflows</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>texts <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">doc_title =</span> <span class="fu">c</span>(<span class="st">"Text A"</span>, <span class="st">"Text B"</span>),</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">text =</span> <span class="fu">c</span>(text_a, text_b)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>texts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  doc_title text                                                                
+  &lt;chr&gt;     &lt;chr&gt;                                                               
+1 Text A    THE CIRCLE OF COMMERCE. The Prooeme. HERODOTVS in his CLIO, reporte…
+2 Text B    CAP. I. The Causes of the want of Money in England. IT hauing pleas…</code></pre>
+</div>
+</div>
+<p>As you can see from the .txt files, these are Early Modern texts with (at least some) of the original orthography. In reality, these have already been partially cleaned as I have accessed them from <a href="https://earlyprint.org/"><strong>EarlyPrint</strong></a> (we will discuss different sources of texts, historical and otherwise) as you start thinking about your term project.</p>
+</section>
+<section id="tokenization-stopwords-and-counting-words" class="level2">
+<h2 class="anchored" data-anchor-id="tokenization-stopwords-and-counting-words">Tokenization, stopwords, and counting words:</h2>
+<p>We will turn each text into a table of one word per row, this is the <strong>tokenization</strong> process. Tokens are the basic unit of text that we are working on. For right now, we are going to consider each word to be a token, but we could break up the text into characters or parts of words if needed. We will then we remove <strong>stopwords</strong> (words like “the” or “and” that are not useful for <em>this</em> analysis) so that the remaining words are more meaningful for comparison.</p>
+<p>We will do this in two steps:</p>
+<ul>
+<li><u>Stopwords</u>: we will create an “all stopwords” list by combining tidytext’s built-in list with our own, corpus-specific, list. Our list is going to be a one-column <a href="https://tibble.tidyverse.org/"><code>tibble</code></a> to match the format of the built-in stopwords:</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Start with tidytext's built-in stopword list</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"stop_words"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Add our own project-specific stopwords (you can, and will, expand this list later)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>custom_stopwords <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">word =</span> <span class="fu">c</span>(</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"vnto"</span>, <span class="st">"haue"</span>, <span class="st">"doo"</span>, <span class="st">"hath"</span>, <span class="st">"bee"</span>, <span class="st">"ye"</span>, <span class="st">"thee"</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>all_stopwords <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(stop_words, custom_stopwords) <span class="sc">%&gt;%</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(word)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>all_stopwords <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 1
+   word       
+   &lt;chr&gt;      
+ 1 a          
+ 2 a's        
+ 3 able       
+ 4 about      
+ 5 above      
+ 6 according  
+ 7 accordingly
+ 8 across     
+ 9 actually   
+10 after      </code></pre>
+</div>
+</div>
+<p>Next we are going to create a function that tokenizes the texts, removes both standard and custom stopwords, and then counts which words appear most frequently in each document. As you look over this section, you will want to become familiar with the <a href="https://tidyverse.org/blog/2023/04/base-vs-magrittr-pipe/">pipe in R</a> (<code>%&gt;%</code>).</p>
+<ul>
+<li><p><code>texts</code> is a <code>tibble</code> where each row corresponds to a document;</p></li>
+<li><p><code>unnest_tokens(word, text)</code>: splits the <code>text</code> column into individual word tokens, creates a new column called <code>word</code>, and expands the tibble so each row is now <em>one word occurrence</em></p></li>
+<li><p><code>mutate</code>: here we are normalizing all words to lower case. This is a <em>research decision</em>: I want to count words like “Money,” “MONEY,” and “money” as the same token, so that I can ask how often the texts talk about “money” regardless of capitalization. <strong>Note</strong>: mutate is part of the <a href="https://dplyr.tidyverse.org/reference/mutate.html">dplyr</a> package.</p></li>
+<li><p><code>anti_join</code>: this is where we remove the stopwords we defined earlier and keeps only the tokens that should (we think!) give us the information we want. Look over the information on <code>joins</code> <a href="https://dplyr.tidyverse.org/reference/filter-joins.html">here</a> and make sure that you understand what it’s doing and understand why the <strong>tibble</strong> format is important! We will be using <code>anti_join</code> frequently.</p></li>
+<li><p>Finally we count.</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>word_counts <span class="ot">&lt;-</span> texts <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest_tokens</span>(word, text) <span class="sc">%&gt;%</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">word =</span> <span class="fu">str_to_lower</span>(word)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(all_stopwords, <span class="at">by =</span> <span class="st">"word"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(doc_title, word, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>word_counts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 7,443 × 3
+   doc_title word            n
+   &lt;chr&gt;     &lt;chr&gt;       &lt;int&gt;
+ 1 Text A    trade         232
+ 2 Text A    exchange      186
+ 3 Text B    trade         185
+ 4 Text A    ſo            184
+ 5 Text A    malynes       158
+ 6 Text A    merchants     126
+ 7 Text A    mony          118
+ 8 Text A    hee           115
+ 9 Text A    kingdome      113
+10 Text A    commodities    96
+# ℹ 7,433 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="comparing-word-frequencies-across-texts" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-word-frequencies-across-texts">Comparing word frequencies across texts</h2>
+<p>Let’s compare how individual words differ across texts after stopword removal through a first visualization. To keep the visualization readable, we focus on the top 20 most frequent words overall. For now, we won’t get into all the details of the visualization code; we will focus on the main components.</p>
+<p>The goal of this visualization is a <u>side-by-side comparison plot</u> showing the top 20 most frequent words across the texts with one facet per text. <strong>Note</strong>: these are the <em>same</em> words for both texts. This means that we are creating a direct comparison of how Misselden uses the most frequent terms.</p>
+<ul>
+<li><p>We start by putting <code>word_count</code> in the correct format with <code>pivot_wider</code>: each word will have a column for each document’s count.</p></li>
+<li><p><code>values_fill = 0</code>: if a word never appears in a text, it gets a 0 instead of <code>NA</code>.</p></li>
+<li><p>Next, we rank words based on this criterion: for each word, look at how often it appears in Text A and how often it appears in Text B, and keep the largest count.</p>
+<ul>
+<li><p>This is what is achieved by computing the row-wise maximum with <code>pmax</code> and then defining the vector: <code>max_n = pmax(TextA, TextB)</code>.</p></li>
+<li><p><code>mutate()</code> adds a column to <code>word_comparison_tbl</code> (the wide version of <code>word_count</code> we are defining in this block) based on how we just defined <code>max_n</code> (that is: it takes the vector and attaches it as a column to the tibble).</p></li>
+<li><p><code>arrange(desc(max_n)</code> sorts the words from most to least frequent based on <code>max_n</code>.</p></li>
+</ul></li>
+</ul>
+<section id="stop-and-regroup" class="level4">
+<h4 class="anchored" data-anchor-id="stop-and-regroup">Stop and regroup:</h4>
+<p>I have just implicitly (sneakily) introduced some new things and you might find it helpful to take a look at this introduction to <a href="https://dcl-prog.stanford.edu/data-structure-basics.html"><strong>data structures</strong></a>. We will reinforce this topic as we go so don’t panic if this is new to you!</p>
+</section>
+<section id="back-to-the-code" class="level4">
+<h4 class="anchored" data-anchor-id="back-to-the-code">Back to the code:</h4>
+<p>We have produced a wide, ranked comparison table. We want to turn into a tidy table that can easily be plotted. To do this we need three main steps:</p>
+<ol type="1">
+<li><p>select the top 20 words to plot (based on our ranking criterion above). We will do this with <code>slice_head(n = plot_n_words)</code>, which takes the first <code>plot_n_words</code> of <code>word_comparison_tbl</code>.</p></li>
+<li><p>reshape from wide to long to please <code>ggplot</code>: we will talk about ggplot more in the future, for now, we can treat it as a blackbox that produces nice visualizations.</p></li>
+<li><p>order the words for the plot with <code>mutate(word = fct_reorder(word, n, .fun = max))</code>. Note: here too, I am asking you to take this as a blackbox for now. What this step is trying to solve is the problem (for us) that a character vector has no inherent order.</p></li>
+</ol>
+<p>Finally we plot!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>plot_n_words <span class="ot">&lt;-</span> <span class="dv">20</span>  <span class="co"># you can change this as needed</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Select the most frequent words overall</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>word_comparison_tbl <span class="ot">&lt;-</span> word_counts <span class="sc">%&gt;%</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> doc_title,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> n,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_fill =</span> <span class="dv">0</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">max_n =</span> <span class="fu">pmax</span>(<span class="st">`</span><span class="at">Text A</span><span class="st">`</span>, <span class="st">`</span><span class="at">Text B</span><span class="st">`</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(max_n))</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>word_plot_data <span class="ot">&lt;-</span> word_comparison_tbl <span class="sc">%&gt;%</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> plot_n_words) <span class="sc">%&gt;%</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="fu">c</span>(<span class="st">`</span><span class="at">Text A</span><span class="st">`</span>, <span class="st">`</span><span class="at">Text B</span><span class="st">`</span>),</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"doc_title"</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"n"</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">word =</span> <span class="fu">fct_reorder</span>(word, n, <span class="at">.fun =</span> max))</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(word_plot_data, <span class="fu">aes</span>(<span class="at">x =</span> n, <span class="at">y =</span> word)) <span class="sc">+</span> <span class="co">#black magic happens thanks to ggplot</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> doc_title, <span class="at">scales =</span> <span class="st">"free_x"</span>) <span class="sc">+</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Most frequent words (stopwords removed)"</span>,</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="fu">paste0</span>(</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Top "</span>, plot_n_words,</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>      <span class="st">" words by maximum frequency across both texts"</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Word frequency"</span>,</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-02-basics_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="bigrams-starting-to-think-about-context" class="level2">
+<h2 class="anchored" data-anchor-id="bigrams-starting-to-think-about-context">Bigrams: starting to think about context</h2>
+<p>Single-word frequencies tell us what terms are common, but they don’t tell us about the context of these words. Our next step will be to try to get a first, basic understanding of how words in our texts fit together. Bigrams allow us to see which words <em>appear together</em>, capturing short phrases and recurring ideas. This is also our first step towards exploring <em>collocations</em>, <em>formulaic language</em>, and <em>discursive patterns</em>, rather than just isolated vocabulary.</p>
+<ul>
+<li>You should be able to understand the syntax of this first step (make sure that you do!):</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>bigrams <span class="ot">&lt;-</span> texts <span class="sc">%&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest_tokens</span>(bigram, text, <span class="at">token =</span> <span class="st">"ngrams"</span>, <span class="at">n =</span> <span class="dv">2</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>bigrams</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 53,809 × 2
+   doc_title bigram           
+   &lt;chr&gt;     &lt;chr&gt;            
+ 1 Text A    the circle       
+ 2 Text A    circle of        
+ 3 Text A    of commerce      
+ 4 Text A    commerce the     
+ 5 Text A    the prooeme      
+ 6 Text A    prooeme herodotvs
+ 7 Text A    herodotvs in     
+ 8 Text A    in his           
+ 9 Text A    his clio         
+10 Text A    clio reportes    
+# ℹ 53,799 more rows</code></pre>
+</div>
+</div>
+<p>Currently, each bigram is stored as a single string. We want to remove stopwords (using the custom list we created earlier). In order to do that, we need to be able to inspect <em>each word separately</em> in the bigram. <code>separate()</code> does just that! It takes the bigram column and splits each string at the space character. It then creates two new columns: “word1” and “word2.”</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>bigrams_separated <span class="ot">&lt;-</span> bigrams <span class="sc">%&gt;%</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(bigram, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"word1"</span>, <span class="st">"word2"</span>), <span class="at">sep =</span> <span class="st">" "</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>bigrams_separated</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 53,809 × 3
+   doc_title word1     word2    
+   &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;    
+ 1 Text A    the       circle   
+ 2 Text A    circle    of       
+ 3 Text A    of        commerce 
+ 4 Text A    commerce  the      
+ 5 Text A    the       prooeme  
+ 6 Text A    prooeme   herodotvs
+ 7 Text A    herodotvs in       
+ 8 Text A    in        his      
+ 9 Text A    his       clio     
+10 Text A    clio      reportes 
+# ℹ 53,799 more rows</code></pre>
+</div>
+</div>
+<ul>
+<li>Now we can remove <code>all_stopwords</code></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>bigrams_filtered <span class="ot">&lt;-</span> bigrams_separated <span class="sc">%&gt;%</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span>word1 <span class="sc">%in%</span> all_stopwords<span class="sc">$</span>word,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span>word2 <span class="sc">%in%</span> all_stopwords<span class="sc">$</span>word</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>bigrams_filtered</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 7,622 × 3
+   doc_title word1    word2    
+   &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;    
+ 1 Text A    prooeme  herodotvs
+ 2 Text A    clio     reportes 
+ 3 Text A    croesvs  king     
+ 4 Text A    ſonne    borne    
+ 5 Text A    borne    dumbe    
+ 6 Text A    king     himſelf  
+ 7 Text A    imminent danger   
+ 8 Text A    certaine perſian  
+ 9 Text A    perſian  ready    
+10 Text A    lay      violent  
+# ℹ 7,612 more rows</code></pre>
+</div>
+</div>
+<p>We remove bigrams where <em>either</em> word is a stopword, since phrases like “of the” or “and the” are rarely meaningful analytically.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>bigram_counts <span class="ot">&lt;-</span> bigrams_filtered <span class="sc">%&gt;%</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(doc_title, word1, word2, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>bigram_counts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6,449 × 4
+   doc_title word1     word2           n
+   &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;       &lt;int&gt;
+ 1 Text B    common    wealth         48
+ 2 Text A    merchants adventurers    35
+ 3 Text B    latin     alphabet       34
+ 4 Text A    low       countries      21
+ 5 Text B    east      india          20
+ 6 Text A    free      trade          19
+ 7 Text A    latin     alphabet       17
+ 8 Text A    natiue    commodities    17
+ 9 Text A    forraine  commodities    16
+10 Text A    letters   patents        14
+# ℹ 6,439 more rows</code></pre>
+</div>
+</div>
+<p>Now that we removed the stopwords, we can use <code>unite</code> to put the bigrams back together:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>bigram_counts <span class="ot">&lt;-</span> bigram_counts <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unite</span>(bigram, word1, word2, <span class="at">sep =</span> <span class="st">" "</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>bigram_counts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6,449 × 3
+   doc_title bigram                    n
+   &lt;chr&gt;     &lt;chr&gt;                 &lt;int&gt;
+ 1 Text B    common wealth            48
+ 2 Text A    merchants adventurers    35
+ 3 Text B    latin alphabet           34
+ 4 Text A    low countries            21
+ 5 Text B    east india               20
+ 6 Text A    free trade               19
+ 7 Text A    latin alphabet           17
+ 8 Text A    natiue commodities       17
+ 9 Text A    forraine commodities     16
+10 Text A    letters patents          14
+# ℹ 6,439 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="comparing-bigrams" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-bigrams">Comparing bigrams:</h2>
+<p>So far, we have looked at the most frequent bigrams <em>within</em> each text. But frequency alone does not tell us what is <em>distinctive</em>. If we compare how often the same bigrams appear across texts, we should be able to start seeing some differences between the two texts.</p>
+<ul>
+<li><p>Since the two texts by Misselden differ in length <em>and</em> in number of bigrams, we want to normalize by the number of bigrams <em>within</em> each document to compare the two.</p></li>
+<li><p>We then reshape the data for comparison: in tidy, we want one row per bigram so that we can easily compare across the two text.</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>bigram_relative <span class="ot">&lt;-</span> bigram_counts <span class="sc">%&gt;%</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(doc_title) <span class="sc">%&gt;%</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_bigrams =</span> <span class="fu">sum</span>(n),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">proportion =</span> n <span class="sc">/</span> total_bigrams</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>bigram_wide <span class="ot">&lt;-</span> bigram_relative <span class="sc">%&gt;%</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(doc_title, bigram, proportion) <span class="sc">%&gt;%</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> doc_title,</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> proportion,</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_fill =</span> <span class="dv">0</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>bigram_wide</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6,379 × 3
+   bigram                `Text B` `Text A`
+   &lt;chr&gt;                    &lt;dbl&gt;    &lt;dbl&gt;
+ 1 common wealth         0.0187    0.00257
+ 2 merchants adventurers 0         0.00692
+ 3 latin alphabet        0.0133    0.00336
+ 4 low countries         0.00156   0.00415
+ 5 east india            0.00780   0      
+ 6 free trade            0         0.00376
+ 7 natiue commodities    0.00273   0.00336
+ 8 forraine commodities  0         0.00316
+ 9 letters patents       0.000390  0.00277
+10 thouſand pounds       0         0.00277
+# ℹ 6,369 more rows</code></pre>
+</div>
+</div>
+<p>Next, we are going to contrast the bigrams in the two texts by identifying which biagrams are most likely to distinguish one text from the other. <strong>N.B.:</strong> this is <strong>not</strong> a statistical test, we are just exploring the differences in the bigrams between the two texts. To recap, up to this point, we have:</p>
+<ul>
+<li><p>extracted bigrams</p></li>
+<li><p>filtered them</p></li>
+<li><p>normalized them within each document</p></li>
+</ul>
+<p>We now want to know which bigram is most characteristic of “Text A” (<em>The Circle of Commerce</em>) <em>reliative to</em> “Text B” (<em>Free Trade</em>).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>bigram_diff <span class="ot">&lt;-</span> bigram_wide <span class="sc">%&gt;%</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">diff =</span> <span class="st">`</span><span class="at">Text A</span><span class="st">`</span> <span class="sc">-</span> <span class="st">`</span><span class="at">Text B</span><span class="st">`</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="fu">abs</span>(diff)))</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>bigram_diff <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 20 × 4
+   bigram                `Text B` `Text A`     diff
+   &lt;chr&gt;                    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+ 1 common wealth         0.0187    0.00257 -0.0161 
+ 2 latin alphabet        0.0133    0.00336 -0.00989
+ 3 east india            0.00780   0       -0.00780
+ 4 merchants adventurers 0         0.00692  0.00692
+ 5 merchants aduenturers 0.00390   0       -0.00390
+ 6 free trade            0         0.00376  0.00376
+ 7 forraine commodities  0         0.00316  0.00316
+ 8 thouſand pounds       0         0.00277  0.00277
+ 9 low countries         0.00156   0.00415  0.00259
+10 letters patents       0.000390  0.00277  0.00238
+11 publique vtility      0.00234   0       -0.00234
+12 cloth trade           0.00429   0.00198 -0.00231
+13 33 ſh                 0         0.00218  0.00218
+14 20 ſhillings          0         0.00198  0.00198
+15 ſh 4                  0         0.00198  0.00198
+16 disorderly trade      0.00195   0       -0.00195
+17 fishing vpon          0.00195   0       -0.00195
+18 india stocke          0.00195   0       -0.00195
+19 kings honour          0.00195   0       -0.00195
+20 maiesties subiects    0.00195   0       -0.00195</code></pre>
+</div>
+</div>
+<p>What does <code>diff</code> tell us? If <code>diff &gt; 0</code>, then the bigram is more prominent in Text A; if <code>diff &lt;0</code>, in Text B. If <code>diff</code> is approximately 0, then it is used more or less in similar proportion in the two texts.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
