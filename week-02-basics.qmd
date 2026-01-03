@@ -147,7 +147,7 @@ We have produced a wide, ranked comparison table. We want to turn into a tidy ta
 
 1.  select the top 20 words to plot (based on our ranking criterion above). We will do this with `slice_head(n = plot_n_words)`, which takes the first `plot_n_words` of `word_comparison_tbl`.
 
-2.  reshape from wide to long to please `ggplot`: we will talk about ggplot more in the future, for now, we can treat it as a blackbox that produces nice visualizations.
+2.  reshape from wide to long to please `ggplot`: we will talk about ggplot more in the future, but, for now, we can treat it as a blackbox that produces nice visualizations.
 
 3.  order the words for the plot with `mutate(word = fct_reorder(word, n, .fun = max))`. Note: here too, I am asking you to take this as a blackbox for now. What this step is trying to solve is the problem (for us) that a character vector has no inherent order.
 
@@ -192,7 +192,7 @@ ggplot(word_plot_data, aes(x = n, y = word)) + #black magic happens thanks to gg
 
 ## Bigrams: starting to think about context
 
-Single-word frequencies tell us what terms are common, but they don't tell us about the context of these words. Our next step will be to try to get a first, basic understanding of how words in our texts fit together. Bigrams allow us to see which words *appear together*, capturing short phrases and recurring ideas. This is also our first step towards exploring *collocations*, *formulaic language*, and *discursive patterns*, rather than just isolated vocabulary.
+Single-word frequencies tell us which terms are common, but they don't tell us about the context of these words. Our next step will be to try to get a first, basic understanding of how words in our texts fit together. Bigrams allow us to see which words *appear together*, capturing short phrases and recurring ideas. This is also our first step towards exploring *collocations*, *formulaic language*, and *discursive patterns*, rather than just isolated vocabulary.
 
 -   You should be able to understand the syntax of this first step (make sure that you do!):
 
@@ -244,7 +244,7 @@ bigram_counts
 
 ## Comparing bigrams:
 
-So far, we have looked at the most frequent bigrams *within* each text. But frequency alone does not tell us what is *distinctive*. If we compare how often the same bigrams appear across texts, we should be able to start seeing some differences between the two texts.
+So far, we have looked at the most frequent bigrams *within* each text. But frequency alone does not tell us what is *distinctive* about a text. Remember: we started by (somewhat artificially) asking how the language of the two texts differ. If we compare how often the same bigrams appear across texts, we should be able to start seeing some differences between them.
 
 -   Since the two texts by Misselden differ in length *and* in number of bigrams, we want to normalize by the number of bigrams *within* each document to compare the two.
 
@@ -270,7 +270,7 @@ bigram_wide <- bigram_relative %>%
 bigram_wide
 ```
 
-Next, we are going to contrast the bigrams in the two texts by identifying which biagrams are most likely to distinguish one text from the other. **N.B.:** this is **not** a statistical test, we are just exploring the differences in the bigrams between the two texts. To recap, up to this point, we have:
+Next, we are going to contrast the bigrams in the two texts by identifying which biagrams are most likely to distinguish one text from the other. **Note:** this is **not** a statistical test, we are just exploring the differences in the bigrams between the two texts. To recap, up to this point, we have:
 
 -   extracted bigrams
 
@@ -291,3 +291,5 @@ bigram_diff %>% slice(1:20)
 ```
 
 What does `diff` tell us? If `diff > 0`, then the bigram is more prominent in Text A; if `diff <0`, in Text B. If `diff` is approximately 0, then it is used more or less in similar proportion in the two texts.
+
+##### Questions:
