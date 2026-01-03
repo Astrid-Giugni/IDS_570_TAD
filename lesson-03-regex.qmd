@@ -1,36 +1,88 @@
 ---
 title: "lesson-03-regex"
 format: html
-editor: visual
+execute:
+  echo: true
+  warning: false
+  message: false
 ---
 
-## Quarto
+### A Quick Aside: Fixing Spelling with Regex
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+When looking at the data from week 2, you may have noticed some unusual characters (see, for example, the print out of the tibble "word_counts"). We need to make some decisions on how to handle them. This is where regular expressions come in. Regular expressions, abbreviated to regex, are a way to define patterns within strings. It will be helpful to get familiar with the package `stringr` (which we have used before without comment) by looking at the documentation [[here]{.underline}](https://stringr.tidyverse.org/).
 
 ```{r}
-1 + 1
+library(readr)
+library(dplyr)
+library(stringr)
+library(tibble)
+
+circle_raw <- read_file("C:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A07594__Circle_of_Commerce.txt")
+str_sub(circle_raw, 1, 500)
+
+text_tbl <- tibble(
+  doc_title = "The Circle of Commerce",
+  text = circle_raw
+)
+
+text_tbl
 ```
 
-You can add options to executable code like this
+In early modern print, the long *s* (ſ) represents the same letter as the modern *s* (both were used in print). When it appears explicitly in transcription or OCR, we can safely *normalize* it to a modern *s*. In historical texts, regex is often used for *normalization*, not “correction." the long *s* isn't an error, it's just a variant (as the British "colour" vs. the American "color" are variants of the same word).
+
+**Regular expressions** allow us to:
+
+-   identify patterns in text, and
+
+-   replace them systematically.
 
 ```{r}
-#| echo: false
-2 * 2
+text_tbl <- text_tbl %>%
+
+ mutate(text_original = text)
+
+text_tbl <- text_tbl %>%
+  mutate(
+    text_clean = str_replace_all(text_original, "ſ", "s")
+  )
+
+str_view(text_tbl$text_original, "ſ")
+# Let's check that the substitution worked:
+str_view(text_tbl$text_clean, "s")
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+A bit of warning:
 
--   headings: regex to fix stuff
+-   We replace **only the explicit character ſ**
 
-<!-- -->
+-   Sometimes, the long S is represented as an "f" in transcribed/OCR'ed texts, but I do *not* recommending trying to guess when an `f` “should be” an `s`. Make sure that you know why! If not, ask!
 
--    bullet points: maybe
+#### Standardizing Name Spellings:
 
-<!-- -->
+Early Modern spelling was not standardized, meaning that the same word may have been spelled in a number of different ways by the same author within the same document. Name spelling was also not standardized and this fact presents some serious problems for us. While it’s pretty easy to decide that “friend” = “freind” (a peculiar spelling by the poet John Milton) for normalization processes, standardizing names in historical texts is not a neutral preprocessing step. It requires biographical and historical research.
 
--    learning goals: more stuff
+If we decide that, for example, Smythe, Smyth, and Smith all refer to the same name, we are making a scholarly claim about identity, authorship, and equivalence across spelling variation. Different research questions may require different choices. Therefore, name standardization rules should always be documented and justified as part of your research.
+
+Having said that, how would we go about standardizing the variant of Smith?
+
+The first step is to define an explicit standardization map. This step will seem excessive right now, but if you are standardizing a large number of words, this vector will keep track of your decisions and it can be expanded as you go.
+
+```{r}
+name_map <- c(
+  "Smythe" = "Smith",
+  "Smyth"  = "Smith",
+  "Smithe" = "Smith"
+)
+```
+
+Now, we do **not** want to simply "search and replace" based on this map. The name-place "Smythfield" (which I am making up right now) should not be replaced by "Smithfield." What we want to replace is the *specific* string "Smyth". To do this, we have to think about word boundaries and typesetting:
+
+\`\``{r}`
+
+`text_tbl <- text_tbl %>%`
+
+`mutate( text_norm = text_clean %>%`
+
+`str_replace_all(regex("\bSmythe\b", ignore_case = TRUE), "Smith") %>%            str_replace_all(regex("\bSmyth\b", ignore_case = TRUE), "Smith") %>%              str_replace_all(regex("\bSmithe\b", ignore_case = TRUE), "Smith") )`
+
+\`\`\`
