@@ -18,9 +18,20 @@ library(stringr)
 library(tibble)  
 
 circle_raw <- read_file("C:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A07594__Circle_of_Commerce.txt") 
-str_sub(circle_raw, 1, 500)  
-text_tbl <- tibble(   doc_title = "The Circle of Commerce",   text = circle_raw )  
+
+text_tbl <- tibble(   
+  doc_title = "The Circle of Commerce",   
+  text = circle_raw 
+  )  
+
 text_tbl
+```
+
+Before we change any parts of the text, we are going to preserve the original text in case we change our mind later on. So we are creating a new `tibble` named `text_tbl` that contains the original text in a column named `text_original`:
+
+```{r}
+#text_tbl <- text_tbl %>%
+#  mutate(text_original = text)
 ```
 
 In early modern print, the long *s* (ſ) represents the same letter as the modern *s* (both were used in print). When it appears explicitly in transcription or OCR, we can safely *normalize* it to a modern *s*. In historical texts, regex is often used for *normalization*, not “correction." the long *s* isn't an error, it's just a variant (as the British "colour" vs. the American "color" are variants of the same word).
@@ -32,13 +43,15 @@ In early modern print, the long *s* (ſ) represents the same letter as the moder
 -   replace them systematically.
 
 ```{r}
-text_tbl <- text_tbl %>%   
-  mutate(text_original = text)  
-text_tbl <- text_tbl %>%   
-  mutate(     text_clean = str_replace_all(text_original, "ſ", "s")   )  #str_view(text_tbl$text_original, "ſ") 
+# text_tbl <- text_tbl %>%   
+#  mutate(     
+#    text_clean = str_replace_all(text_original, "ſ", "s")   
+#    )  
 
-# Let's check that the substitution worked: 
-str_view(text_tbl$text_clean, "s")
+# Let's check that the substitution worked:
+#str_view(text_tbl$text_original, "ſ") 
+
+#tr_view(text_tbl$text_clean, "s")
 ```
 
 A bit of warning:
@@ -58,18 +71,19 @@ Having said that, how would we go about standardizing the variant of Smith?
 The first step is to define an explicit standardization map. This step will seem excessive right now, but if you are standardizing a large number of words, this vector will keep track of your decisions and it can be expanded as you go.
 
 ```{r}
-name_map <- c(   "Smythe" = "Smith",   "Smyth"  = "Smith",   "Smithe" = "Smith" )
+#name_map <- c(   
+#"Smythe" = "Smith",   "Smyth"  = "Smith",   "Smithe" = "Smith" )
 ```
 
 Now, we do **not** want to simply "search and replace" based on this map. The name-place "Smythfield" (which I am making up right now) should not be replaced by "Smithfield." What we want to replace is the *specific* string "Smyth". To do this, we have to think about word boundaries and typesetting (we want to catch all versions of the name regardless of case):
 
 ```{r}
-texts <- texts %>%
-  mutate(
-    text_norm = text_clean %>%
-      str_replace_all(regex("\\bSmythe\\b", ignore_case = TRUE), "Smith") %>%
-      str_replace_all(regex("\\bSmyth\\b",  ignore_case = TRUE), "Smith") %>%
-      str_replace_all(regex("\\bSmithe\\b", ignore_case = TRUE), "Smith")
-  )
+#texts <- text_tbl %>%
+#  mutate(
+#    text_norm = text_clean %>%
+#      str_replace_all(regex("\\bSmythe\\b", ignore_case = TRUE), "Smith") %>%
+#      str_replace_all(regex("\\bSmyth\\b",  ignore_case = TRUE), "Smith") %>%
+#      str_replace_all(regex("\\bSmithe\\b", ignore_case = TRUE), "Smith")
+#  )
 
 ```
