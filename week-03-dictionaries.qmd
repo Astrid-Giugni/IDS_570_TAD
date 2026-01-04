@@ -58,8 +58,6 @@ tibble(
   long_s_before = str_count(text_tbl$text_original, "ſ"),
   long_s_after  = str_count(text_tbl$text_clean, "ſ")
 )
-
-
 ```
 
 A bit of warning:
@@ -94,7 +92,6 @@ text_standard <- text_tbl %>%
       str_replace_all(regex("\\bSmyth\\b",  ignore_case = TRUE), "Smith") %>%
       str_replace_all(regex("\\bSmithe\\b", ignore_case = TRUE), "Smith")
   )
-
 ```
 
 The code above uses `\\b` to denote the word boundary. This syntax is peculiar to R (in Python is would be `\b` instead). The boundary matches the position between: a word character (`[A–Z a–z 0–9 _]`) AND a non-word character (space, punctuation, start/end of string). So, `\\bSmithe\\b` will catch: "Smithe", "Smithe.", "Smithe)", etc. but **not** Smithefield.
@@ -105,17 +102,13 @@ Note also that I added a new column with `mutate`, called `text_norm`. This way,
 
 Let's start to explore how *The Circle of Commerce* talks about "trade." Last week we focused on single words, which is fine. But there are limitations to what word counts tell us about a text. What if we wanted to know more than just how often the word "trade" is used? An obvious, first question is to ask how Misselden describes trade in *The Circle*: is he focusing on "domestic trade" or "foreign trade"? Does the think that "trade is growing" or that "trade is declining"? We can start exploring these kinds of relationship by using **n-grams** containing the word trade. An n-gram is simply a sequence of n words. So a bi-gram is two words, such as "free trade"; a tri-gram is three words, such as "trade is growing."
 
-I am going to focus on bigrams as it will keep the lesson clean and easy to follow. Let's start by setting up the needed packages:
+I am going to focus on bigrams as it will keep the lesson clean and easy to follow. Let's start by setting up the needed packages (in addition to the ones we already loaded):
 
 ```{r}
-library(readr) 
-library(dplyr) 
-library(stringr) 
-library(tibble) 
 library(tidyr) 
 library(tidytext) 
 library(ggplot2) 
-library(forcats) 
+library(forcats)
 
 #We are going to load two more libraries that are going to be used for the next goal for today (collocations): more info at https://quanteda.io/ 
 library(quanteda) 
@@ -127,10 +120,57 @@ Bigrams tell us which words tend to appear next to each other in our text. But t
 We are going to start by tokenizing into bigrams. To do so, we are going to take two words at the time rather than one at the time when we use `unnest_tokens`.
 
 ```{r}
+
 bigrams_raw <- text_standard %>%
-select(doc_title, text_norm) %>%
-unnest_tokens(output = "bigram", input = text_norm, token = "ngrams", n = 2)
+ select(doc_title, text_norm) %>%
+ unnest_tokens(output = "bigram", input = text_norm, token = "ngrams", n = 2)
+
+#let's take a look
 
 bigrams_raw %>% count(bigram, sort = TRUE) %>% slice_head(n = 10)
 
 ```
+
+#### Cleaning the bigrams:
+
+As you can see from the list above, we never removed stopwords from `text_standard`. We are going to do this now. We will have to split up the bigrams into single words and remove stopwords for each "half" of the bigram:
+
+```{r}
+data("stop_words") # the standard list from tidytext, but you can adapt the process from week 2 to include custom stop words
+
+bigrams_clean <- bigrams_raw %>%
+separate(bigram, into = c("word1", "word2"), sep = " ") %>%
+filter(!word1 %in% stop_words$word) %>%
+filter(!word2 %in% stop_words$word) %>%
+filter(str_detect(word1, "^[a-z]+$")) %>% # keep alphabetic tokens
+filter(str_detect(word2, "^[a-z]+$"))
+
+bigrams_clean %>% count(word1, word2, sort = TRUE) %>% slice_head(n = 10)
+```
+
+Now we glue the bigrams back together:
+
+```{r}
+bigram_counts <- bigrams_clean %>%
+count(word1, word2, sort = TRUE) %>%
+unite("bigram", word1, word2, sep = " ")
+
+bigram_counts %>%
+slice_head(n = 20) %>%
+mutate(bigram = fct_reorder(bigram, n)) %>%
+ggplot(aes(x = n, y = bigram)) +
+geom_col() +
+labs(
+title = "Most frequent bigrams (after stopword filtering)",
+x = "Count",
+y = NULL
+)
+```
+
+[**Important conceptual point**]{.underline}**:** why are we creating bigrams first, cleaning them from stopwords, and *then* gluing them back together? Shouldn't we just tokenize the text into individual words, clean the stopwords, and then find the bigrams?
+
+Let's test this out with a phrase such as: "strong economy of international trade." If we do bigrams first, we get: "strong economy", "economy of", "of international", "international trade." Removing stopwords will give us: "strong economy", "international trade" (make sure this makes sense to you).
+
+If we cleaned the stopwords *first*, the phrase would turn into: "strong economy international trade." The bigrams would then be: "strong economy", "economy international", "international trade." We now have an "extra" bigram, "economy international" (can you see why?).
+
+**NB**: there will be situations where the second method (clean first, bigrams second) *may be* the better option! Think of the phrase: "the state of the art." The clean first method will give us "state art," while our method (bigrams first, clean second) won't capture this at all. The bigram "state art" is a distortion of the concept "the state of the art"--which method is better is up to you.
