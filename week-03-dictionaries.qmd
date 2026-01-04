@@ -100,7 +100,7 @@ Note also that I added a new column with `mutate`, called `text_norm`. This way,
 
 ### Describing the Text: N-grams and Trade
 
-Let's start to explore how *The Circle of Commerce* talks about "trade." Last week we focused on single words, which is fine. But there are limitations to what word counts tell us about a text. What if we wanted to know more than just how often the word "trade" is used? An obvious, first question is to ask how Misselden describes trade in *The Circle*: is he focusing on "domestic trade" or "foreign trade"? Does the think that "trade is growing" or that "trade is declining"? We can start exploring these kinds of relationship by using **n-grams** containing the word trade. An n-gram is simply a sequence of n words. So a bi-gram is two words, such as "free trade"; a tri-gram is three words, such as "trade is growing."
+Let's start to explore how *The Circle of Commerce* talks about "trade." Last week we focused on single words and on all bigrams. But there are limitations to what word counts and context-free bigrams tell us about a text. What if we wanted to know more than just how often the word "trade" is used? An obvious, first question is to ask how Misselden describes trade in *The Circle*: is he focusing on "domestic trade" or "foreign trade"? Does the think that "trade is growing" or that "trade is declining"? We can start exploring these kinds of relationship by using n-grams containing the word trade. The first step of this analysis will be a bit of review.
 
 I am going to focus on bigrams as it will keep the lesson clean and easy to follow. Let's start by setting up the needed packages (in addition to the ones we already loaded):
 
@@ -148,7 +148,7 @@ filter(str_detect(word2, "^[a-z]+$"))
 bigrams_clean %>% count(word1, word2, sort = TRUE) %>% slice_head(n = 10)
 ```
 
-Now we glue the bigrams back together:
+Now we glue the bigrams back together and visualize them using `ggplot`:
 
 ```{r}
 bigram_counts <- bigrams_clean %>%
@@ -166,11 +166,3 @@ x = "Count",
 y = NULL
 )
 ```
-
-[**Important conceptual point**]{.underline}**:** why are we creating bigrams first, cleaning them from stopwords, and *then* gluing them back together? Shouldn't we just tokenize the text into individual words, clean the stopwords, and then find the bigrams?
-
-Let's test this out with a phrase such as: "strong economy of international trade." If we do bigrams first, we get: "strong economy", "economy of", "of international", "international trade." Removing stopwords will give us: "strong economy", "international trade" (make sure this makes sense to you).
-
-If we cleaned the stopwords *first*, the phrase would turn into: "strong economy international trade." The bigrams would then be: "strong economy", "economy international", "international trade." We now have an "extra" bigram, "economy international" (can you see why?).
-
-**NB**: there will be situations where the second method (clean first, bigrams second) *may be* the better option! Think of the phrase: "the state of the art." The clean first method will give us "state art," while our method (bigrams first, clean second) won't capture this at all. The bigram "state art" is a distortion of the concept "the state of the art"--which method is better is up to you.

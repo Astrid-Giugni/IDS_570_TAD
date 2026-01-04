@@ -242,6 +242,14 @@ bigram_counts <- bigram_counts %>%
 bigram_counts
 ```
 
+[**Important conceptual point**]{.underline}**:** why are we creating bigrams first, cleaning them from stopwords, and *then* gluing them back together? Shouldn't we just tokenize the text into individual words, clean the stopwords, and then find the bigrams?
+
+Let's test this out with a phrase such as: "strong economy of international trade." If we do bigrams first, we get: "strong economy", "economy of", "of international", "international trade." Removing stopwords will give us: "strong economy", "international trade" (make sure this makes sense to you).
+
+If we cleaned the stopwords *first*, the phrase would turn into: "strong economy international trade." The bigrams would then be: "strong economy", "economy international", "international trade." We now have an "extra" bigram, "economy international" (can you see why?).
+
+**NB**: there will be situations where the second method (clean first, bigrams second) *may be* the better option! Think of the phrase: "the state of the art." The clean first method will give us "state art," while our method (bigrams first, clean second) won't capture this at all. The bigram "state art" is a distortion of the concept "the state of the art"--which method is better depends on the question you are asking, but you need to be aware that the choices you make have downstream effects.
+
 ## Comparing bigrams:
 
 So far, we have looked at the most frequent bigrams *within* each text. But frequency alone does not tell us what is *distinctive* about a text. Remember: we started by (somewhat artificially) asking how the language of the two texts differ. If we compare how often the same bigrams appear across texts, we should be able to start seeing some differences between them.
