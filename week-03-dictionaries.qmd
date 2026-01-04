@@ -24,14 +24,17 @@ text_tbl <- tibble(
   text = circle_raw 
   )  
 
-text_tbl
+# Taking a look at text_tbl (or at least part of it since it's very long):
+text_tbl %>% select(doc_title)
+nchar(text_tbl$text)
+str_sub(text_tbl$text, 1, 400)
 ```
 
 Before we change any parts of the text, we are going to preserve the original text in case we change our mind later on. So we are creating a new `tibble` named `text_tbl` that contains the original text in a column named `text_original`:
 
 ```{r}
-#text_tbl <- text_tbl %>%
-#  mutate(text_original = text)
+text_tbl <- text_tbl %>%
+  mutate(text_original = text)
 ```
 
 In early modern print, the long *s* (ſ) represents the same letter as the modern *s* (both were used in print). When it appears explicitly in transcription or OCR, we can safely *normalize* it to a modern *s*. In historical texts, regex is often used for *normalization*, not “correction." the long *s* isn't an error, it's just a variant (as the British "colour" vs. the American "color" are variants of the same word).
@@ -43,15 +46,20 @@ In early modern print, the long *s* (ſ) represents the same letter as the moder
 -   replace them systematically.
 
 ```{r}
-# text_tbl <- text_tbl %>%   
-#  mutate(     
-#    text_clean = str_replace_all(text_original, "ſ", "s")   
-#    )  
+ text_tbl <- text_tbl %>%   
+  mutate(     
+    text_clean = str_replace_all(text_original, "ſ", "s")   
+    )  
 
-# Let's check that the substitution worked:
-#str_view(text_tbl$text_original, "ſ") 
 
-#tr_view(text_tbl$text_clean, "s")
+# Let's count how many "ſ" we had before and after to check that the substitution worked:
+
+tibble(
+  long_s_before = str_count(text_tbl$text_original, "ſ"),
+  long_s_after  = str_count(text_tbl$text_clean, "ſ")
+)
+
+
 ```
 
 A bit of warning:
@@ -71,19 +79,58 @@ Having said that, how would we go about standardizing the variant of Smith?
 The first step is to define an explicit standardization map. This step will seem excessive right now, but if you are standardizing a large number of words, this vector will keep track of your decisions and it can be expanded as you go.
 
 ```{r}
-#name_map <- c(   
-#"Smythe" = "Smith",   "Smyth"  = "Smith",   "Smithe" = "Smith" )
+name_map <- c(   
+"Smythe" = "Smith",   "Smyth"  = "Smith",   "Smithe" = "Smith" 
+)
 ```
 
 Now, we do **not** want to simply "search and replace" based on this map. The name-place "Smythfield" (which I am making up right now) should not be replaced by "Smithfield." What we want to replace is the *specific* string "Smyth". To do this, we have to think about word boundaries and typesetting (we want to catch all versions of the name regardless of case):
 
 ```{r}
-#texts <- text_tbl %>%
-#  mutate(
-#    text_norm = text_clean %>%
-#      str_replace_all(regex("\\bSmythe\\b", ignore_case = TRUE), "Smith") %>%
-#      str_replace_all(regex("\\bSmyth\\b",  ignore_case = TRUE), "Smith") %>%
-#      str_replace_all(regex("\\bSmithe\\b", ignore_case = TRUE), "Smith")
-#  )
+text_standard <- text_tbl %>%
+  mutate(
+    text_norm = text_clean %>%
+      str_replace_all(regex("\\bSmythe\\b", ignore_case = TRUE), "Smith") %>%
+      str_replace_all(regex("\\bSmyth\\b",  ignore_case = TRUE), "Smith") %>%
+      str_replace_all(regex("\\bSmithe\\b", ignore_case = TRUE), "Smith")
+  )
+
+```
+
+The code above uses `\\b` to denote the word boundary. This syntax is peculiar to R (in Python is would be `\b` instead). The boundary matches the position between: a word character (`[A–Z a–z 0–9 _]`) AND a non-word character (space, punctuation, start/end of string). So, `\\bSmithe\\b` will catch: "Smithe", "Smithe.", "Smithe)", etc. but **not** Smithefield.
+
+Note also that I added a new column with `mutate`, called `text_norm`. This way, the original column `text_clean` is not changed.
+
+### Describing the Text: N-grams and Trade
+
+Let's start to explore how *The Circle of Commerce* talks about "trade." Last week we focused on single words, which is fine. But there are limitations to what word counts tell us about a text. What if we wanted to know more than just how often the word "trade" is used? An obvious, first question is to ask how Misselden describes trade in *The Circle*: is he focusing on "domestic trade" or "foreign trade"? Does the think that "trade is growing" or that "trade is declining"? We can start exploring these kinds of relationship by using **n-grams** containing the word trade. An n-gram is simply a sequence of n words. So a bi-gram is two words, such as "free trade"; a tri-gram is three words, such as "trade is growing."
+
+I am going to focus on bigrams as it will keep the lesson clean and easy to follow. Let's start by setting up the needed packages:
+
+```{r}
+library(readr) 
+library(dplyr) 
+library(stringr) 
+library(tibble) 
+library(tidyr) 
+library(tidytext) 
+library(ggplot2) 
+library(forcats) 
+
+#We are going to load two more libraries that are going to be used for the next goal for today (collocations): more info at https://quanteda.io/ 
+library(quanteda) 
+library(quanteda.textstats)
+```
+
+Bigrams tell us which words tend to appear next to each other in our text. But their raw frequencies can be dominated by turns of phrase (such as "the trade" or "this trade") that may or may not be helpful in our analysis. So we will have to make some decisions on how to clean the texts and how to interpret our results.
+
+We are going to start by tokenizing into bigrams. To do so, we are going to take two words at the time rather than one at the time when we use `unnest_tokens`.
+
+```{r}
+bigrams_raw <- text_standard %>%
+select(doc_title, text_norm) %>%
+unnest_tokens(output = "bigram", input = text_norm, token = "ngrams", n = 2)
+
+bigrams_raw %>% count(bigram, sort = TRUE) %>% slice_head(n = 10)
 
 ```
