@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>IDS 570: “Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts” – Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts</title>
+<title>Week 04: Text Representation (1) – Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,6 +19,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -103,7 +138,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Course</a></li><li class="breadcrumb-item"><a href="./index.html">IDS 570: “Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts”</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-04-representation.html">Week 04: Text Representation (1)</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -134,7 +169,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">IDS 570: “Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts”</span></a>
   </div>
 </li>
@@ -169,7 +204,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./week-04-representation.html" class="sidebar-item-text sidebar-link">
+  <a href="./week-04-representation.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Week 04: Text Representation (1)</span></a>
   </div>
 </li>
@@ -184,9 +219,9 @@ ul.task-list li input[type="checkbox"] {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Course</a></li><li class="breadcrumb-item"><a href="./index.html">IDS 570: “Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts”</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-04-representation.html">Week 04: Text Representation (1)</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">IDS 570: “Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts”</h1>
+<h1 class="title">Week 04: Text Representation (1)</h1>
 </div>
 
 
@@ -203,9 +238,18 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="course-description" class="level2">
-<h2 class="anchored" data-anchor-id="course-description">Course description:</h2>
-<p>With the recent explosion in availability of digitized historical and literary texts and the availability of powerful language models, researchers are increasingly turning to computational tools for the analysis of text as data. But not all text is equally amenable to computational approaches. Historical texts often require specialized approaches to bridge the gap between the books as originally produced and analysis-ready data. In this course, students will learn to prepare and analyze historical and literary texts for natural language processing. We will also consider questions of interpretation and the ethics of corpus construction.Our corpora will derive from economic documents and travel narratives from the 17th century. These texts are challenging and require careful curation and cleaning, and they will force you to learn meticulous practices and work-flows in text analysis. Whether working with contemporary or historical texts, most textual data is messy and requires careful preprocessing. By focusing on these Early Modern documents, you will learn how to approach <em>quantitative</em> text analysis with <em>qualitative</em> study of the cultural, economic, and political context that produced the data you are analyzing.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#We are going to load two more libraries that are going to be used for the next goal for today (collocations): more info at https://quanteda.io/ </span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda) </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda.textstats)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>While the results from last week are interesting, they are of limited by the fact that bigrams locate word pairs that are <em>right next to each other</em>. What if I want to find out if Misselden uses certain words together frequently <em>even if</em> they are not exactly next to each other?</p>
+<section id="collocation-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="collocation-analysis">Collocation Analysis:</h3>
+<p>Collocation analysis is designed to find pairs of words that occur together <u>more often than we would expect statistically</u>, compared to how often each word appears on its own. The goal is to find <u>meaningful associations</u> (more on that later) rather than just frequent pairings. The question we want to ask of word pairs such as “cloth trade” is: are the two words near each other in the text simply because they are <em>individually</em> frequent words or are they an actual, meaningful <em>lexical unit</em> (a collocation)?</p>
+<p>A simple way to get a first feeling for this is that collocations downplay the importance of pairs of words where each word is very common in the text. If you look at the “Trade-them bigrams” visualization, you will notice the bigram “heretofore export.” “Heretofore” simply means “before” or “before now”… it’s a pretty common word in Early Modern English. It’s presence is <em>probably</em> skewing the results of our bigram analysis. Collocation analysis should avoid that problem.</p>
+<p>There are a number of measures that are used in</p>
+<p>This is were the package <code>Quanteda</code> comes in.</p>
 
 
 </section>

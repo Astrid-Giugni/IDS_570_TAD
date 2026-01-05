@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>week-03-dictionaries – Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts</title>
+<title>Week 03: Dictionaries – Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,6 +19,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -167,6 +202,12 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Week 03: Dictionaries</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./week-04-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 04: Text Representation (1)</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -180,7 +221,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-03-dictionaries.html">Week 03: Dictionaries</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">week-03-dictionaries</h1>
+<h1 class="title">Week 03: Dictionaries</h1>
 </div>
 
 
@@ -197,8 +238,440 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="section" class="level2">
-<h2 class="anchored" data-anchor-id="section"></h2>
+<section id="a-quick-aside-fixing-spelling-with-regex" class="level3">
+<h3 class="anchored" data-anchor-id="a-quick-aside-fixing-spelling-with-regex">A Quick Aside: Fixing Spelling with Regex</h3>
+<p>When looking at the data from week 2, you may have noticed some unusual characters (see, for example, the print out of the tibble “word_counts”). We need to make some decisions on how to handle them. This is where regular expressions come in. Regular expressions, abbreviated to regex, are a way to define patterns within strings. It will be helpful to get familiar with the package <code>stringr</code> (which we have used before without comment) by looking at the documentation <a href="https://stringr.tidyverse.org/"><u>here</u></a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr) </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr) </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr) </span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)  </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>circle_raw <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"C:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A07594__Circle_of_Commerce.txt"</span>) </span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>text_tbl <span class="ot">&lt;-</span> <span class="fu">tibble</span>(   </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">doc_title =</span> <span class="st">"The Circle of Commerce"</span>,   </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">text =</span> circle_raw </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  )  </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Taking a look at text_tbl (or at least part of it since it's very long):</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>text_tbl <span class="sc">%&gt;%</span> <span class="fu">select</span>(doc_title)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 1
+  doc_title             
+  &lt;chr&gt;                 
+1 The Circle of Commerce</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nchar</span>(text_tbl<span class="sc">$</span>text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 191605</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_sub</span>(text_tbl<span class="sc">$</span>text, <span class="dv">1</span>, <span class="dv">400</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "THE CIRCLE OF COMMERCE. The Prooeme. HERODOTVS in his CLIO, reportes that CROESVS King of LYDIA had a ſonne borne dumbe: and his Countrey being invaded, and the King himſelf in imminent danger of death by a certaine Perſian ready to lay violent hands on him; the Kings ſonne affected with the preſent danger, then ſpake that neuer ſpake before, and cryed alowd, O homo ne perimas Patrem! O man kill n"</code></pre>
+</div>
+</div>
+<p>Before we change any parts of the text, we are going to preserve the original text in case we change our mind later on. So we are creating a new <code>tibble</code> named <code>text_tbl</code> that contains the original text in a column named <code>text_original</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>text_tbl <span class="ot">&lt;-</span> text_tbl <span class="sc">%&gt;%</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">text_original =</span> text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In early modern print, the long <em>s</em> (ſ) represents the same letter as the modern <em>s</em> (both were used in print). When it appears explicitly in transcription or OCR, we can safely <em>normalize</em> it to a modern <em>s</em>. In historical texts, regex is often used for <em>normalization</em>, not “correction.” the long <em>s</em> isn’t an error, it’s just a variant (as the British “colour” vs.&nbsp;the American “color” are variants of the same word).</p>
+<p><strong>Regular expressions</strong> allow us to:</p>
+<ul>
+<li><p>identify patterns in text, and</p></li>
+<li><p>replace them systematically.</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a> text_tbl <span class="ot">&lt;-</span> text_tbl <span class="sc">%&gt;%</span>   </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(     </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">text_clean =</span> <span class="fu">str_replace_all</span>(text_original, <span class="st">"ſ"</span>, <span class="st">"s"</span>)   </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    )  </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Let's count how many "ſ" we had before and after to check that the substitution worked:</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">long_s_before =</span> <span class="fu">str_count</span>(text_tbl<span class="sc">$</span>text_original, <span class="st">"ſ"</span>),</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">long_s_after  =</span> <span class="fu">str_count</span>(text_tbl<span class="sc">$</span>text_clean, <span class="st">"ſ"</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 2
+  long_s_before long_s_after
+          &lt;int&gt;        &lt;int&gt;
+1          4517            0</code></pre>
+</div>
+</div>
+<p>A bit of warning:</p>
+<ul>
+<li><p>We replace <strong>only the explicit character ſ</strong></p></li>
+<li><p>Sometimes, the long S is represented as an “f” in transcribed/OCR’ed texts, but I do <em>not</em> recommending trying to guess when an <code>f</code> “should be” an <code>s</code>. Make sure that you know why! If not, ask!</p></li>
+</ul>
+<section id="standardizing-name-spellings" class="level4">
+<h4 class="anchored" data-anchor-id="standardizing-name-spellings">Standardizing Name Spellings:</h4>
+<p>Early Modern spelling was not standardized, meaning that the same word may have been spelled in a number of different ways by the same author within the same document. Name spelling was also not standardized and this fact presents some serious problems for us. While it’s pretty easy to decide that “friend” = “freind” (a peculiar spelling by the poet John Milton) for normalization processes, standardizing names in historical texts is not a neutral preprocessing step. It requires biographical and historical research.</p>
+<p>If we decide that, for example, Smythe, Smyth, and Smith all refer to the same name, we are making a scholarly claim about identity, authorship, and equivalence across spelling variation. Different research questions may require different choices. Therefore, name standardization rules should always be documented and justified as part of your research.</p>
+<p>Having said that, how would we go about standardizing the variant of Smith?</p>
+<p>The first step is to define an explicit standardization map. This step will seem excessive right now, but if you are standardizing a large number of words, this vector will keep track of your decisions and it can be expanded as you go.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>name_map <span class="ot">&lt;-</span> <span class="fu">c</span>(   </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="st">"Smythe"</span> <span class="ot">=</span> <span class="st">"Smith"</span>,   <span class="st">"Smyth"</span>  <span class="ot">=</span> <span class="st">"Smith"</span>,   <span class="st">"Smithe"</span> <span class="ot">=</span> <span class="st">"Smith"</span> </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, we do <strong>not</strong> want to simply “search and replace” based on this map. The name-place “Smythfield” (which I am making up right now) should not be replaced by “Smithfield.” What we want to replace is the <em>specific</em> string “Smyth”. To do this, we have to think about word boundaries and typesetting (we want to catch all versions of the name regardless of case):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>text_standard <span class="ot">&lt;-</span> text_tbl <span class="sc">%&gt;%</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">text_norm =</span> text_clean <span class="sc">%&gt;%</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_replace_all</span>(<span class="fu">regex</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">bSmythe</span><span class="sc">\\</span><span class="st">b"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>), <span class="st">"Smith"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_replace_all</span>(<span class="fu">regex</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">bSmyth</span><span class="sc">\\</span><span class="st">b"</span>,  <span class="at">ignore_case =</span> <span class="cn">TRUE</span>), <span class="st">"Smith"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_replace_all</span>(<span class="fu">regex</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">bSmithe</span><span class="sc">\\</span><span class="st">b"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>), <span class="st">"Smith"</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The code above uses <code>\\b</code> to denote the word boundary. This syntax is peculiar to R (in Python is would be <code>\b</code> instead). The boundary matches the position between: a word character (<code>[A–Z a–z 0–9 _]</code>) AND a non-word character (space, punctuation, start/end of string). So, <code>\\bSmithe\\b</code> will catch: “Smithe”, “Smithe.”, “Smithe)”, etc. but <strong>not</strong> Smithefield.</p>
+<p>Note also that I added a new column with <code>mutate</code>, called <code>text_norm</code>. This way, the original column <code>text_clean</code> is not changed.</p>
+</section>
+</section>
+<section id="describing-the-text-n-grams-and-trade" class="level3">
+<h3 class="anchored" data-anchor-id="describing-the-text-n-grams-and-trade">Describing the Text: N-grams and Trade</h3>
+<p>Let’s start to explore how <em>The Circle of Commerce</em> talks about “trade.” Last week we focused on single words and on all bigrams. But there are limitations to what word counts and context-free bigrams tell us about a text. What if we wanted to know more than just how often the word “trade” is used? An obvious, first question is to ask how Misselden describes trade in <em>The Circle</em>: is he focusing on “domestic trade” or “foreign trade”? Does the think that “trade is growing” or that “trade is declining”? We can start exploring these kinds of relationship by using n-grams containing the word trade. The first steps of this analysis will be a bit of review.</p>
+<p>I am going to focus on bigrams as it will keep the lesson clean and easy to follow. Let’s start by setting up the needed packages (in addition to the ones we already loaded):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr) </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidytext) </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2) </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forcats)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Bigrams tell us which words tend to appear next to each other in our text. But their raw frequencies can be dominated by turns of phrase (such as “the trade” or “this trade”) that may or may not be helpful in our analysis. So we will have to make some decisions on how to clean the texts and how to interpret our results.</p>
+<p>We are going to start by tokenizing into bigrams. To do so, we are going to take two words at the time rather than one at the time when we use <code>unnest_tokens</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>bigrams_raw <span class="ot">&lt;-</span> text_standard <span class="sc">%&gt;%</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">select</span>(doc_title, text_norm) <span class="sc">%&gt;%</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">unnest_tokens</span>(<span class="at">output =</span> <span class="st">"bigram"</span>, <span class="at">input =</span> text_norm, <span class="at">token =</span> <span class="st">"ngrams"</span>, <span class="at">n =</span> <span class="dv">2</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#let's take a look</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>bigrams_raw <span class="sc">%&gt;%</span> <span class="fu">count</span>(bigram, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 2
+   bigram       n
+   &lt;chr&gt;    &lt;int&gt;
+ 1 of the     386
+ 2 in the     224
+ 3 to the     144
+ 4 and the    113
+ 5 it is      102
+ 6 for the     90
+ 7 of trade    90
+ 8 to be       80
+ 9 of his      77
+10 that the    73</code></pre>
+</div>
+</div>
+<section id="cleaning-the-bigrams" class="level4">
+<h4 class="anchored" data-anchor-id="cleaning-the-bigrams">Cleaning the bigrams:</h4>
+<p>As you can see from the list above, we never removed stopwords from <code>text_standard</code>. We are going to do this now. We will have to split up the bigrams into single words and remove stopwords for each “half” of the bigram (see week 2 for more details on cleaning):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"stop_words"</span>) <span class="co"># the standard list from tidytext, but you can adapt the process from week 2 to include custom stop words</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>bigrams_clean <span class="ot">&lt;-</span> bigrams_raw <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">separate</span>(bigram, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"word1"</span>, <span class="st">"word2"</span>), <span class="at">sep =</span> <span class="st">" "</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(<span class="sc">!</span>word1 <span class="sc">%in%</span> stop_words<span class="sc">$</span>word) <span class="sc">%&gt;%</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(<span class="sc">!</span>word2 <span class="sc">%in%</span> stop_words<span class="sc">$</span>word) <span class="sc">%&gt;%</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(<span class="fu">str_detect</span>(word1, <span class="st">"^[a-z]+$"</span>)) <span class="sc">%&gt;%</span> <span class="co"># keep alphabetic tokens</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(<span class="fu">str_detect</span>(word2, <span class="st">"^[a-z]+$"</span>))</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>bigrams_clean <span class="sc">%&gt;%</span> <span class="fu">count</span>(word1, word2, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 3
+   word1     word2           n
+   &lt;chr&gt;     &lt;chr&gt;       &lt;int&gt;
+ 1 merchants adventurers    35
+ 2 low       countries      21
+ 3 free      trade          19
+ 4 latin     alphabet       17
+ 5 natiue    commodities    17
+ 6 forraine  commodities    16
+ 7 letters   patents        14
+ 8 thousand  pounds         14
+ 9 common    wealth         13
+10 cloth     trade          10</code></pre>
+</div>
+</div>
+<p>Now we glue the bigrams back together and visualize them using <code>ggplot</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>bigram_counts <span class="ot">&lt;-</span> bigrams_clean <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">count</span>(word1, word2, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">unite</span>(<span class="st">"bigram"</span>, word1, word2, <span class="at">sep =</span> <span class="st">" "</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>bigram_counts <span class="sc">%&gt;%</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">20</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">bigram =</span> <span class="fu">fct_reorder</span>(bigram, n)) <span class="sc">%&gt;%</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> n, <span class="at">y =</span> bigram)) <span class="sc">+</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">labs</span>(</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="at">title =</span> <span class="st">"Most frequent bigrams (after stopword filtering)"</span>,</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="at">x =</span> <span class="st">"Count"</span>,</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-03-dictionaries_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="homing-in-on-the-concept-of-trade" class="level4">
+<h4 class="anchored" data-anchor-id="homing-in-on-the-concept-of-trade">Homing in on the concept of <u>trade</u>:</h4>
+<p>We are going to work on two straightforward “trade-focused” strategies that will give us a preliminary way to capture the concept of trade through token analysis:</p>
+<ol type="1">
+<li><p>Filter bigrams that literally contain the token <code>trade</code></p></li>
+<li><p>Use a small “trade lexicon” to capture near-synonyms (e.g., traffick, commerce, merchant, exchange)</p></li>
+</ol>
+<p>Let’s start with the first strategy: which bigrams contain the token <code>trade</code>?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>trade_bigrams <span class="ot">&lt;-</span> bigram_counts <span class="sc">%&gt;%</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(<span class="fu">str_detect</span>(bigram, <span class="st">"</span><span class="sc">\\</span><span class="st">btrade</span><span class="sc">\\</span><span class="st">b"</span>)) <span class="co"># this line should look familiar</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>trade_bigrams <span class="sc">%&gt;%</span> <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 25 × 2
+   bigram                n
+   &lt;chr&gt;             &lt;int&gt;
+ 1 free trade           19
+ 2 cloth trade          10
+ 3 trade cap             5
+ 4 adventurers trade     4
+ 5 fishing trade         3
+ 6 kingdomes trade       3
+ 7 forraine trade        2
+ 8 india trade           2
+ 9 persia trade          2
+10 considered trade      1
+# ℹ 15 more rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>trade_bigrams <span class="sc">%&gt;%</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">20</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">bigram =</span> <span class="fu">fct_reorder</span>(bigram, n)) <span class="sc">%&gt;%</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> n, <span class="at">y =</span> bigram)) <span class="sc">+</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="fu">labs</span>(</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="at">title =</span> <span class="st">"Bigrams that include the word 'trade'"</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="at">x =</span> <span class="st">"Count"</span>,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-03-dictionaries_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This is helpful: it lets us get a first sense of what types of trade might be most important conceptually to Misselden (“free trade” is clearly something that he is concerned with). But what about trade related terms, such as “commodities” or “exchange”? How do their bigrams fit in?</p>
+<p>Let’s create a trade lexicon and check:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>trade_lexicon <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"trade"</span>, <span class="st">"traffick"</span>, <span class="st">"traffic"</span>, <span class="st">"commerce"</span>, <span class="st">"merchant"</span>, <span class="st">"merchants"</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"exchange"</span>, <span class="st">"export"</span>, <span class="st">"import"</span>, <span class="st">"commodity"</span>, <span class="st">"commodities"</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"navigation"</span>, <span class="st">"shipping"</span>, <span class="st">"market"</span>, <span class="st">"markets"</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>trade_theme_bigrams <span class="ot">&lt;-</span> bigrams_clean <span class="sc">%&gt;%</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(word1 <span class="sc">%in%</span> trade_lexicon <span class="sc">|</span> word2 <span class="sc">%in%</span> trade_lexicon) <span class="sc">%&gt;%</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(word1, word2, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unite</span>(<span class="st">"bigram"</span>, word1, word2, <span class="at">sep =</span> <span class="st">" "</span>)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>trade_theme_bigrams <span class="sc">%&gt;%</span> <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 25 × 2
+   bigram                    n
+   &lt;chr&gt;                 &lt;int&gt;
+ 1 merchants adventurers    35
+ 2 free trade               19
+ 3 natiue commodities       17
+ 4 forraine commodities     16
+ 5 cloth trade              10
+ 6 exchange betweene         8
+ 7 commodities exported      5
+ 8 commodities imported      5
+ 9 low exchange              5
+10 politique exchange        5
+# ℹ 15 more rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>trade_theme_bigrams <span class="sc">%&gt;%</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">20</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">bigram =</span> <span class="fu">fct_reorder</span>(bigram, n)) <span class="sc">%&gt;%</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> n, <span class="at">y =</span> bigram)) <span class="sc">+</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="fu">labs</span>(</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="at">title =</span> <span class="st">"Trade-theme bigrams (lexicon-based)"</span>,</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="at">x =</span> <span class="st">"Count"</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-03-dictionaries_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We now see that “natiue commodities” and “forraine commodities” are almost as important as “free trade” in <em>The Circle of Commerce</em>, and “merchants adventurers” is even more prominent.</p>
+<p><strong>Warning:</strong> while my lexicon tracks the alternate spelling for “traffic” (= “traffick”), it doesn’t account for other possible spelling variations (such as “native” = “natiue”). In addition, it treats the variations as distinct words, so that “naval traffic” is being counted as a different bigram from “naval traffick.” This is fine (in my opinion) at this exploratory stage, but it’s something that will need addressing in our analysis down the line.</p>
+<ul>
+<li><u>For your own entertainment</u>: test your understanding of regex by standardizing “traffick” to “traffic” in the text upstream of the bigram analysis.</li>
+</ul>
+</section>
+</section>
+<section id="sentiment-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="sentiment-analysis">Sentiment Analysis:</h3>
+<p>So far, we have explore the language around trade (and trade-related words), but what about the <em>sentiment</em> of this language? Sentiment analysis is a pretty standard technique in NLP projects, but, as we discussed in class, it doesn’t translate smoothly to specialized and historical discourse. For our purposes, we will want to create a targeted sentiment analysis where we measure sentiment only in passages near “trade” (and related terms), instead of across the whole document. This will give us more granular insight over the documents’ tone around the concept of trade.</p>
+<p>Let’s compare <em>The Circle of Commerce</em> (1623) to the earlier text, <em>Free Trade</em> (1622). We will do this in steps:</p>
+<ol type="1">
+<li><p>Define a trade keyword set (e.g., trade/commerce/merchant).</p></li>
+<li><p>Extract token windows around each keyword occurrence (±30 words). There is no hard and fast rule on the size of the window that you want to select. I settled on 30 as a good estimate/guess based on my experience in reading Early Modern texts.</p></li>
+<li><p>Compute sentiment inside those windows only.</p></li>
+<li><p>Compare two texts.</p></li>
+</ol>
+<p>Let’s start the usual way:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidytext)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>circle_raw <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"texts/A07594__Circle_of_Commerce.txt"</span>)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>free_raw   <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"texts/B14801__Free_Trade.txt"</span>)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>texts_miss <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">doc_title =</span> <span class="fu">c</span>(<span class="st">"Circle of Commerce"</span>, <span class="st">"Free Trade"</span>),</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">text =</span> <span class="fu">c</span>(circle_raw, free_raw)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We are going to do some basic normalization:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>texts_miss <span class="ot">&lt;-</span> texts_miss <span class="sc">%&gt;%</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">text_norm =</span> text <span class="sc">%&gt;%</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_replace_all</span>(<span class="st">"ſ"</span>, <span class="st">"s"</span>) <span class="sc">%&gt;%</span>   <span class="co"># long s as above</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_replace_all</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">s+"</span>, <span class="st">" "</span>) <span class="sc">%&gt;%</span> <span class="co"># collapse whitespace</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_to_lower</span>()</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Note:</strong> I am adding a line to collapse whitespace because historical texts can have irregular spaces due to archaic typography. We want to remove extraneous whitespaces and replace them with a single whitespace, such as “The circle of commerce” –&gt; “The circle of commerce.” This problem is not unique to historical texts: as you are aware, social media posts don’t always adhere to the best typesetting (or spelling or grammar…) rules!</p>
+<p><strong>Important:</strong> since we are going to want to create a window of 30 words around our target trade terms, we are going to need to keep track of the <em>position</em> of each word in the document. We do this with the index (<code>token_id</code>).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>tokens <span class="ot">&lt;-</span> texts_miss <span class="sc">%&gt;%</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest_tokens</span>(word, text_norm, <span class="at">token =</span> <span class="st">"words"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(doc_title) <span class="sc">%&gt;%</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">token_id =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To make sure that you understand what we are doing above, start by reviewing <code>unnest_tokens</code> from week 2. That should give you a sense of why we want <code>token_id = row_number</code>. Finally, inspect <code>tokens</code> in RStudio–does it look the way you expect it to?</p>
+<p>Next, we are going to identify where our target terms (in this case, I am going to look at “trade”, “commerce”, “merchant”, and “merchants”, but you can play around with these choices) are in the texts:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>trade_terms <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"trade"</span>, <span class="st">"commerce"</span>, <span class="st">"merchant"</span>, <span class="st">"merchants"</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>trade_hits <span class="ot">&lt;-</span> tokens <span class="sc">%&gt;%</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(word <span class="sc">%in%</span> trade_terms) <span class="sc">%&gt;%</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(doc_title, <span class="at">hit_word =</span> word, <span class="at">hit_token_id =</span> token_id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now that we have located the position of the trade terms (<code>trade_hits</code>), we can create the ±30 token window around them:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>window_size <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>trade_windows <span class="ot">&lt;-</span> tokens <span class="sc">%&gt;%</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(trade_hits, <span class="at">by =</span> <span class="st">"doc_title"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(token_id <span class="sc">&gt;=</span> hit_token_id <span class="sc">-</span> window_size,</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>         token_id <span class="sc">&lt;=</span> hit_token_id <span class="sc">+</span> window_size) <span class="sc">%&gt;%</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">window_id =</span> <span class="fu">paste</span>(doc_title, hit_token_id, <span class="at">sep =</span> <span class="st">"_"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>A couple of notes about the code above:</p>
+<ol type="1">
+<li><p>I gave you a link to information about <code>joins</code> last week, go back to it to understand <code>inner_join</code>.</p></li>
+<li><p>When you run this code, you will get a warning about “an unexpected many-to-many relationship”: <u>this is fine and expected</u>. Our target words appear <em>frequently</em> in the documents (they are, after all, mercantile documents about trade) and so the windows we are creating are overlapping, leading R to warn us about this issue. You can silence the warning if you want.</p></li>
+</ol>
+<p>Let’s take a look at what one window looks like:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>trade_windows <span class="sc">%&gt;%</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(window_id <span class="sc">==</span> <span class="fu">nth</span>(<span class="fu">unique</span>(window_id), <span class="dv">10</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">window_text =</span> <span class="fu">str_c</span>(word, <span class="at">collapse =</span> <span class="st">" "</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(window_text) <span class="sc">%&gt;%</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>vnfitnesse of my pen to represent such pieces so also had i not the happines to attend those then or these since in any of their assemblies as did other merchants whereby my discourse might haue receiued some life and force from their worth and influence their good acceptation of my poore endeauours together with the approbation of many other noble</code></pre>
+</div>
+</div>
+<p>Just as you expected (right?), this is a 61-token window centered around one of our target words (“merchants” in this case).</p>
+<p>Now we are reading to actually compute sentiments. <code>Tidytext</code> gives us access to a number of sentiment lexicons. We are going to use a binary one, <code>bing</code> (by <a href="https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html">Bing Liu and his collaborators</a>), that categorizes words into positive or negative. As we discussed at the onset, this is not going to be historically accurate, but it will give us a reasonable baseline.</p>
+<p>We are going to get into the code details in a second, but let’s start with the reasoning <em>behind</em> this approach:</p>
+<ul>
+<li><p>We are going to look at <em>all</em> the 61-token windows around “trade”, “merchant”, etc.</p></li>
+<li><p>Match words to the sentiment dictionary</p></li>
+<li><p>Count: how many positive words vs negative words in each window?</p></li>
+<li><p>Calculate a net score: positive count minus negative count [so, a window with 5 positive, 2 negative → net = +3 (overall positive)].</p></li>
+</ul>
+<p>The code looks like this:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>bing <span class="ot">&lt;-</span> <span class="fu">get_sentiments</span>(<span class="st">"bing"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>window_sentiment <span class="ot">&lt;-</span> trade_windows <span class="sc">%&gt;%</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(bing, <span class="at">by =</span> <span class="st">"word"</span>) <span class="sc">%&gt;%</span>  <span class="co"># keeps only sentiment-bearing words</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(doc_title, window_id, sentiment) <span class="sc">%&gt;%</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> sentiment, <span class="at">values_from =</span> n, <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">net_sentiment =</span> positive <span class="sc">-</span> negative)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, we create an overall summary of sentiments for each text:</p>
+<ul>
+<li><p>We are going to count how many instances we found of trade-related terms (= the number of window).</p></li>
+<li><p>The number of positive and negative words around trade-related terms.</p></li>
+<li><p>The total net sentiment (= positive - negative)</p></li>
+<li><p>The average net sentiment per window (total net sentiment divided by number of windows).</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>text_sentiment_summary <span class="ot">&lt;-</span> window_sentiment <span class="sc">%&gt;%</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(doc_title) <span class="sc">%&gt;%</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">windows =</span> <span class="fu">n</span>(),</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_positive =</span> <span class="fu">sum</span>(positive),</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_negative =</span> <span class="fu">sum</span>(negative),</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_net_sentiment =</span> <span class="fu">sum</span>(net_sentiment),      </span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">avg_net_per_window =</span> <span class="fu">mean</span>(net_sentiment),</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>text_sentiment_summary</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 6
+  doc_title          windows total_positive total_negative total_net_sentiment
+  &lt;chr&gt;                &lt;int&gt;          &lt;int&gt;          &lt;int&gt;               &lt;int&gt;
+1 Circle of Commerce     337            552            324                 228
+2 Free Trade             249            404            310                  94
+# ℹ 1 more variable: avg_net_per_window &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>Based on this summary, we can start to see that <em>The</em> <em>Circle of Commerce</em> uses more positive language around the trade-related terms that we selected. To get a better handle of this, we are going to plot the distribution of sentiment scores across all the trade windows for each document as a bar graph:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(window_sentiment, <span class="fu">aes</span>(<span class="at">x =</span> net_sentiment)) <span class="sc">+</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> doc_title, <span class="at">ncol =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Sentiment in Trade-Centered Windows (±30 words)"</span>,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Net sentiment (positive - negative) per window"</span>,</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Number of trade windows"</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-03-dictionaries_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 </section>

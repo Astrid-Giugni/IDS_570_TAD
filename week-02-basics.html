@@ -202,6 +202,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Week 03: Dictionaries</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./week-04-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 04: Text Representation (1)</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -396,7 +402,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>We have produced a wide, ranked comparison table. We want to turn into a tidy table that can easily be plotted. To do this we need three main steps:</p>
 <ol type="1">
 <li><p>select the top 20 words to plot (based on our ranking criterion above). We will do this with <code>slice_head(n = plot_n_words)</code>, which takes the first <code>plot_n_words</code> of <code>word_comparison_tbl</code>.</p></li>
-<li><p>reshape from wide to long to please <code>ggplot</code>: we will talk about ggplot more in the future, for now, we can treat it as a blackbox that produces nice visualizations.</p></li>
+<li><p>reshape from wide to long to please <code>ggplot</code>: we will talk about ggplot more in the future, but, for now, we can treat it as a blackbox that produces nice visualizations.</p></li>
 <li><p>order the words for the plot with <code>mutate(word = fct_reorder(word, n, .fun = max))</code>. Note: here too, I am asking you to take this as a blackbox for now. What this step is trying to solve is the problem (for us) that a character vector has no inherent order.</p></li>
 </ol>
 <p>Finally we plot!</p>
@@ -447,7 +453,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="bigrams-starting-to-think-about-context" class="level2">
 <h2 class="anchored" data-anchor-id="bigrams-starting-to-think-about-context">Bigrams: starting to think about context</h2>
-<p>Single-word frequencies tell us what terms are common, but they don’t tell us about the context of these words. Our next step will be to try to get a first, basic understanding of how words in our texts fit together. Bigrams allow us to see which words <em>appear together</em>, capturing short phrases and recurring ideas. This is also our first step towards exploring <em>collocations</em>, <em>formulaic language</em>, and <em>discursive patterns</em>, rather than just isolated vocabulary.</p>
+<p>Single-word frequencies tell us which terms are common, but they don’t tell us about the context of these words. Our next step will be to try to get a first, basic understanding of how words in our texts fit together. Bigrams allow us to see which words <em>appear together</em>, capturing short phrases and recurring ideas. This is also our first step towards exploring <em>collocations</em>, <em>formulaic language</em>, and <em>discursive patterns</em>, rather than just isolated vocabulary.</p>
 <ul>
 <li>You should be able to understand the syntax of this first step (make sure that you do!):</li>
 </ul>
@@ -570,10 +576,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 # ℹ 6,439 more rows</code></pre>
 </div>
 </div>
+<p><u><strong>Important conceptual point</strong></u><strong>:</strong> why are we creating bigrams first, cleaning them from stopwords, and <em>then</em> gluing them back together? Shouldn’t we just tokenize the text into individual words, clean the stopwords, and then find the bigrams?</p>
+<p>Let’s test this out with a phrase such as: “strong economy of international trade.” If we do bigrams first, we get: “strong economy”, “economy of”, “of international”, “international trade.” Removing stopwords will give us: “strong economy”, “international trade” (make sure this makes sense to you).</p>
+<p>If we cleaned the stopwords <em>first</em>, the phrase would turn into: “strong economy international trade.” The bigrams would then be: “strong economy”, “economy international”, “international trade.” We now have an “extra” bigram, “economy international” (can you see why?).</p>
+<p><strong>NB</strong>: there will be situations where the second method (clean first, bigrams second) <em>may be</em> the better option! Think of the phrase: “the state of the art.” The clean first method will give us “state art,” while our method (bigrams first, clean second) won’t capture this at all. The bigram “state art” is a distortion of the concept “the state of the art”–which method is better depends on the question you are asking, but you need to be aware that the choices you make have downstream effects.</p>
 </section>
 <section id="comparing-bigrams" class="level2">
 <h2 class="anchored" data-anchor-id="comparing-bigrams">Comparing bigrams:</h2>
-<p>So far, we have looked at the most frequent bigrams <em>within</em> each text. But frequency alone does not tell us what is <em>distinctive</em>. If we compare how often the same bigrams appear across texts, we should be able to start seeing some differences between the two texts.</p>
+<p>So far, we have looked at the most frequent bigrams <em>within</em> each text. But frequency alone does not tell us what is <em>distinctive</em> about a text. Remember: we started by (somewhat artificially) asking how the language of the two texts differ. If we compare how often the same bigrams appear across texts, we should be able to start seeing some differences between them.</p>
 <ul>
 <li><p>Since the two texts by Misselden differ in length <em>and</em> in number of bigrams, we want to normalize by the number of bigrams <em>within</em> each document to compare the two.</p></li>
 <li><p>We then reshape the data for comparison: in tidy, we want one row per bigram so that we can easily compare across the two text.</p></li>
@@ -613,7 +623,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 # ℹ 6,369 more rows</code></pre>
 </div>
 </div>
-<p>Next, we are going to contrast the bigrams in the two texts by identifying which biagrams are most likely to distinguish one text from the other. <strong>N.B.:</strong> this is <strong>not</strong> a statistical test, we are just exploring the differences in the bigrams between the two texts. To recap, up to this point, we have:</p>
+<p>Next, we are going to contrast the bigrams in the two texts by identifying which biagrams are most likely to distinguish one text from the other. <strong>Note:</strong> this is <strong>not</strong> a statistical test, we are just exploring the differences in the bigrams between the two texts. To recap, up to this point, we have:</p>
 <ul>
 <li><p>extracted bigrams</p></li>
 <li><p>filtered them</p></li>
@@ -655,8 +665,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>What does <code>diff</code> tell us? If <code>diff &gt; 0</code>, then the bigram is more prominent in Text A; if <code>diff &lt;0</code>, in Text B. If <code>diff</code> is approximately 0, then it is used more or less in similar proportion in the two texts.</p>
+<section id="questions" class="level5">
+<h5 class="anchored" data-anchor-id="questions">Questions:</h5>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
