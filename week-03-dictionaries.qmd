@@ -296,7 +296,7 @@ trade_hits <- tokens %>%
   select(doc_title, hit_word = word, hit_token_id = token_id)
 ```
 
-Now that we have located the position of the trade terms (`trade_hits`), we can create the 30 token window around them:
+Now that we have located the position of the trade terms (`trade_hits`), we can create the ±30 token window around them:
 
 ```{r}
 window_size <- 30
@@ -318,6 +318,71 @@ Let's take a look at what one window looks like:
 
 ```{r}
 trade_windows %>%
-  filter(window_id == nth(unique(window_id), 10)) %>%  # 10th window
-  summarise(window_text = str_c(word, collapse = " "))
+  filter(window_id == nth(unique(window_id), 10)) %>%
+  summarise(window_text = str_c(word, collapse = " ")) %>%
+  pull(window_text) %>%
+  cat()
+```
+
+Just as you expected (right?), this is a 61-token window centered around one of our target words ("merchants" in this case).
+
+Now we are reading to actually compute sentiments. `Tidytext` gives us access to a number of sentiment lexicons. We are going to use a binary one, `bing` (by [Bing Liu and his collaborators](https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html)), that categorizes words into positive or negative. As we discussed at the onset, this is not going to be historically accurate, but it will give us a reasonable baseline.
+
+We are going to get into the code details in a second, but let's start with the reasoning *behind* this approach:
+
+-   We are going to look at *all* the 61-token windows around "trade", "merchant", etc.
+
+-   Match words to the sentiment dictionary
+
+-   Count: how many positive words vs negative words in each window?
+
+-   Calculate a net score: positive count minus negative count \[so, a window with 5 positive, 2 negative → net = +3 (overall positive)\].
+
+The code looks like this:
+
+```{r}
+bing <- get_sentiments("bing")
+
+window_sentiment <- trade_windows %>%
+  inner_join(bing, by = "word") %>%  # keeps only sentiment-bearing words
+  count(doc_title, window_id, sentiment) %>%
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) %>%
+  mutate(net_sentiment = positive - negative)
+```
+
+Next, we create an overall summary of sentiments for each text:
+
+-   We are going to count how many instances we found of trade-related terms (= the number of window).
+
+-   The number of positive and negative words around trade-related terms.
+
+-   The total net sentiment (= positive - negative)
+
+-   The average net sentiment per window (total net sentiment divided by number of windows).
+
+```{r}
+text_sentiment_summary <- window_sentiment %>%
+  group_by(doc_title) %>%
+  summarise(
+    windows = n(),
+    total_positive = sum(positive),
+    total_negative = sum(negative),
+    total_net_sentiment = sum(net_sentiment),      
+    avg_net_per_window = mean(net_sentiment),
+    .groups = "drop"
+  )
+text_sentiment_summary
+```
+
+Based on this summary, we can start to see that *The* *Circle of Commerce* uses more positive language around the trade-related terms that we selected. To get a better handle of this, we are going to plot the distribution of sentiment scores across all the trade windows:
+
+```{r}
+ggplot(window_sentiment, aes(x = net_sentiment)) +
+  geom_histogram(binwidth = 1) +
+  facet_wrap(~ doc_title, ncol = 1) +
+  labs(
+    title = "Sentiment in Trade-Centered Windows (±30 words)",
+    x = "Net sentiment (positive - negative) per window",
+    y = "Number of trade windows"
+  )
 ```
