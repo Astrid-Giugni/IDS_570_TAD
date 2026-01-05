@@ -1,0 +1,26 @@
+---
+title: "Week 04: Text Representation (1)"
+format: html
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#We are going to load two more libraries that are going to be used for the next goal for today (collocations): more info at https://quanteda.io/ 
+library(quanteda) 
+library(quanteda.textstats)
+```
+
+While the results from last week are interesting, they are of limited by the fact that bigrams locate word pairs that are *right next to each other*. What if I want to find out if Misselden uses certain words together frequently *even if* they are not exactly next to each other?
+
+### Collocation Analysis:
+
+Collocation analysis is designed to find pairs of words that occur together [more often than we would expect statistically]{.underline}, compared to how often each word appears on its own. The goal is to find [meaningful associations]{.underline} (more on that later) rather than just frequent pairings. The question we want to ask of word pairs such as "cloth trade" is: are the two words near each other in the text simply because they are *individually* frequent words or are they an actual, meaningful *lexical unit* (a collocation)?
+
+A simple way to get a first feeling for this is that collocations downplay the importance of pairs of words where each word is very common in the text. If you look at the "Trade-them bigrams" visualization, you will notice the bigram "heretofore export." "Heretofore" simply means "before" or "before now"... it's a pretty common word in Early Modern English. It's presence is *probably* skewing the results of our bigram analysis. Collocation analysis should avoid that problem.
+
+There are a number of measures that are used in
+
+This is were the package `Quanteda` comes in.
