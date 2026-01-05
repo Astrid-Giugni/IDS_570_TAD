@@ -100,7 +100,7 @@ Note also that I added a new column with `mutate`, called `text_norm`. This way,
 
 ### Describing the Text: N-grams and Trade
 
-Let's start to explore how *The Circle of Commerce* talks about "trade." Last week we focused on single words and on all bigrams. But there are limitations to what word counts and context-free bigrams tell us about a text. What if we wanted to know more than just how often the word "trade" is used? An obvious, first question is to ask how Misselden describes trade in *The Circle*: is he focusing on "domestic trade" or "foreign trade"? Does the think that "trade is growing" or that "trade is declining"? We can start exploring these kinds of relationship by using n-grams containing the word trade. The first step of this analysis will be a bit of review.
+Let's start to explore how *The Circle of Commerce* talks about "trade." Last week we focused on single words and on all bigrams. But there are limitations to what word counts and context-free bigrams tell us about a text. What if we wanted to know more than just how often the word "trade" is used? An obvious, first question is to ask how Misselden describes trade in *The Circle*: is he focusing on "domestic trade" or "foreign trade"? Does the think that "trade is growing" or that "trade is declining"? We can start exploring these kinds of relationship by using n-grams containing the word trade. The first steps of this analysis will be a bit of review.
 
 I am going to focus on bigrams as it will keep the lesson clean and easy to follow. Let's start by setting up the needed packages (in addition to the ones we already loaded):
 
@@ -109,10 +109,6 @@ library(tidyr)
 library(tidytext) 
 library(ggplot2) 
 library(forcats)
-
-#We are going to load two more libraries that are going to be used for the next goal for today (collocations): more info at https://quanteda.io/ 
-library(quanteda) 
-library(quanteda.textstats)
 ```
 
 Bigrams tell us which words tend to appear next to each other in our text. But their raw frequencies can be dominated by turns of phrase (such as "the trade" or "this trade") that may or may not be helpful in our analysis. So we will have to make some decisions on how to clean the texts and how to interpret our results.
@@ -133,7 +129,7 @@ bigrams_raw %>% count(bigram, sort = TRUE) %>% slice_head(n = 10)
 
 #### Cleaning the bigrams:
 
-As you can see from the list above, we never removed stopwords from `text_standard`. We are going to do this now. We will have to split up the bigrams into single words and remove stopwords for each "half" of the bigram:
+As you can see from the list above, we never removed stopwords from `text_standard`. We are going to do this now. We will have to split up the bigrams into single words and remove stopwords for each "half" of the bigram (see week 2 for more details on cleaning):
 
 ```{r}
 data("stop_words") # the standard list from tidytext, but you can adapt the process from week 2 to include custom stop words
@@ -165,4 +161,163 @@ title = "Most frequent bigrams (after stopword filtering)",
 x = "Count",
 y = NULL
 )
+```
+
+####  Homing in on the concept of [trade]{.underline}:
+
+We are going to work on two straightforward “trade-focused” strategies that will give us a preliminary way to capture the concept of trade through token analysis:
+
+1.   Filter bigrams that literally contain the token `trade`
+
+2.   Use a small “trade lexicon” to capture near-synonyms (e.g., traffick, commerce, merchant, exchange)
+
+Let's start with the first strategy: which bigrams contain the token `trade`?
+
+```{r}
+trade_bigrams <- bigram_counts %>%
+filter(str_detect(bigram, "\\btrade\\b")) # this line should look familiar
+
+trade_bigrams %>% slice_head(n = 25)
+
+trade_bigrams %>%
+slice_head(n = 20) %>%
+mutate(bigram = fct_reorder(bigram, n)) %>%
+ggplot(aes(x = n, y = bigram)) +
+geom_col() +
+labs(
+title = "Bigrams that include the word 'trade'",
+x = "Count",
+y = NULL
+)
+```
+
+This is helpful: it lets us get a first sense of what types of trade might be most important conceptually to Misselden ("free trade" is clearly something that he is concerned with). But what about trade related terms, such as "commodities" or "exchange"? How do their bigrams fit in?
+
+Let's create a trade lexicon and check:
+
+```{r}
+trade_lexicon <- c(
+  "trade", "traffick", "traffic", "commerce", "merchant", "merchants",
+  "exchange", "export", "import", "commodity", "commodities",
+  "navigation", "shipping", "market", "markets"
+)
+
+trade_theme_bigrams <- bigrams_clean %>%
+  filter(word1 %in% trade_lexicon | word2 %in% trade_lexicon) %>%
+  count(word1, word2, sort = TRUE) %>%
+  unite("bigram", word1, word2, sep = " ")
+
+trade_theme_bigrams %>% slice_head(n = 25)
+
+trade_theme_bigrams %>%
+slice_head(n = 20) %>%
+mutate(bigram = fct_reorder(bigram, n)) %>%
+ggplot(aes(x = n, y = bigram)) +
+geom_col() +
+labs(
+title = "Trade-theme bigrams (lexicon-based)",
+x = "Count",
+y = NULL
+)
+```
+
+We now see that "natiue commodities" and "forraine commodities" are almost as important as "free trade" in *The Circle of Commerce*, and "merchants adventurers" is even more prominent.
+
+**Warning:** while my lexicon tracks the alternate spelling for "traffic" (= "traffick"), it doesn't account for other possible spelling variations (such as "native" = "natiue"). In addition, it treats the variations as distinct words, so that "naval traffic" is being counted as a different bigram from "naval traffick." This is fine (in my opinion) at this exploratory stage, but it's something that will need addressing in our analysis down the line.
+
+-   [For your own entertainment]{.underline}: test your understanding of regex by standardizing "traffick" to "traffic" in the text upstream of the bigram analysis.
+
+### Sentiment Analysis:
+
+So far, we have explore the language around trade (and trade-related words), but what about the *sentiment* of this language? Sentiment analysis is a pretty standard technique in NLP projects, but, as we discussed in class, it doesn't translate smoothly to specialized and historical discourse. For our purposes, we will want to create a targeted sentiment analysis where we measure sentiment only in passages near “trade” (and related terms), instead of across the whole document. This will give us more granular insight over the documents' tone around the concept of trade.
+
+Let's compare *The Circle of Commerce* (1623) to the earlier text, *Free Trade* (1622). We will do this in steps:
+
+1.  Define a trade keyword set (e.g., trade/commerce/merchant).
+
+2.  Extract token windows around each keyword occurrence (±30 words). There is no hard and fast rule on the size of the window that you want to select. I settled on 30 as a good estimate/guess based on my experience in reading Early Modern texts.
+
+3.  Compute sentiment inside those windows only.
+
+4.  Compare two texts.
+
+Let's start the usual way:
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(tidytext)
+library(ggplot2)
+
+circle_raw <- read_file("texts/A07594__Circle_of_Commerce.txt")
+free_raw   <- read_file("texts/B14801__Free_Trade.txt")
+
+texts_miss <- tibble(
+  doc_title = c("Circle of Commerce", "Free Trade"),
+  text = c(circle_raw, free_raw)
+)
+```
+
+We are going to do some basic normalization:
+
+```{r}
+texts_miss <- texts_miss %>%
+  mutate(
+    text_norm = text %>%
+      str_replace_all("ſ", "s") %>%   # long s as above
+      str_replace_all("\\s+", " ") %>% # collapse whitespace
+      str_to_lower()
+  )
+```
+
+**Note:** I am adding a line to collapse whitespace because historical texts can have irregular spaces due to archaic typography. We want to remove extraneous whitespaces and replace them with a single whitespace, such as "The circle of commerce" –\> "The circle of commerce." This problem is not unique to historical texts: as you are aware, social media posts don't always adhere to the best typesetting (or spelling or grammar...) rules!
+
+**Important:** since we are going to want to create a window of 30 words around our target trade terms, we are going to need to keep track of the *position* of each word in the document. We do this with the index (`token_id`).
+
+```{r}
+tokens <- texts_miss %>%
+  unnest_tokens(word, text_norm, token = "words") %>%
+  group_by(doc_title) %>%
+  mutate(token_id = row_number()) %>%
+  ungroup()
+```
+
+To make sure that you understand what we are doing above, start by reviewing `unnest_tokens` from week 2. That should give you a sense of why we want `token_id = row_number`. Finally, inspect `tokens` in RStudio–does it look the way you expect it to?
+
+Next, we are going to identify where our target terms (in this case, I am going to look at "trade", "commerce", "merchant", and "merchants", but you can play around with these choices) are in the texts:
+
+```{r}
+trade_terms <- c("trade", "commerce", "merchant", "merchants")
+
+trade_hits <- tokens %>%
+  filter(word %in% trade_terms) %>%
+  select(doc_title, hit_word = word, hit_token_id = token_id)
+```
+
+Now that we have located the position of the trade terms (`trade_hits`), we can create the 30 token window around them:
+
+```{r}
+window_size <- 30
+
+trade_windows <- tokens %>%
+  inner_join(trade_hits, by = "doc_title") %>%
+  filter(token_id >= hit_token_id - window_size,
+         token_id <= hit_token_id + window_size) %>%
+  mutate(window_id = paste(doc_title, hit_token_id, sep = "_"))
+```
+
+A couple of notes about the code above:
+
+1.  I gave you a link to information about `joins` last week, go back to it to understand `inner_join`.
+
+2.  When you run this code, you will get a warning about "an unexpected many-to-many relationship": [this is fine and expected]{.underline}. Our target words appear *frequently* in the documents (they are, after all, mercantile documents about trade) and so the windows we are creating are overlapping, leading R to warn us about this issue. You can silence the warning if you want.
+
+Let's take a look at what one window looks like:
+
+```{r}
+trade_windows %>%
+  filter(window_id == nth(unique(window_id), 10)) %>%  # 10th window
+  summarise(window_text = str_c(word, collapse = " "))
 ```
