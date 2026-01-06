@@ -7,20 +7,198 @@ execute:
   message: false
 ---
 
+### Document-Feature Matrices
+
+In Week 3, we began to compare two of Misselden's documents through sentiment analysis around trade terminology. In class on Wednesday, we discussed measures of similarity between texts and what a Document-Feature Matrix (DFM) looks like. Let's implement what we learned in class by comparing the two Misselden's texts to "mystery" text `A06785.txt`.
+
+To create a DFM of the three texts, we will use the `quanteda` package. We start by loading the packages, reading the texts, and combining into a `quanteda` corpus named `corp`.
+
 ```{r}
-#We are going to load two more libraries that are going to be used for the next goal for today (collocations): more info at https://quanteda.io/ 
-library(quanteda) 
+library(tibble)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(quanteda)
 library(quanteda.textstats)
+
+txt_circle    <- read_file("C:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A07594__Circle_of_Commerce.txt")
+txt_free      <- read_file("C:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/B14801__Free_Trade.txt")
+txt_third     <- read_file("C:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A06785.txt")
+
+texts <- c(
+  "Circle_of_Commerce" = txt_circle,
+  "Free_Trade"         = txt_free,
+  "Third_Text_A06785"  = txt_third
+)
+
+corp <- corpus(texts)
 ```
 
-While the results from last week are interesting, they are of limited by the fact that bigrams locate word pairs that are *right next to each other*. What if I want to find out if Misselden uses certain words together frequently *even if* they are not exactly next to each other?
+We then tokenize and do some basic cleaning (most of this should be very familiar by now):
 
-### Collocation Analysis:
+```{r}
+toks <- tokens(
+  corp,
+  remove_punct   = TRUE,
+  remove_numbers = TRUE,
+  remove_symbols = TRUE
+)
 
-Collocation analysis is designed to find pairs of words that occur together [more often than we would expect statistically]{.underline}, compared to how often each word appears on its own. The goal is to find [meaningful associations]{.underline} (more on that later) rather than just frequent pairings. The question we want to ask of word pairs such as "cloth trade" is: are the two words near each other in the text simply because they are *individually* frequent words or are they an actual, meaningful *lexical unit* (a collocation)?
+toks <- tokens_tolower(toks)
 
-A simple way to get a first feeling for this is that collocations downplay the importance of pairs of words where each word is very common in the text. If you look at the "Trade-them bigrams" visualization, you will notice the bigram "heretofore export." "Heretofore" simply means "before" or "before now"... it's a pretty common word in Early Modern English. It's presence is *probably* skewing the results of our bigram analysis. Collocation analysis should avoid that problem.
+custom_stop <- c(
+  "vnto","haue","doo","hath","bee","ye","thee","hee","shall","hast","doe",
+  "beene","thereof","thus" 
+)
 
-There are a number of measures that are used in
+toks <- tokens_remove(toks, pattern = c(stopwords("en"), custom_stop))
+```
 
-This is were the package `Quanteda` comes in.
+The choices that we made when tokenizing do matter! Note that I doing the following:
+
+-   I am removing punctuation. With this decision, I am asserting that for this analysis, punctuation doesn't matter (so I want to treat "commerce." = "commerce!" = "commerce"). You may disagree! If were were doing an analysis of *style*, then punctuation would matter a lot.
+
+-   I am removing numbers. Since these are mercantile texts (including the "mystery" one), it may seems weird to remove potential economic data. My choice is based on a concern for distracting or inaccurate numbers (such as pagination or rounded guesses about population and trade estimates). Again, you may disagree and want to keep them (that's an easy fix in the code above).
+
+-   I am removing symbols. This goes hand-in-hand with the choice about numbers. Most symbols are going to be transcription/OCR errors. The only (likely) valuable ones are currency markers. Since I opted to remove numbers, I decided to remove symbols.
+
+As I have taken pains to demonstrate, these are all decisions that you can change. But you have to have a *principled reason* to do so!
+
+Now we can build the DFM using `quanteda`'s [`dfm()`](https://quanteda.io/reference/dfm.html) and inspect it to make sure that it looks reasonable:
+
+```{r}
+# Document-feature matrix (DFM)
+dfm_mat <- dfm(toks)
+
+# Inspect by raw count (in our corpus) the top 25 features 
+dfm_mat
+topfeatures(dfm_mat, 25)
+```
+
+OK, so far so good. This is a sparse matrix and the top features seem quite plausible. We could also use this as a way to (potentially) remove some more stop words (I am not sure that "one" or "now" are giving us much information). I am going to keep things as they are. In the aggregate, stopwords won't be a problem for what we are doing today (this is an empirical statement based on experience; I present no evidence for this here), and we are going to have a better way to get rid of overly common terms in the next section.
+
+-   For your entertainment: try playing around with stopwords and difference choices in the tokenization step.
+
+To compare the documents, we are going to use the second new library we introduced today: `quanteda.textstats`. It will gives us a number of ways to compare our three texts. We are going to try two of them and compare the results.
+
+#### First: 
+
+Let's start with a correlation measure. We are going to treat each document as a [word frequency vector]{.underline}. So, if we have N words in our corpus, each document is represented by an N-dimensional vector based on the frequency of each word within that text. The vectors are simply the rows of the DFM (where each row is a document).
+
+What we are going to measure in this step is the pairwise Pearson correlation between the vectors across all the word features (the columns of the DFM).
+
+```{r}
+# correlation similarity
+sim_cor <- textstat_simil(
+  dfm_mat,
+  method = "correlation",
+  margin = "documents"
+)
+sim_cor
+```
+
+#### Second: 
+
+Now that we understand how each document is represented at a vector, we can measure the distance between them *as* vectors by measuring the angle between them. We do this using [cosine similarity]{.underline} (as discussed in class). We just have to change the `method` in `textstat_simil()`.
+
+```{r}
+sim_cos <- textstat_simil(
+  dfm_mat,
+  method = "cosine",
+  margin = "documents"
+)
+
+sim_cos
+```
+
+In both cases, we (reassuringly) got 1.000 down the diagonal (each text is perfectly similar to itself) and the matrices are symmetric (can you see why this should be the case?). We also notice that the two texts by Misselden are more similar to each other than to the "mystery" text in both measures. This is also good news since the third text is by a different author.
+
+The third text is Gerard Malynes's *The Center of the Circle of Commerce* (1623). Malynes and Misselden disagree over governmental intervention in trade, and their works address each other's arguments.
+
+-   Question for you: given that Malynes's work is closely related to Misselden's what do you think of the measures of similarity we just computed? As you think about this, remind yourself of how the DFM is set up.
+
+### TF-IDF:
+
+Not all words are created equal in a document. We know this because we remove stopwords and we even create custom stopwords to account for idiosyncratically common words. This can be due to historical context or to technical, but non-characteristic language. For example, my research is on 17th century Puritan sermons and the use of the word "Scripture" is not a particularly distinguishing feature of these texts. But, as I say of many things in this class, this is a value judgement and dependent on technique. It *may* turn out that keeping a common word such as "Scripture" in my corpus would actually produce better results. By making these decisions [explicit]{.underline} in a stopwords list, we can always retrace our steps.
+
+The downside of relying on stopwords is that, in a sense, we have to take educated guesses at which words don't carry enough *discriminating* *meaning between texts* for our corpus. This is where TF-IDF comes in.
+
+There are two components to TF-IDF:
+
+-   Term frequency (TF), which captures how often a word appears in a document (what we have been counting when setting up the DFM)
+
+-   Inverse Document Frequency (IDF), which measures how rare a word is across the corpus. A word that appears in only a few documents will have high IDF. This means that a word with high IDF can be a *distinguishing* feature for a document. $\text{IDF} = \log\left(\frac{\text{number of total docs}}{\text{number of docs with term}}\right)$
+
+    -   Note: `quanteda` gives you the option to use either natural or base 10 log. The default is base 10. See the full documentation [here](https://quanteda.io/reference/dfm_tfidf.html). In some other applications, you will see a preference for natural logarithm. The difference between the two is really irrelevant (it's easy to apply a change of base) and what matters is the compression. What the log does: it keeps the monotonic property of IDF (rarer words get higher IDF values), but it won't let something like a typo in one document dominate.
+
+TF-IDF is just the product of TF with IDF. `Quanteda` will do all the work for us.
+
+Let's go ahead and see how TF-IDF changes our DFM matrix:
+
+```{r}
+dfm_tfidf <- dfm_tfidf(dfm_mat)
+
+dfm_tfidf
+topfeatures(dfm_tfidf, 20)
+
+#Note: so far, dfm_tfidf is a quanteda object that has a compact storage format. If we want to use it with base R, we need to change it into a general R matrix by doing the following: 
+
+tfidf_mat <- as.matrix(dfm_tfidf)
+```
+
+You can think of `tfidf_mat` as a matrix where the rows are the documents, the columns are the terms in the corpus, and the values are the TF-IDF weights (instead of the raw counts). Now we can extract the words with the top TF_IDF values for each text:
+
+```{r}
+# Circle of Commerce
+circle_tfidf <- tfidf_mat["Circle_of_Commerce", ]
+
+# Sort and get top 20
+top_circle <- sort(circle_tfidf, decreasing = TRUE)[1:20]
+top_circle
+
+# Free Trade
+free_tfidf <- tfidf_mat["Free_Trade", ]
+
+# Sort and get top 20
+top_free <- sort(free_tfidf, decreasing = TRUE)[1:20]
+top_free
+
+# A06786
+A06785_tfidf <- tfidf_mat["Third_Text_A06785", ]
+
+# Sort and get top 20
+top_A06785 <- sort(A06785_tfidf, decreasing = TRUE)[1:20]
+top_A06785
+```
+
+-   A technical R note: here `tfidf_mat["Circle_of_Commerce", ]` were are subsetting the matrix `tfidf_mat` using [`[row, column]`]{.underline} notation. I am asking R to go to the row named "Circle_of_Commerce" from the matrix and grab all of the columns (the blank space after the comma). For a reference on how to subset data in R, go [here](https://docs.ycrc.yale.edu/r-novice-gapminder/06-data-subsetting/). To test yourself, what would you expect to see if you were to print the result of the following? (You have all the information you need on this page!)
+
+    `subset_test <- tfidf_mat["Circle_of_Commerce", c("malynes", "forraine", "ballance")]`
+
+We can now visualize the most characteristic terms for each document:
+
+```{r}
+tfidf_top_tbl <- bind_rows(
+  tibble(document = "Circle of Commerce", term = names(top_circle), tfidf = unname(top_circle)),
+  tibble(document = "Free Trade",         term = names(top_free),   tfidf = unname(top_free)),
+  tibble(document = "Third Text",         term = names(top_A06785),  tfidf = unname(top_A06785))
+)
+
+ggplot(tfidf_top_tbl, aes(x = tfidf, y = reorder(term, tfidf))) +
+  geom_col() +
+  facet_wrap(~ document, scales = "free_y") +
+  labs(
+    title = "Most Characteristic Terms by Document (TF–IDF)",
+    x = "TF–IDF score",
+    y = NULL
+  ) +
+  theme_minimal()
+```
+
+##### WARNING and an task for you:
+
+The visualization above isn't *quite* right. I don't mean that it's technically wrong: the code is correct and the visualization is displaying the correct terms for each document. However, I made some choices along the way that resulted in some less than illuminating results.
+
+-   What would you change? Why? Hint: think through the discussion about how TF-IDF is computed and what it captures.
+
+-   *How* would you change it? Hint: you may want to review the lesson from week 3.

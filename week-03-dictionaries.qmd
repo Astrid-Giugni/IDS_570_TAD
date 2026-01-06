@@ -163,13 +163,13 @@ y = NULL
 )
 ```
 
-####  Homing in on the concept of [trade]{.underline}:
+#### Homing in on the concept of [trade]{.underline}:
 
 We are going to work on two straightforward “trade-focused” strategies that will give us a preliminary way to capture the concept of trade through token analysis:
 
-1.   Filter bigrams that literally contain the token `trade`
+1.  Filter bigrams that literally contain the token `trade`
 
-2.   Use a small “trade lexicon” to capture near-synonyms (e.g., traffick, commerce, merchant, exchange)
+2.  Use a small “trade lexicon” to capture near-synonyms (e.g., traffick, commerce, merchant, exchange)
 
 Let's start with the first strategy: which bigrams contain the token `trade`?
 
@@ -374,7 +374,7 @@ text_sentiment_summary <- window_sentiment %>%
 text_sentiment_summary
 ```
 
-Based on this summary, we can start to see that *The* *Circle of Commerce* uses more positive language around the trade-related terms that we selected. To get a better handle of this, we are going to plot the distribution of sentiment scores across all the trade windows:
+Based on this summary, we can start to see that *The* *Circle of Commerce* uses more positive language around the trade-related terms that we selected. To get a better handle of this, we are going to plot the distribution of sentiment scores across all the trade windows for each document as a bar graph:
 
 ```{r}
 ggplot(window_sentiment, aes(x = net_sentiment)) +
@@ -386,3 +386,9 @@ ggplot(window_sentiment, aes(x = net_sentiment)) +
     y = "Number of trade windows"
   )
 ```
+
+### Addendum about Sentiments:
+
+We want to be careful in how we interpret sentiment analysis. What we are computing above is a score based on the common (standard?) usage of terms such as "wonderful" or "happy" or "depressing", where we label certain terms as expressing either positive or negative sentiments. These are of course deeply cultural questions. We all know the stereotypes of Italians being effusive while the British are reserved (as an Italian I do not in the least approve of this absolutely terrible and unfair statement)–does a "great!" from two different speakers mean the same level of positive approval?
+
+The past is culturally different to the present and we have to be very careful with sentiment analysis with historical texts. The correct solution would be to create our own, historically based lexicon by becoming familiar with the writing style and linguistic nuances of the 17th century and then scoring terminology (or better yet passages and phrases) for positive or negative sentiments. This is obviously labor intensive. But *competent* text analysis on *any* specialized language (historical, medical, legal, etc) requires expertise and care.
