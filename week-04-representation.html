@@ -103,6 +103,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -238,20 +267,275 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<section id="document-feature-matrices" class="level3">
+<h3 class="anchored" data-anchor-id="document-feature-matrices">Document-Feature Matrices</h3>
+<p>In Week 3, we began to compare two of Misselden’s documents through sentiment analysis around trade terminology. In class on Wednesday, we discussed measures of similarity between texts and what a Document-Feature Matrix (DFM) looks like. Let’s implement what we learned in class by comparing the two Misselden’s texts to “mystery” text <code>A06785.txt</code>.</p>
+<p>To create a DFM of the three texts, we will use the <code>quanteda</code> package. We start by loading the packages, reading the texts, and combining into a <code>quanteda</code> corpus named <code>corp</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#We are going to load two more libraries that are going to be used for the next goal for today (collocations): more info at https://quanteda.io/ </span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda) </span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda.textstats)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda.textstats)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>txt_circle    <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"C:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A07594__Circle_of_Commerce.txt"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>txt_free      <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"C:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/B14801__Free_Trade.txt"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>txt_third     <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"C:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A06785.txt"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>texts <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Circle_of_Commerce"</span> <span class="ot">=</span> txt_circle,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Free_Trade"</span>         <span class="ot">=</span> txt_free,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Third_Text_A06785"</span>  <span class="ot">=</span> txt_third</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>corp <span class="ot">&lt;-</span> <span class="fu">corpus</span>(texts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>While the results from last week are interesting, they are of limited by the fact that bigrams locate word pairs that are <em>right next to each other</em>. What if I want to find out if Misselden uses certain words together frequently <em>even if</em> they are not exactly next to each other?</p>
-<section id="collocation-analysis" class="level3">
-<h3 class="anchored" data-anchor-id="collocation-analysis">Collocation Analysis:</h3>
-<p>Collocation analysis is designed to find pairs of words that occur together <u>more often than we would expect statistically</u>, compared to how often each word appears on its own. The goal is to find <u>meaningful associations</u> (more on that later) rather than just frequent pairings. The question we want to ask of word pairs such as “cloth trade” is: are the two words near each other in the text simply because they are <em>individually</em> frequent words or are they an actual, meaningful <em>lexical unit</em> (a collocation)?</p>
-<p>A simple way to get a first feeling for this is that collocations downplay the importance of pairs of words where each word is very common in the text. If you look at the “Trade-them bigrams” visualization, you will notice the bigram “heretofore export.” “Heretofore” simply means “before” or “before now”… it’s a pretty common word in Early Modern English. It’s presence is <em>probably</em> skewing the results of our bigram analysis. Collocation analysis should avoid that problem.</p>
-<p>There are a number of measures that are used in</p>
-<p>This is were the package <code>Quanteda</code> comes in.</p>
+<p>We then tokenize and do some basic cleaning (most of this should be very familiar by now):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>toks <span class="ot">&lt;-</span> <span class="fu">tokens</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  corp,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">remove_punct   =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">remove_numbers =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">remove_symbols =</span> <span class="cn">TRUE</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>toks <span class="ot">&lt;-</span> <span class="fu">tokens_tolower</span>(toks)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>custom_stop <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"vnto"</span>,<span class="st">"haue"</span>,<span class="st">"doo"</span>,<span class="st">"hath"</span>,<span class="st">"bee"</span>,<span class="st">"ye"</span>,<span class="st">"thee"</span>,<span class="st">"hee"</span>,<span class="st">"shall"</span>,<span class="st">"hast"</span>,<span class="st">"doe"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"beene"</span>,<span class="st">"thereof"</span>,<span class="st">"thus"</span> </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>toks <span class="ot">&lt;-</span> <span class="fu">tokens_remove</span>(toks, <span class="at">pattern =</span> <span class="fu">c</span>(<span class="fu">stopwords</span>(<span class="st">"en"</span>), custom_stop))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The choices that we made when tokenizing do matter! Note that I doing the following:</p>
+<ul>
+<li><p>I am removing punctuation. With this decision, I am asserting that for this analysis, punctuation doesn’t matter (so I want to treat “commerce.” = “commerce!” = “commerce”). You may disagree! If were were doing an analysis of <em>style</em>, then punctuation would matter a lot.</p></li>
+<li><p>I am removing numbers. Since these are mercantile texts (including the “mystery” one), it may seems weird to remove potential economic data. My choice is based on a concern for distracting or inaccurate numbers (such as pagination or rounded guesses about population and trade estimates). Again, you may disagree and want to keep them (that’s an easy fix in the code above).</p></li>
+<li><p>I am removing symbols. This goes hand-in-hand with the choice about numbers. Most symbols are going to be transcription/OCR errors. The only (likely) valuable ones are currency markers. Since I opted to remove numbers, I decided to remove symbols.</p></li>
+</ul>
+<p>As I have taken pains to demonstrate, these are all decisions that you can change. But you have to have a <em>principled reason</em> to do so!</p>
+<p>Now we can build the DFM using <code>quanteda</code>’s <a href="https://quanteda.io/reference/dfm.html"><code>dfm()</code></a> and inspect it to make sure that it looks reasonable:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Document-feature matrix (DFM)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dfm_mat <span class="ot">&lt;-</span> <span class="fu">dfm</span>(toks)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect by raw count (in our corpus) the top 25 features </span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>dfm_mat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Document-feature matrix of: 3 documents, 9,083 features (56.93% sparse) and 0 docvars.
+                    features
+docs                 circle commerce prooeme herodotvs clio reportes croesvs
+  Circle_of_Commerce     14       25       1         1    2        1       1
+  Free_Trade              1       22       0         0    0        0       0
+  Third_Text_A06785      41       31       0         0    0        0       0
+                    features
+docs                 king lydia ſonne
+  Circle_of_Commerce   35     1     5
+  Free_Trade           53     0     0
+  Third_Text_A06785    36     0     0
+[ reached max_nfeat ... 9,073 more features ]</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">topfeatures</span>(dfm_mat, <span class="dv">25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      trade    exchange commodities       money   merchants         may 
+        602         478         293         290         282         272 
+        one      moneys       great    kingdome         now        made 
+        268         267         214         188         187         186 
+       said          ſo        much           p     malynes       cloth 
+        186         184         183         170         162         162 
+      value     without        time       price        upon         man 
+        150         148         147         146         145         142 
+    whereby 
+        133 </code></pre>
+</div>
+</div>
+<p>OK, so far so good. This is a sparse matrix and the top features seem quite plausible. We could also use this as a way to (potentially) remove some more stop words (I am not sure that “one” or “now” are giving us much information). I am going to keep things as they are. In the aggregate, stopwords won’t be a problem for what we are doing today (this is an empirical statement based on experience; I present no evidence for this here), and we are going to have a better way to get rid of overly common terms in the next section.</p>
+<ul>
+<li>For your entertainment: try playing around with stopwords and difference choices in the tokenization step.</li>
+</ul>
+<p>To compare the documents, we are going to use the second new library we introduced today: <code>quanteda.textstats</code>. It will gives us a number of ways to compare our three texts. We are going to try two of them and compare the results.</p>
+<section id="first" class="level4">
+<h4 class="anchored" data-anchor-id="first">First:</h4>
+<p>Let’s start with a correlation measure. We are going to treat each document as a <u>word frequency vector</u>. So, if we have N words in our corpus, each document is represented by an N-dimensional vector based on the frequency of each word within that text. The vectors are simply the rows of the DFM (where each row is a document).</p>
+<p>What we are going to measure in this step is the pairwise Pearson correlation between the vectors across all the word features (the columns of the DFM).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># correlation similarity</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>sim_cor <span class="ot">&lt;-</span> <span class="fu">textstat_simil</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  dfm_mat,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"correlation"</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">margin =</span> <span class="st">"documents"</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>sim_cor</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>textstat_simil object; method = "correlation"
+                   Circle_of_Commerce Free_Trade Third_Text_A06785
+Circle_of_Commerce              1.000      0.569             0.505
+Free_Trade                      0.569      1.000             0.441
+Third_Text_A06785               0.505      0.441             1.000</code></pre>
+</div>
+</div>
+</section>
+<section id="second" class="level4">
+<h4 class="anchored" data-anchor-id="second">Second:</h4>
+<p>Now that we understand how each document is represented at a vector, we can measure the distance between them <em>as</em> vectors by measuring the angle between them. We do this using <u>cosine similarity</u> (as discussed in class). We just have to change the <code>method</code> in <code>textstat_simil()</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sim_cos <span class="ot">&lt;-</span> <span class="fu">textstat_simil</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  dfm_mat,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"cosine"</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">margin =</span> <span class="st">"documents"</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>sim_cos</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>textstat_simil object; method = "cosine"
+                   Circle_of_Commerce Free_Trade Third_Text_A06785
+Circle_of_Commerce              1.000      0.596             0.533
+Free_Trade                      0.596      1.000             0.471
+Third_Text_A06785               0.533      0.471             1.000</code></pre>
+</div>
+</div>
+<p>In both cases, we (reassuringly) got 1.000 down the diagonal (each text is perfectly similar to itself) and the matrices are symmetric (can you see why this should be the case?). We also notice that the two texts by Misselden are more similar to each other than to the “mystery” text in both measures. This is also good news since the third text is by a different author.</p>
+<p>The third text is Gerard Malynes’s <em>The Center of the Circle of Commerce</em> (1623). Malynes and Misselden disagree over governmental intervention in trade, and their works address each other’s arguments.</p>
+<ul>
+<li>Question for you: given that Malynes’s work is closely related to Misselden’s what do you think of the measures of similarity we just computed? As you think about this, remind yourself of how the DFM is set up.</li>
+</ul>
+</section>
+</section>
+<section id="tf-idf" class="level3">
+<h3 class="anchored" data-anchor-id="tf-idf">TF-IDF:</h3>
+<p>Not all words are created equal in a document. We know this because we remove stopwords and we even create custom stopwords to account for idiosyncratically common words. This can be due to historical context or to technical, but non-characteristic language. For example, my research is on 17th century Puritan sermons and the use of the word “Scripture” is not a particularly distinguishing feature of these texts. But, as I say of many things in this class, this is a value judgement and dependent on technique. It <em>may</em> turn out that keeping a common word such as “Scripture” in my corpus would actually produce better results. By making these decisions <u>explicit</u> in a stopwords list, we can always retrace our steps.</p>
+<p>The downside of relying on stopwords is that, in a sense, we have to take educated guesses at which words don’t carry enough <em>discriminating</em> <em>meaning between texts</em> for our corpus. This is where TF-IDF comes in.</p>
+<p>There are two components to TF-IDF:</p>
+<ul>
+<li><p>Term frequency (TF), which captures how often a word appears in a document (what we have been counting when setting up the DFM)</p></li>
+<li><p>Inverse Document Frequency (IDF), which measures how rare a word is across the corpus. A word that appears in only a few documents will have high IDF. This means that a word with high IDF can be a <em>distinguishing</em> feature for a document. <span class="math inline">\(\text{IDF} = \log\left(\frac{\text{number of total docs}}{\text{number of docs with term}}\right)\)</span></p>
+<ul>
+<li>Note: <code>quanteda</code> gives you the option to use either natural or base 10 log. The default is base 10. See the full documentation <a href="https://quanteda.io/reference/dfm_tfidf.html">here</a>. In some other applications, you will see a preference for natural logarithm. The difference between the two is really irrelevant (it’s easy to apply a change of base) and what matters is the compression. What the log does: it keeps the monotonic property of IDF (rarer words get higher IDF values), but it won’t let something like a typo in one document dominate.</li>
+</ul></li>
+</ul>
+<p>TF-IDF is just the product of TF with IDF. <code>Quanteda</code> will do all the work for us.</p>
+<p>Let’s go ahead and see how TF-IDF changes our DFM matrix:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dfm_tfidf <span class="ot">&lt;-</span> <span class="fu">dfm_tfidf</span>(dfm_mat)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>dfm_tfidf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Document-feature matrix of: 3 documents, 9,083 features (56.93% sparse) and 0 docvars.
+                    features
+docs                 circle commerce   prooeme herodotvs      clio  reportes
+  Circle_of_Commerce      0        0 0.4771213 0.4771213 0.9542425 0.4771213
+  Free_Trade              0        0 0         0         0         0        
+  Third_Text_A06785       0        0 0         0         0         0        
+                    features
+docs                   croesvs king     lydia    ſonne
+  Circle_of_Commerce 0.4771213    0 0.4771213 2.385606
+  Free_Trade         0            0 0         0       
+  Third_Text_A06785  0            0 0         0       
+[ reached max_nfeat ... 9,073 more features ]</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">topfeatures</span>(dfm_tfidf, <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      ſo     upon   moneys  foreign     alſo       us     unto kingdome 
+87.79031 69.18258 47.01637 41.50955 37.21546 34.82985 33.39849 33.10516 
+    ſuch     said  becauſe    realm    theſe ballance forraine    thoſe 
+32.92137 32.75297 31.96712 30.53576 29.58152 29.10440 29.10440 28.62728 
+    muſt  malynes     loss  balance 
+28.62728 28.52678 28.15015 24.81031 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Note: so far, dfm_tfidf is a quanteda object that has a compact storage format. If we want to use it with base R, we need to change it into a general R matrix by doing the following: </span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>tfidf_mat <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(dfm_tfidf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You can think of <code>tfidf_mat</code> as a matrix where the rows are the documents, the columns are the terms in the corpus, and the values are the TF-IDF weights (instead of the raw counts). Now we can extract the words with the top TF_IDF values for each text:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Circle of Commerce</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>circle_tfidf <span class="ot">&lt;-</span> tfidf_mat[<span class="st">"Circle_of_Commerce"</span>, ]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort and get top 20</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>top_circle <span class="ot">&lt;-</span> <span class="fu">sort</span>(circle_tfidf, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>]</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>top_circle</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      ſo     alſo     ſuch  becauſe    theſe ballance forraine    thoſe 
+87.79031 37.21546 32.92137 31.96712 29.58152 29.10440 29.10440 28.62728 
+    muſt  malynes     ſame    ſhall     ſome    firſt    leſſe     mony 
+28.62728 27.82242 24.33318 22.42470 21.94758 20.99334 20.99334 20.42659 
+     vſe kingdome   ſhould himſelfe 
+20.03909 19.89831 19.08485 19.08485 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Free Trade</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>free_tfidf <span class="ot">&lt;-</span> tfidf_mat[<span class="st">"Free_Trade"</span>, ]</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort and get top 20</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>top_free <span class="ot">&lt;-</span> <span class="fu">sort</span>(free_tfidf, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>]</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>top_free</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    maiesties  christendome      kingdome           vse          also 
+    17.653486     14.313638     13.206844     12.882274     12.150297 
+        selfe          vpon      maiestie         seeme common-wealth 
+    10.496668     10.037202     10.019546      8.588183      8.452380 
+       causes      forreine    gouernment    domestique      encrease 
+     7.924107      7.748015      7.395833      7.156819      6.679698 
+        vsury      speciall       iustice     non-latin      alphabet 
+     6.679698      6.202576      6.202576      5.987103      5.987103 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A06786</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>A06785_tfidf <span class="ot">&lt;-</span> tfidf_mat[<span class="st">"Third_Text_A06785"</span>, ]</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort and get top 20</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>top_A06785 <span class="ot">&lt;-</span> <span class="fu">sort</span>(A06785_tfidf, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>]</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>top_A06785</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          upon         moneys        foreign             us           unto 
+      69.18258       46.48809       41.50955       34.82985       33.39849 
+         realm           said           loss        balance     merchant's 
+      30.53576       30.28770       28.15015       24.81031       24.81031 
+             s         silver         native        stivers      misselden 
+      20.25049       19.08485       19.08485       17.65349       17.17637 
+          coin undervaluation  overbalancing       enhanced         weight 
+      17.17637       17.17637       17.17637       15.74500       15.74500 </code></pre>
+</div>
+</div>
+<ul>
+<li><p>A technical R note: here <code>tfidf_mat["Circle_of_Commerce", ]</code> were are subsetting the matrix <code>tfidf_mat</code> using <u><code>[row, column]</code></u> notation. I am asking R to go to the row named “Circle_of_Commerce” from the matrix and grab all of the columns (the blank space after the comma). For a reference on how to subset data in R, go <a href="https://docs.ycrc.yale.edu/r-novice-gapminder/06-data-subsetting/">here</a>. To test yourself, what would you expect to see if you were to print the result of the following? (You have all the information you need on this page!)</p>
+<p><code>subset_test &lt;- tfidf_mat["Circle_of_Commerce", c("malynes", "forraine", "ballance")]</code></p></li>
+</ul>
+<p>We can now visualize the most characteristic terms for each document:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>tfidf_top_tbl <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">document =</span> <span class="st">"Circle of Commerce"</span>, <span class="at">term =</span> <span class="fu">names</span>(top_circle), <span class="at">tfidf =</span> <span class="fu">unname</span>(top_circle)),</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">document =</span> <span class="st">"Free Trade"</span>,         <span class="at">term =</span> <span class="fu">names</span>(top_free),   <span class="at">tfidf =</span> <span class="fu">unname</span>(top_free)),</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">document =</span> <span class="st">"Third Text"</span>,         <span class="at">term =</span> <span class="fu">names</span>(top_A06785),  <span class="at">tfidf =</span> <span class="fu">unname</span>(top_A06785))</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tfidf_top_tbl, <span class="fu">aes</span>(<span class="at">x =</span> tfidf, <span class="at">y =</span> <span class="fu">reorder</span>(term, tfidf))) <span class="sc">+</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> document, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Most Characteristic Terms by Document (TF–IDF)"</span>,</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"TF–IDF score"</span>,</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-04-representation_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="warning-and-an-task-for-you" class="level5">
+<h5 class="anchored" data-anchor-id="warning-and-an-task-for-you">WARNING and an task for you:</h5>
+<p>The visualization above isn’t <em>quite</em> right. I don’t mean that it’s technically wrong: the code is correct and the visualization is displaying the correct terms for each document. However, I made some choices along the way that resulted in some less than illuminating results.</p>
+<ul>
+<li><p>What would you change? Why? Hint: think through the discussion about how TF-IDF is computed and what it captures.</p></li>
+<li><p><em>How</em> would you change it? Hint: you may want to review the lesson from week 3.</p></li>
+</ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
