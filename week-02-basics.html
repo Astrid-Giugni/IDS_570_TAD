@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -67,14 +67,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-0bdd48912f367403fb324bb7748766b8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-b57d1312aa7c10f38068bb8d7c282b76.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -113,6 +114,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">Text as Data</span>
     </a>
@@ -151,6 +154,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
         <div class="sidebar-search">
         <div id="quarto-search" class="" title="Search"></div>
@@ -269,7 +276,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
 <p>At the beginning of each R file, you will want to call all the packages needed. This will look like:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
@@ -277,12 +284,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forcats)</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(scales)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(scales)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>I am storing my text files in a directory named <code>texts/</code> inside my project: I strongly suggest doing the same to make your life easier.</p>
 <p>The next section of code demonstrates how to read the files and to organize them into a type of dataframe that is well suited for Tidy work: a <a href="https://tibble.tidyverse.org/">tibble</a>. For this week, I am using generic “file_a” and “file_b” names to simplify the rather complex original file names. We will discuss the naming conventions of these files as well as how to deal with XML files (the original format of Misselden’s texts) in the next few weeks, but for now, I want you to focus on getting them into the appropriate format for analysis.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># You will need the correct file paths if you don't follow my naming conventions:</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># You will need the correct file paths if you don't follow my naming conventions:</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>file_a <span class="ot">&lt;-</span> <span class="st">"texts/A07594__Circle_of_Commerce.txt"</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>file_b <span class="ot">&lt;-</span> <span class="st">"texts/B14801__Free_Trade.txt"</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -296,7 +303,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">text =</span> <span class="fu">c</span>(text_a, text_b)</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>texts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>texts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 2
   doc_title text                                                                
@@ -315,7 +322,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><u>Stopwords</u>: we will create an “all stopwords” list by combining tidytext’s built-in list with our own, corpus-specific, list. Our list is going to be a one-column <a href="https://tibble.tidyverse.org/"><code>tibble</code></a> to match the format of the built-in stopwords:</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Start with tidytext's built-in stopword list</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Start with tidytext's built-in stopword list</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"stop_words"</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Add our own project-specific stopwords (you can, and will, expand this list later)</span></span>
@@ -328,7 +335,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>all_stopwords <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(stop_words, custom_stopwords) <span class="sc">%&gt;%</span></span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(word)</span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>all_stopwords <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>all_stopwords <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 1
    word       
@@ -354,18 +361,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p>Finally we count.</p></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>word_counts <span class="ot">&lt;-</span> texts <span class="sc">%&gt;%</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>word_counts <span class="ot">&lt;-</span> texts <span class="sc">%&gt;%</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest_tokens</span>(word, text) <span class="sc">%&gt;%</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">word =</span> <span class="fu">str_to_lower</span>(word)) <span class="sc">%&gt;%</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(all_stopwords, <span class="at">by =</span> <span class="st">"word"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(doc_title, word, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>word_counts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>word_counts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 7,443 × 3
+<pre><code># A tibble: 7,438 × 3
    doc_title word            n
    &lt;chr&gt;     &lt;chr&gt;       &lt;int&gt;
- 1 Text A    trade         232
+ 1 Text A    trade         233
  2 Text A    exchange      186
  3 Text B    trade         185
  4 Text A    ſo            184
@@ -375,7 +382,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  8 Text A    hee           115
  9 Text A    kingdome      113
 10 Text A    commodities    96
-# ℹ 7,433 more rows</code></pre>
+# ℹ 7,428 more rows</code></pre>
 </div>
 </div>
 </section>
@@ -407,7 +414,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ol>
 <p>Finally we plot!</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>plot_n_words <span class="ot">&lt;-</span> <span class="dv">20</span>  <span class="co"># you can change this as needed</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>plot_n_words <span class="ot">&lt;-</span> <span class="dv">20</span>  <span class="co"># you can change this as needed</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Select the most frequent words overall</span></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>word_comparison_tbl <span class="ot">&lt;-</span> word_counts <span class="sc">%&gt;%</span></span>
@@ -440,7 +447,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Word frequency"</span>,</span>
 <span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
 <span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -453,17 +460,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="bigrams-starting-to-think-about-context" class="level2">
 <h2 class="anchored" data-anchor-id="bigrams-starting-to-think-about-context">Bigrams: starting to think about context</h2>
-<p>Single-word frequencies tell us which terms are common, but they don’t tell us about the context of these words. Our next step will be to try to get a first, basic understanding of how words in our texts fit together. Bigrams allow us to see which words <em>appear together</em>, capturing short phrases and recurring ideas. This is also our first step towards exploring <em>collocations</em>, <em>formulaic language</em>, and <em>discursive patterns</em>, rather than just isolated vocabulary.</p>
+<p>Single-word frequencies tell us which terms are common, but they don’t tell us about the context of these words. Our next step will be to try to get a first, basic understanding of how words in our texts fit together. Bigrams allow us to see which words <em>appear together</em>, capturing short phrases and recurring ideas. This is also our first step towards exploring <em>formulaic language</em>,and <em>discursive patterns</em>, rather than just isolated vocabulary.</p>
 <ul>
 <li>You should be able to understand the syntax of this first step (make sure that you do!):</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>bigrams <span class="ot">&lt;-</span> texts <span class="sc">%&gt;%</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>bigrams <span class="ot">&lt;-</span> texts <span class="sc">%&gt;%</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest_tokens</span>(bigram, text, <span class="at">token =</span> <span class="st">"ngrams"</span>, <span class="at">n =</span> <span class="dv">2</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>bigrams</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>bigrams</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 53,809 × 2
+<pre><code># A tibble: 53,816 × 2
    doc_title bigram           
    &lt;chr&gt;     &lt;chr&gt;            
  1 Text A    the circle       
@@ -476,17 +483,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  8 Text A    in his           
  9 Text A    his clio         
 10 Text A    clio reportes    
-# ℹ 53,799 more rows</code></pre>
+# ℹ 53,806 more rows</code></pre>
 </div>
 </div>
 <p>Currently, each bigram is stored as a single string. We want to remove stopwords (using the custom list we created earlier). In order to do that, we need to be able to inspect <em>each word separately</em> in the bigram. <code>separate()</code> does just that! It takes the bigram column and splits each string at the space character. It then creates two new columns: “word1” and “word2.”</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>bigrams_separated <span class="ot">&lt;-</span> bigrams <span class="sc">%&gt;%</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>bigrams_separated <span class="ot">&lt;-</span> bigrams <span class="sc">%&gt;%</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(bigram, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"word1"</span>, <span class="st">"word2"</span>), <span class="at">sep =</span> <span class="st">" "</span>)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>bigrams_separated</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>bigrams_separated</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 53,809 × 3
+<pre><code># A tibble: 53,816 × 3
    doc_title word1     word2    
    &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;    
  1 Text A    the       circle   
@@ -499,22 +506,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  8 Text A    in        his      
  9 Text A    his       clio     
 10 Text A    clio      reportes 
-# ℹ 53,799 more rows</code></pre>
+# ℹ 53,806 more rows</code></pre>
 </div>
 </div>
 <ul>
 <li>Now we can remove <code>all_stopwords</code></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>bigrams_filtered <span class="ot">&lt;-</span> bigrams_separated <span class="sc">%&gt;%</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>bigrams_filtered <span class="ot">&lt;-</span> bigrams_separated <span class="sc">%&gt;%</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span>word1 <span class="sc">%in%</span> all_stopwords<span class="sc">$</span>word,</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span>word2 <span class="sc">%in%</span> all_stopwords<span class="sc">$</span>word</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>bigrams_filtered</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>bigrams_filtered</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 7,622 × 3
+<pre><code># A tibble: 7,625 × 3
    doc_title word1    word2    
    &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;    
  1 Text A    prooeme  herodotvs
@@ -527,53 +534,53 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  8 Text A    certaine perſian  
  9 Text A    perſian  ready    
 10 Text A    lay      violent  
-# ℹ 7,612 more rows</code></pre>
+# ℹ 7,615 more rows</code></pre>
 </div>
 </div>
 <p>We remove bigrams where <em>either</em> word is a stopword, since phrases like “of the” or “and the” are rarely meaningful analytically.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>bigram_counts <span class="ot">&lt;-</span> bigrams_filtered <span class="sc">%&gt;%</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>bigram_counts <span class="ot">&lt;-</span> bigrams_filtered <span class="sc">%&gt;%</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(doc_title, word1, word2, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>bigram_counts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>bigram_counts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6,449 × 4
+<pre><code># A tibble: 6,447 × 4
    doc_title word1     word2           n
    &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;       &lt;int&gt;
  1 Text B    common    wealth         48
  2 Text A    merchants adventurers    35
  3 Text B    latin     alphabet       34
  4 Text A    low       countries      21
- 5 Text B    east      india          20
- 6 Text A    free      trade          19
+ 5 Text A    free      trade          20
+ 6 Text B    east      india          20
  7 Text A    latin     alphabet       17
  8 Text A    natiue    commodities    17
  9 Text A    forraine  commodities    16
-10 Text A    letters   patents        14
-# ℹ 6,439 more rows</code></pre>
+10 Text A    common    wealth         14
+# ℹ 6,437 more rows</code></pre>
 </div>
 </div>
 <p>Now that we removed the stopwords, we can use <code>unite</code> to put the bigrams back together:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>bigram_counts <span class="ot">&lt;-</span> bigram_counts <span class="sc">%&gt;%</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>bigram_counts <span class="ot">&lt;-</span> bigram_counts <span class="sc">%&gt;%</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unite</span>(bigram, word1, word2, <span class="at">sep =</span> <span class="st">" "</span>)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>bigram_counts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>bigram_counts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6,449 × 3
+<pre><code># A tibble: 6,447 × 3
    doc_title bigram                    n
    &lt;chr&gt;     &lt;chr&gt;                 &lt;int&gt;
  1 Text B    common wealth            48
  2 Text A    merchants adventurers    35
  3 Text B    latin alphabet           34
  4 Text A    low countries            21
- 5 Text B    east india               20
- 6 Text A    free trade               19
+ 5 Text A    free trade               20
+ 6 Text B    east india               20
  7 Text A    latin alphabet           17
  8 Text A    natiue commodities       17
  9 Text A    forraine commodities     16
-10 Text A    letters patents          14
-# ℹ 6,439 more rows</code></pre>
+10 Text A    common wealth            14
+# ℹ 6,437 more rows</code></pre>
 </div>
 </div>
 <p><u><strong>Important conceptual point</strong></u><strong>:</strong> why are we creating bigrams first, cleaning them from stopwords, and <em>then</em> gluing them back together? Shouldn’t we just tokenize the text into individual words, clean the stopwords, and then find the bigrams?</p>
@@ -589,7 +596,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p>We then reshape the data for comparison: in tidy, we want one row per bigram so that we can easily compare across the two text.</p></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>bigram_relative <span class="ot">&lt;-</span> bigram_counts <span class="sc">%&gt;%</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>bigram_relative <span class="ot">&lt;-</span> bigram_counts <span class="sc">%&gt;%</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(doc_title) <span class="sc">%&gt;%</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_bigrams =</span> <span class="fu">sum</span>(n),</span>
@@ -605,22 +612,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_fill =</span> <span class="dv">0</span></span>
 <span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>bigram_wide</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>bigram_wide</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6,379 × 3
+<pre><code># A tibble: 6,377 × 3
    bigram                `Text B` `Text A`
    &lt;chr&gt;                    &lt;dbl&gt;    &lt;dbl&gt;
- 1 common wealth         0.0187    0.00257
+ 1 common wealth         0.0187    0.00277
  2 merchants adventurers 0         0.00692
  3 latin alphabet        0.0133    0.00336
  4 low countries         0.00156   0.00415
- 5 east india            0.00780   0      
- 6 free trade            0         0.00376
+ 5 free trade            0         0.00395
+ 6 east india            0.00779   0      
  7 natiue commodities    0.00273   0.00336
  8 forraine commodities  0         0.00316
  9 letters patents       0.000390  0.00277
 10 thouſand pounds       0         0.00277
-# ℹ 6,369 more rows</code></pre>
+# ℹ 6,367 more rows</code></pre>
 </div>
 </div>
 <p>Next, we are going to contrast the bigrams in the two texts by identifying which biagrams are most likely to distinguish one text from the other. <strong>Note:</strong> this is <strong>not</strong> a statistical test, we are just exploring the differences in the bigrams between the two texts. To recap, up to this point, we have:</p>
@@ -631,30 +638,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>We now want to know which bigram is most characteristic of “Text A” (<em>The Circle of Commerce</em>) <u>relative to</u> “Text B” (<em>Free Trade</em>).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>bigram_diff <span class="ot">&lt;-</span> bigram_wide <span class="sc">%&gt;%</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>bigram_diff <span class="ot">&lt;-</span> bigram_wide <span class="sc">%&gt;%</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">diff =</span> <span class="st">`</span><span class="at">Text A</span><span class="st">`</span> <span class="sc">-</span> <span class="st">`</span><span class="at">Text B</span><span class="st">`</span></span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="fu">abs</span>(diff)))</span>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>bigram_diff <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>bigram_diff <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 20 × 4
    bigram                `Text B` `Text A`     diff
    &lt;chr&gt;                    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
- 1 common wealth         0.0187    0.00257 -0.0161 
+ 1 common wealth         0.0187    0.00277 -0.0159 
  2 latin alphabet        0.0133    0.00336 -0.00989
- 3 east india            0.00780   0       -0.00780
+ 3 east india            0.00779   0       -0.00779
  4 merchants adventurers 0         0.00692  0.00692
- 5 merchants aduenturers 0.00390   0       -0.00390
- 6 free trade            0         0.00376  0.00376
+ 5 free trade            0         0.00395  0.00395
+ 6 merchants aduenturers 0.00390   0       -0.00390
  7 forraine commodities  0         0.00316  0.00316
  8 thouſand pounds       0         0.00277  0.00277
  9 low countries         0.00156   0.00415  0.00259
 10 letters patents       0.000390  0.00277  0.00238
 11 publique vtility      0.00234   0       -0.00234
 12 cloth trade           0.00429   0.00198 -0.00231
-13 33 ſh                 0         0.00218  0.00218
+13 33 ſh                 0         0.00217  0.00217
 14 20 ſhillings          0         0.00198  0.00198
 15 ſh 4                  0         0.00198  0.00198
 16 disorderly trade      0.00195   0       -0.00195
@@ -667,6 +674,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>What does <code>diff</code> tell us? If <code>diff &gt; 0</code>, then the bigram is more prominent in Text A; if <code>diff &lt;0</code>, in Text B. If <code>diff</code> is approximately 0, then it is used more or less in similar proportion in the two texts.</p>
 <section id="questions" class="level5">
 <h5 class="anchored" data-anchor-id="questions">Questions:</h5>
+<ul>
+<li><p>How do you interpret the results above? What do they tell you?</p></li>
+<li><p>There is a problem with the list above due to spelling inconsistencies in the period (as well as the fact that we ignored numbers). How do you think this is affecting our results? Next week, you will learn a way to fix this.</p></li>
+</ul>
 
 
 </section>
@@ -724,13 +735,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
