@@ -192,7 +192,7 @@ ggplot(word_plot_data, aes(x = n, y = word)) + #black magic happens thanks to gg
 
 ## Bigrams: starting to think about context
 
-Single-word frequencies tell us which terms are common, but they don't tell us about the context of these words. Our next step will be to try to get a first, basic understanding of how words in our texts fit together. Bigrams allow us to see which words *appear together*, capturing short phrases and recurring ideas. This is also our first step towards exploring *collocations*, *formulaic language*, and *discursive patterns*, rather than just isolated vocabulary.
+Single-word frequencies tell us which terms are common, but they don't tell us about the context of these words. Our next step will be to try to get a first, basic understanding of how words in our texts fit together. Bigrams allow us to see which words *appear together*, capturing short phrases and recurring ideas. This is also our first step towards exploring *formulaic language*,and *discursive patterns*, rather than just isolated vocabulary.
 
 -   You should be able to understand the syntax of this first step (make sure that you do!):
 
@@ -301,3 +301,7 @@ bigram_diff %>% slice(1:20)
 What does `diff` tell us? If `diff > 0`, then the bigram is more prominent in Text A; if `diff <0`, in Text B. If `diff` is approximately 0, then it is used more or less in similar proportion in the two texts.
 
 ##### Questions:
+
+-   How do you interpret the results above? What do they tell you?
+
+-   There is a problem with the list above due to spelling inconsistencies in the period (as well as the fact that we ignored numbers). How do you think this is affecting our results? Next week, you will learn a way to fix this.

@@ -81,7 +81,7 @@ OK, so far so good. This is a sparse matrix and the top features seem quite plau
 
 To compare the documents, we are going to use the second new library we introduced today: `quanteda.textstats`. It will gives us a number of ways to compare our three texts. We are going to try two of them and compare the results.
 
-#### First: 
+#### First:
 
 Let's start with a correlation measure. We are going to treat each document as a [word frequency vector]{.underline}. So, if we have N words in our corpus, each document is represented by an N-dimensional vector based on the frequency of each word within that text. The vectors are simply the rows of the DFM (where each row is a document).
 
@@ -97,7 +97,7 @@ sim_cor <- textstat_simil(
 sim_cor
 ```
 
-#### Second: 
+#### Second:
 
 Now that we understand how each document is represented at a vector, we can measure the distance between them *as* vectors by measuring the angle between them. We do this using [cosine similarity]{.underline} (as discussed in class). We just have to change the `method` in `textstat_simil()`.
 
