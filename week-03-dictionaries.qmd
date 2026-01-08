@@ -17,7 +17,7 @@ library(dplyr)
 library(stringr) 
 library(tibble)  
 
-circle_raw <- read_file("C:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A07594__Circle_of_Commerce.txt") 
+circle_raw <- read_file("D:\Users\astri\Desktop\R-work\IDS_570_TAD\textsA07594__Circle_of_Commerce.txt") 
 
 text_tbl <- tibble(   
   doc_title = "The Circle of Commerce",   

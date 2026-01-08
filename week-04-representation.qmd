@@ -21,9 +21,9 @@ library(ggplot2)
 library(quanteda)
 library(quanteda.textstats)
 
-txt_circle    <- read_file("C:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A07594__Circle_of_Commerce.txt")
-txt_free      <- read_file("C:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/B14801__Free_Trade.txt")
-txt_third     <- read_file("C:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A06785.txt")
+txt_circle    <- read_file("D:\Users\astri\Desktop\R-work\IDS_570_TAD\texts/A07594__Circle_of_Commerce.txt")
+txt_free      <- read_file("D:\Users\astri\Desktop\R-work\IDS_570_TAD\texts/B14801__Free_Trade.txt")
+txt_third     <- read_file("D:\Users\astri\Desktop\R-work\IDS_570_TAD\texts/A06785.txt")
 
 texts <- c(
   "Circle_of_Commerce" = txt_circle,
