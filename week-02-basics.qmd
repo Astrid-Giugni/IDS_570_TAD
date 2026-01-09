@@ -11,7 +11,7 @@ execute:
 
 ## Week's Goals:
 
-This week, we compare two early modern economic texts by examining word frequencies and bigrams. Our two texts are by Edward Misselden, one of the major [Early Modern mercantilists](https://plato.stanford.edu/entries/economics-early-modern/) whose work we will be analyzing. The goal is for you to become familiar with how to start implementing NLP workflows in RStudio. The two texts are available on Canvas, under **files** in the folder named **Week 2**.
+This week, we compare two early modern economic texts by examining word frequencies and bigrams. Our two texts are by Edward Misselden, one of the major [Early Modern mercantilists](https://plato.stanford.edu/entries/economics-early-modern/) whose work we will be analyzing. The goal is for you to become familiar with how to start implementing NLP workflows in RStudio. The two texts are available on Canvas, under **files** in the folder named **Text Files** (note: there are other files in there which we will use later on in the term).
 
 [Note:]{.underline} this will be the standard set up going forward. Sample code will be here and files will be on Canvas, unless otherwise specified.
 
