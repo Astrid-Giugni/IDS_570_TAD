@@ -17,7 +17,7 @@ library(dplyr)
 library(stringr) 
 library(tibble)  
 
-circle_raw <- read_file("D:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A07594__Circle_of_Commerce.txt") 
+circle_raw <- read_file("texts/A07594__Circle_of_Commerce.txt") 
 
 text_tbl <- tibble(   
   doc_title = "The Circle of Commerce",   
@@ -66,7 +66,7 @@ A bit of warning:
 
 -   Sometimes, the long S is represented as an "f" in transcribed/OCR'ed texts, but I do *not* recommending trying to guess when an `f` “should be” an `s`. Make sure that you know why! If not, ask!
 
-Finally, to pick up another loose thread from Week 2, we can use regex to *selectively* keep *some* punctuation and symbols. Remember that we used `unnest_tokens` to tokenize our text, but we learnt that it automatically removes punctuation. We can set that parameter to `FALSE` and keep *all* punctuation. But we can also be more selective. For example, if I only want to keep currency markers, apostrophes, and hyphens, I can do the following:
+Finally, to pick up another loose thread from Week 2, we can use regex to *selectively* keep *some* punctuation and symbols. Remember that we used `unnest_tokens` to tokenize our text, but we learnt that it automatically removes punctuation. We can set that parameter to `FALSE` and keep *all* punctuation. But we can also be more selective. For example, if I only want to keep currency markers (British pounds for our texts), apostrophes, and hyphens, I can do the following:
 
 ``` R
 text_tbl <- text_tbl %>%
