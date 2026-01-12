@@ -149,7 +149,7 @@ bigrams_clean <- bigrams_raw %>%
 separate(bigram, into = c("word1", "word2"), sep = " ") %>%
 filter(!word1 %in% stop_words$word) %>%
 filter(!word2 %in% stop_words$word) %>%
-filter(str_detect(word1, "^[a-z]+$")) %>% # keep alphabetic tokens
+filter(str_detect(word1, "^[a-z]+$")) %>% # note: here I am removing ALL punctuation (earlier we kept specific symbols)
 filter(str_detect(word2, "^[a-z]+$"))
 
 bigrams_clean %>% count(word1, word2, sort = TRUE) %>% slice_head(n = 10)
@@ -361,15 +361,19 @@ window_sentiment <- trade_windows %>%
   mutate(net_sentiment = positive - negative)
 ```
 
-Next, we create an overall summary of sentiments for each text:
+Next, we create an overall summary of sentiments for each text. First:
 
--   We are going to count how many instances we found of trade-related terms (= the number of window).
+-   We are going to find all occurrences of trade-related tokens and create a fixed size "window" around each term.
 
--   The number of positive and negative words around trade-related terms.
+-   We then `inner_join` those tokens to the Bing sentiment lexicon so that each token can be labeled as either *positive* or *negative*. In this step, if a token doesn't appear in the Bing lexicon, it gets dropped (a window that contains no Bing words will have no rows in `window_sentiment`). This means that `n()` is counting rows of `window_sentiment`. That is, `n()` counts the number of word-tokens matched in Bing, aggregated by `doc_title`.
+
+Then, from `window_sentiment`, we compute:
+
+-   The number of positive and negative Bing-matched token occurrences (so, if "good" appears five times, it contributes five positive occurrences) in our trade-related window.
 
 -   The total net sentiment (= positive - negative)
 
--   The average net sentiment per window (total net sentiment divided by number of windows).
+-   The average net sentiment per sentiment-bearing window = `net_sentiment / n_distinct(window_id)` . That is, the denominator is the number of windows with at least one Bing match.
 
 ```{r}
 text_sentiment_summary <- window_sentiment %>%
