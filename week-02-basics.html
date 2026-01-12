@@ -316,7 +316,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="tokenization-stopwords-and-counting-words" class="level2">
 <h2 class="anchored" data-anchor-id="tokenization-stopwords-and-counting-words">Tokenization, stopwords, and counting words:</h2>
-<p>We will turn each text into a table of one word per row, this is the <strong>tokenization</strong> process. Tokens are the basic unit of text that we are working on. For right now, we are going to consider each word to be a token, but we could break up the text into characters or parts of words if needed. We will then we remove <strong>stopwords</strong> (words like “the” or “and” that are not useful for <em>this</em> analysis) so that the remaining words are more meaningful for comparison.</p>
+<p>We will turn each text into a table of one word per row, this is the <strong>tokenization</strong> process in Tidy. Tokens are the basic unit of text that we are working on and the process of tokenization “breaks down” the text into these units for computational analysis. For right now, we are going to consider each word to be a token, but we could break up the text into characters or parts of words if needed. We will then we remove <strong>stopwords</strong> (words like “the” or “and” that are not useful for <em>this</em> analysis) so that the remaining words are more meaningful for comparison.</p>
 <p>We will do this in two steps:</p>
 <ul>
 <li><u>Stopwords</u>: we will create an “all stopwords” list by combining tidytext’s built-in list with our own, corpus-specific, list. Our list is going to be a one-column <a href="https://tibble.tidyverse.org/"><code>tibble</code></a> to match the format of the built-in stopwords:</li>
@@ -385,6 +385,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 # ℹ 7,428 more rows</code></pre>
 </div>
 </div>
+<p><strong>Note:</strong> <code>unnest_tokes(word, text)</code> removes punctuation and lowercases automatically. You can a couple of options for this issue. The first is to change a couple of parameters in the function: <code>unnest_tokens(word, text, strip_punct = FALSE)</code> to keep the punctuation and <code>unnest_tokens(word, text, to_lower = FALSE)</code> to keep upper cases. What if you want to keep only <em>certain</em> symbols and types of punctuation? We will discuss this at the beginning of Week 3.</p>
 </section>
 <section id="comparing-word-frequencies-across-texts" class="level2">
 <h2 class="anchored" data-anchor-id="comparing-word-frequencies-across-texts">Comparing word frequencies across texts</h2>
