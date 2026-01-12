@@ -254,7 +254,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr) </span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)  </span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>circle_raw <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"D:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A07594__Circle_of_Commerce.txt"</span>) </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>circle_raw <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"texts/A07594__Circle_of_Commerce.txt"</span>) </span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>text_tbl <span class="ot">&lt;-</span> <span class="fu">tibble</span>(   </span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">doc_title =</span> <span class="st">"The Circle of Commerce"</span>,   </span>
@@ -314,7 +314,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p>We replace <strong>only the explicit character ſ</strong></p></li>
 <li><p>Sometimes, the long S is represented as an “f” in transcribed/OCR’ed texts, but I do <em>not</em> recommending trying to guess when an <code>f</code> “should be” an <code>s</code>. Make sure that you know why! If not, ask!</p></li>
 </ul>
-<p>Finally, to pick up another loose thread from Week 2, we can use regex to <em>selectively</em> keep <em>some</em> punctuation and symbols. Remember that we used <code>unnest_tokens</code> to tokenize our text, but we learnt that it automatically removes punctuation. We can set that parameter to <code>FALSE</code> and keep <em>all</em> punctuation. But we can also be more selective. For example, if I only want to keep currency markers, apostrophes, and hyphens, I can do the following:</p>
+<p>Finally, to pick up another loose thread from Week 2, we can use regex to <em>selectively</em> keep <em>some</em> punctuation and symbols. Remember that we used <code>unnest_tokens</code> to tokenize our text, but we learnt that it automatically removes punctuation. We can set that parameter to <code>FALSE</code> and keep <em>all</em> punctuation. But we can also be more selective. For example, if I only want to keep currency markers (British pounds for our texts), apostrophes, and hyphens, I can do the following:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>text_tbl <span class="ot">&lt;-</span> text_tbl <span class="sc">%&gt;%</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">text_clean =</span> <span class="fu">str_replace_all</span>(text_clean, <span class="fu">regex</span>(<span class="st">"[[:punct:]&amp;&amp;[^£'-]]"</span>), <span class="st">" "</span>) <span class="co"># note I am writing over "text_clean", we could also create a new                                                                                       column instead</span></span>
@@ -391,7 +391,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">separate</span>(bigram, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"word1"</span>, <span class="st">"word2"</span>), <span class="at">sep =</span> <span class="st">" "</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(<span class="sc">!</span>word1 <span class="sc">%in%</span> stop_words<span class="sc">$</span>word) <span class="sc">%&gt;%</span></span>
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(<span class="sc">!</span>word2 <span class="sc">%in%</span> stop_words<span class="sc">$</span>word) <span class="sc">%&gt;%</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(<span class="fu">str_detect</span>(word1, <span class="st">"^[a-z]+$"</span>)) <span class="sc">%&gt;%</span> <span class="co"># keep alphabetic tokens</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(<span class="fu">str_detect</span>(word1, <span class="st">"^[a-z]+$"</span>)) <span class="sc">%&gt;%</span> <span class="co"># note: here I am removing ALL punctuation (earlier we kept specific symbols)</span></span>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(<span class="fu">str_detect</span>(word2, <span class="st">"^[a-z]+$"</span>))</span>
 <span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>bigrams_clean <span class="sc">%&gt;%</span> <span class="fu">count</span>(word1, word2, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -639,12 +639,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> sentiment, <span class="at">values_from =</span> n, <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">net_sentiment =</span> positive <span class="sc">-</span> negative)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Next, we create an overall summary of sentiments for each text:</p>
+<p>Next, we create an overall summary of sentiments for each text. First:</p>
 <ul>
-<li><p>We are going to count how many instances we found of trade-related terms (= the number of window).</p></li>
-<li><p>The number of positive and negative words around trade-related terms.</p></li>
+<li><p>We are going to find all occurrences of trade-related tokens and create a fixed size “window” around each term.</p></li>
+<li><p>We then <code>inner_join</code> those tokens to the Bing sentiment lexicon so that each token can be labeled as either <em>positive</em> or <em>negative</em>. In this step, if a token doesn’t appear in the Bing lexicon, it gets dropped (a window that contains no Bing words will have no rows in <code>window_sentiment</code>). This means that <code>n()</code> is counting rows of <code>window_sentiment</code>. That is, <code>n()</code> counts the number of word-tokens matched in Bing, aggregated by <code>doc_title</code>.</p></li>
+</ul>
+<p>Then, from <code>window_sentiment</code>, we compute:</p>
+<ul>
+<li><p>The number of positive and negative Bing-matched token occurrences (so, if “good” appears five times, it contributse five positive occurrences) in our trade-related window.</p></li>
 <li><p>The total net sentiment (= positive - negative)</p></li>
-<li><p>The average net sentiment per window (total net sentiment divided by number of windows).</p></li>
+<li><p>The average net sentiment per sentiment-bearing window = <code>net_sentiment / n_distinct(window_id)</code> . That is, the denominator is the number of windows with at least one Bing match.</p></li>
 </ul>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>text_sentiment_summary <span class="ot">&lt;-</span> window_sentiment <span class="sc">%&gt;%</span></span>
