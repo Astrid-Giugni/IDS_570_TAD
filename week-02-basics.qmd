@@ -74,7 +74,7 @@ As you can see from the .txt files, these are Early Modern texts with (at least 
 
 ## Tokenization, stopwords, and counting words:
 
-We will turn each text into a table of one word per row, this is the **tokenization** process. Tokens are the basic unit of text that we are working on. For right now, we are going to consider each word to be a token, but we could break up the text into characters or parts of words if needed. We will then we remove **stopwords** (words like "the" or "and" that are not useful for *this* analysis) so that the remaining words are more meaningful for comparison.
+We will turn each text into a table of one word per row, this is the **tokenization** process in Tidy. Tokens are the basic unit of text that we are working on and the process of tokenization "breaks down" the text into these units for computational analysis. For right now, we are going to consider each word to be a token, but we could break up the text into characters or parts of words if needed. We will then we remove **stopwords** (words like "the" or "and" that are not useful for *this* analysis) so that the remaining words are more meaningful for comparison.
 
 We will do this in two steps:
 
@@ -118,6 +118,8 @@ word_counts <- texts %>%
 
 word_counts
 ```
+
+**Note:** `unnest_tokes(word, text)` removes punctuation and lowercases automatically. You can a couple of options for this issue. The first is to change a couple of parameters in the function: `unnest_tokens(word, text, strip_punct = FALSE)` to keep the punctuation and `unnest_tokens(word, text, to_lower = FALSE)` to keep upper cases. What if you want to keep only *certain* symbols and types of punctuation? We will discuss this at the beginning of Week 3.
 
 ## Comparing word frequencies across texts
 

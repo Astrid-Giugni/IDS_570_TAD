@@ -66,6 +66,17 @@ A bit of warning:
 
 -   Sometimes, the long S is represented as an "f" in transcribed/OCR'ed texts, but I do *not* recommending trying to guess when an `f` “should be” an `s`. Make sure that you know why! If not, ask!
 
+Finally, to pick up another loose thread from Week 2, we can use regex to *selectively* keep *some* punctuation and symbols. Remember that we used `unnest_tokens` to tokenize our text, but we learnt that it automatically removes punctuation. We can set that parameter to `FALSE` and keep *all* punctuation. But we can also be more selective. For example, if I only want to keep currency markers, apostrophes, and hyphens, I can do the following:
+
+``` R
+text_tbl <- text_tbl %>%
+  mutate(
+    text_clean = str_replace_all(text_clean, regex("[[:punct:]&&[^£'-]]"), " ") # note I am writing over "text_clean", we could also create a new                                                                                       column instead
+  )
+```
+
+**NB:** "`^` at the start of a character class in regex means "NOT". I am removing all punctuation *except* the list I am defining.
+
 #### Standardizing Name Spellings:
 
 Early Modern spelling was not standardized, meaning that the same word may have been spelled in a number of different ways by the same author within the same document. Name spelling was also not standardized and this fact presents some serious problems for us. While it’s pretty easy to decide that “friend” = “freind” (a peculiar spelling by the poet John Milton) for normalization processes, standardizing names in historical texts is not a neutral preprocessing step. It requires biographical and historical research.
