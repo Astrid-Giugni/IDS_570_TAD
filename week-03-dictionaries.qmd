@@ -68,7 +68,7 @@ A bit of warning:
 
 Finally, to pick up another loose thread from Week 2, we can use regex to *selectively* keep *some* punctuation and symbols. Remember that we used `unnest_tokens` to tokenize our text, but we learnt that it automatically removes punctuation. We can set that parameter to `FALSE` and keep *all* punctuation. But we can also be more selective. For example, if I only want to keep currency markers (British pounds for our texts), apostrophes, and hyphens, I can do the following:
 
-``` R
+``` r
 text_tbl <- text_tbl %>%
   mutate(
     text_clean = str_replace_all(text_clean, regex("[[:punct:]&&[^£'-]]"), " ") # note I am writing over "text_clean", we could also create a new                                                                                       column instead
