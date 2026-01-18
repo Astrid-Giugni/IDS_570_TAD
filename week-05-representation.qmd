@@ -1,0 +1,86 @@
+---
+title: "week-05-representation.qmd"
+editor: visual
+format: html
+execute:
+  eval: true
+  echo: true
+  warning: false
+  message: false
+---
+
+### Measures of Lexical Complexity
+
+In this tutorial, we'll explore three measures of **lexical complexity** (also called lexical diversity or lexical richness) using two historical texts; one you know well by now, the other one is a mystery text that you can find on Canvas:
+
+1.  "The Circle of Commerce" by Edward Misselden (1623)
+2.  "A69858.text"
+
+We want to see see if the two texts differ in terms of vocabulary diversity in a meaningful way.
+
+What is Lexical Complexity? Lexical complexity measures how varied a writer's vocabulary is. A text with high lexical diversity uses many different words, while a text with low diversity repeats the same words frequently. We'll learn three different, but well-validated, measures:
+
+1.  **Type-Token Ratio (TTR)** - The simplest measure
+2.  **Guiraud Index** - Corrects for text length
+3.  **Measure of Textual Lexical Diversity (MTLD)** - The most sophisticated measure
+
+We are going to introduce a new library for MTLD ([koRpus](https://cran.r-project.org/web/packages/koRpus/vignettes/koRpus_vignette.html)). This is a great library to be familiar with because it includes functions for automatics language detection, hyphenation, several indices of lexical diversity (including MTLD), and indices of readability. It's also well documented and a standard package in academic work.
+
+``` r
+library(readr) 
+library(tidyverse)
+library(tidyr) 
+library(tidytext) 
+library(ggplot2) 
+library(koRpus)       # Our new library
+
+# Set a clean theme for plots
+theme_set(theme_minimal(base_size = 14))
+
+# Read the text files
+circle <- read_file("texts/A07594__Circle_of_Commerce.txt")
+centre <- read_file("texts/A06785.txt")
+
+# Create a tidy data frame with both texts
+texts_df <- tibble(
+  document = c("Circle of Commerce", "A69858"),
+  author = c("Misselden", "Unknow"),
+  text = c(circle, centre)
+)
+```
+
+Now that we have our two texts loaded, let start with Type-Toke Ratio (TTR). TTR is the simplest measure of lexical diversity. It's calculated as:
+
+$$\text{TTR} = \frac{\text{Types (unique words)}}{\text{Tokens (total words)}}$$
+
+```{r}
+
+# Tokenize the texts and do some basic cleaning (review week 2 if you are usure!)
+tokens <- texts_df %>%
+  unnest_tokens(word, text) %>%
+  mutate(word = str_to_lower(word))
+
+# Calculate TTR for each text
+ttr_results <- tokens %>%
+  group_by(document, author) %>%
+  summarise(
+    tokens = n(),                    # Count total words
+    types = n_distinct(word),        # Count unique words
+    ttr = types / tokens,            # Calculate TTR
+    .groups = "drop"
+  )
+
+# Display results
+ttr_results %>%
+  knitr::kable(
+    digits = 3,
+    caption = "Type-Token Ratio Results",
+    col.names = c("Document", "Author", "Total Words", "Unique Words", "TTR")
+  )
+```
+
+Note: I am using a new function, [`knitr()`](https://bookdown.org/yihui/rmarkdown-cookbook/kable.html), to display the results as a simple table in your console.
+
+### Measures of Syntactic Complexity
+
+More stuff and code

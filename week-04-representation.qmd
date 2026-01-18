@@ -195,7 +195,7 @@ ggplot(tfidf_top_tbl, aes(x = tfidf, y = reorder(term, tfidf))) +
   theme_minimal()
 ```
 
-##### WARNING and an task for you:
+##### WARNING and a task for you:
 
 The visualization above isn't *quite* right. I don't mean that it's technically wrong: the code is correct and the visualization is displaying the correct terms for each document. However, I made some choices along the way that resulted in some less than illuminating results.
 
