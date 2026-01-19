@@ -9,7 +9,7 @@ execute:
   message: false
 ---
 
-### Measures of Lexical Complexity
+## Measures of Lexical Complexity
 
 In this tutorial, we'll explore three measures of **lexical complexity** (also called lexical diversity or lexical richness) using two historical texts; one you know well by now, the other one is a mystery text that you can find on Canvas:
 
@@ -24,18 +24,29 @@ What is Lexical Complexity? Lexical complexity measures how varied a writer's vo
 2.  **Guiraud Index** - Corrects for text length
 3.  **Measure of Textual Lexical Diversity (MTLD)** - The most sophisticated measure
 
+### I. Type-Token Ratio (TTR)
+
 We are going to introduce a new library for MTLD ([koRpus](https://cran.r-project.org/web/packages/koRpus/vignettes/koRpus_vignette.html)). This is a great library to be familiar with because it includes functions for automatics language detection, hyphenation, several indices of lexical diversity (including MTLD), and indices of readability. It's also well documented and a standard package in academic work.
 
-``` r
+```{r}
+#| label: setup
+
 library(readr) 
 library(tidyverse)
 library(tidyr) 
 library(tidytext) 
 library(ggplot2) 
-library(koRpus)       # Our new library
+library(udpipe)
+library(koRpus)
 
-# Set a clean theme for plots
+#install.packages("koRpus.lang.en") # You will need to do this once
+library(koRpus.lang.en)
+
 theme_set(theme_minimal(base_size = 14))
+```
+
+```{r}
+#| label: load-data
 
 # Read the text files
 circle <- read_file("texts/A07594__Circle_of_Commerce.txt")
@@ -44,12 +55,17 @@ centre <- read_file("texts/A06785.txt")
 # Create a tidy data frame with both texts
 texts_df <- tibble(
   document = c("Circle of Commerce", "A69858"),
-  author = c("Misselden", "Unknow"),
+  author = c("Misselden", "Unknown"),
   text = c(circle, centre)
 )
+
+# Display basic information
+texts_df %>%
+  select(document, author) %>%
+  knitr::kable(caption = "Our Two Texts")
 ```
 
-Now that we have our two texts loaded, let start with Type-Toke Ratio (TTR). TTR is the simplest measure of lexical diversity. It's calculated as:
+Now that we have our two texts loaded, let start with **Type-Toke Ratio (TTR)**. TTR is the simplest measure of lexical diversity. It's calculated as:
 
 $$\text{TTR} = \frac{\text{Types (unique words)}}{\text{Tokens (total words)}}$$
 
@@ -79,8 +95,336 @@ ttr_results %>%
   )
 ```
 
-Note: I am using a new function, [`knitr()`](https://bookdown.org/yihui/rmarkdown-cookbook/kable.html), to display the results as a simple table in your console.
+Note: I am using a new function, `knitr::kable(x)`, to display the results as a simple table. It takes whatever is the `x` (=data frame or matrix) and makes it into a table.
 
-### Measures of Syntactic Complexity
+Let's visualize the results that we just got:
 
-More stuff and code
+```{r}
+#| label: plot-ttr
+#| fig-width: 8
+#| fig-height: 5
+
+# Create a bar plot comparing TTR
+ggplot(ttr_results, aes(x = author, y = ttr, fill = author)) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = round(ttr, 3)), 
+            vjust = -0.5, size = 5) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(
+    title = "Type-Token Ratio Comparison",
+    subtitle = "Higher values = more diverse vocabulary",
+    x = NULL,
+    y = "Type-Token Ratio (TTR)"
+  ) +
+  theme(legend.position = "none") +
+  ylim(0, max(ttr_results$ttr) * 1.15)
+```
+
+From this first measure, we see that Misselden's text has a higher TTR than the unknown one. What does this mean, *exactly*? Well, we can see that in *The Circle of Commerce* about 14.1% of the words are new word forms (that is, a word string–after normalization–that has not appeared before in exactly that form in the text so far), while for the "mystery" text, only 11.6% of the words are new word forms. That is, TTR is a measure of "non-repetition" of word forms. Another way to think about it is that for *The Circle of Commerce*, if you encounter any random word in the text, that's a 14.1% chance that it's a word type you haven't seen before. So, *The Circle of Commerce* has greater lexical variety than A69858: it repeats itself slightly less than A69858.
+
+**Warning:** longer texts will *almost always* have a lower TTR score than shorter texts, even if they have a richer vocabulary (can you see why?). Earlier, we saw that A6858 has, in total, 36285 words, while *Circle of Commerce* has, in total, 33894. The two texts aren't substantially different in length (2,391 words, so about 7%), but we need to double check with a length-corrected measure (such as Guiraud and MTLD).
+
+**Why you might still want to compute TTR:** it's a standard across disciplines and you will encounter it in publications, so you need to know what you are looking at. Anyone reading a corpus analysis will recognize it and be able to understand what it represents. TTR is a standard measure of lexical variety. It's easy to audit and easy to reproduce. It's also a good first diagnostic check.
+
+### **II. Guiraud Index**
+
+The **Guiraud Index** (also called Root TTR) solves the text length problem by using a mathematical correction:
+
+$$\text{Guiraud} = \frac{\text{Types}}{\sqrt{\text{Tokens}}}$$
+
+By dividing by the **square root** of tokens instead of the raw count, the Guiraud Index is more stable across different text lengths. This adjustment is a practical approximation that assumes that as the length of a text doubles, its vocabulary does **not** double. The square root in the Guiraud index is there because vocabulary growth in texts is *empirically* sublinear: as a text gets longer, new words appear more slowly. The Guiraud Index essentially asks: how many distinct word forms does a text introduce once we partially correct for the fact that longer texts repeat terms more often?
+
+**Calculate Guiraud Index:**
+
+```{r}
+#| label: calculate-guiraud
+
+# Calculate Guiraud Index for each text
+guiraud_results <- tokens %>%
+  group_by(document, author) %>%
+  summarise(
+    tokens = n(),
+    types = n_distinct(word),
+    guiraud = types / sqrt(tokens),   # Guiraud formula
+    .groups = "drop"
+  )
+
+# Display results
+guiraud_results %>%
+  knitr::kable(
+    digits = 3,
+    caption = "Guiraud Index Results",
+    col.names = c("Document", "Author", "Total Words", "Unique Words", "Guiraud Index")
+  )
+```
+
+And let's visualize it:
+
+```{r}
+#| label: plot-guiraud
+#| fig-width: 8
+#| fig-height: 5
+
+# Create a bar plot comparing Guiraud Index
+ggplot(guiraud_results, aes(x = author, y = guiraud, fill = author)) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = round(guiraud, 2)), 
+            vjust = -0.5, size = 5) +
+  scale_fill_brewer(palette = "Set1") +
+  labs(
+    title = "Guiraud Index Comparison",
+    subtitle = "Length-corrected measure of lexical diversity",
+    x = NULL,
+    y = "Guiraud Index"
+  ) +
+  theme(legend.position = "none") +
+  ylim(0, max(guiraud_results$guiraud) * 1.15)
+```
+
+This result confirms what we noticed with TTR: *The Circle* has a more varied vocabulary than the mystery text even when we partially account for the length of the text. Great!
+
+**However**, you want to make sure that when you compare texts using the Guiraud Index, you are looking at texts that are of similar genre and (though less so) similar length. Diferrent types of texts are associated with different demands onn vocabulary and rhetorical strategies (for example, a legal argument will require different vocabulary choice than a news report of the same court proceeding). Because the index still depends on text length and genre, there is no universal ‘benchmark’ scale. Instead, values should be interpreted relatively, as we are doing here.
+
+This leads us to:
+
+### **III.** Measure of Textual Lexical Diversity (MTLD)
+
+What is MTLD?
+
+**MTLD** is the most sophisticated measure we'll use. It was designed to account for the problems of the measures above. TTR and Guiraud essentially ask: given a text of length N, how many distinct word forms does it contain? MTD instead asks: how long can a text continue before its lexical diversity drops below a fixed threshold? It works by:
+
+1.  Reading through the text sequentially
+2.  Calculating a running TTR as it goes
+3.  Counting how many times the TTR drops below 0.72 (this has been determined empirically across many text types and genres). Once you detect that the document's TTR drops below 0.72, you count *one factor*. Then you reset and restart computing TTR on the next chunk of text.
+4.  The result is the average "length" needed before vocabulary starts repeating and it's computed by:
+
+### Measure of Textual Lexical Diversity (MTLD)
+
+The **Measure of Textual Lexical Diversity (MTLD)** is computed as:
+
+$$
+\text{MTLD} = \frac{N}{F}
+$$
+
+where:
+
+-   N = total number of word tokens in the text
+
+-   F = total number of **factors**, including any partial factor at the end of the text
+
+In practice, MTLD is usually computed **in both directions** (forward and backward through the text), and the final value is the mean of the two:
+
+$$
+\text{MTLD}_{\text{final}} = 
+\frac{\text{MTLD}_{\text{forward}} + \text{MTLD}_{\text{backward}}}{2}
+$$
+
+**Higher MTLD** = more diverse vocabulary (the author can go longer before repeating words).
+
+Let's compute this second version (both forward and backward through the text using the `koRpus` package (and use the formatting that it requires). Note: `koRpus` gives you a number of options which you can find [here](https://cran.r-project.org/web/packages/koRpus/koRpus.pdf).
+
+```{r}
+#| label: calculate-mtld
+#| warning: false
+#| message: false
+
+
+# Function to calculate MTLD for a text
+calculate_mtld <- function(text_string, doc_name) {
+  # Create a temporary file (koRpus requirement)
+  temp_file <- tempfile(fileext = ".txt")
+  writeLines(text_string, temp_file)
+  
+  # Tokenize with koRpus
+  tokenized <- tokenize(temp_file, lang = "en")
+  
+  # Calculate MTLD
+  mtld_result <- MTLD(tokenized)
+  
+  # Extract the MTLD value
+  mtld_value <- mtld_result@MTLD$MTLD
+  
+  # Clean up
+  unlink(temp_file)
+  
+  return(mtld_value)
+}
+
+# Calculate MTLD for both texts
+mtld_results <- texts_df %>%
+  rowwise() %>%
+  mutate(
+    mtld = calculate_mtld(text, document)
+  ) %>%
+  ungroup() %>%
+  select(document, author, mtld)
+
+# Display results
+mtld_results %>%
+  knitr::kable(
+    digits = 2,
+    caption = "MTLD Results",
+    col.names = c("Document", "Author", "MTLD")
+  )
+```
+
+An `R` coding note for those of you who are new to coding. The MTLD computation using `koRups` is being put together in the curly brackets that define all the steps that the new function we are defining, `calculate_mtld`, will perform. **NB:** `calculate_mtld`does not actually compute MTLD, it just takes a text string (our Tidy data), converts it to a file for `koRpus`, calls in `koRpus` to compute MTLD, and then returns everything to Tidy.
+
+Let's visualize the results:
+
+```{r}
+#| label: plot-mtld
+#| fig-width: 8
+#| fig-height: 5
+
+# Create a bar plot comparing MTLD
+ggplot(mtld_results, aes(x = author, y = mtld, fill = author)) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = round(mtld, 1)), 
+            vjust = -0.5, size = 5) +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(
+    title = "MTLD Comparison",
+    subtitle = "Mean Length of Sequential Word Strings (Higher = More Diverse)",
+    x = NULL,
+    y = "MTLD Score"
+  ) +
+  theme(legend.position = "none") +
+  ylim(0, max(mtld_results$mtld) * 1.15)
+```
+
+Well, this is interesting and important in understanding how these measures work. Unlike TTR and Guiraud, MTLD assigns a greater lexical variety to our mystery text. The two documents are of similar length, so we can't just attribute it to that. What MTLD is picking up is a difference in how *lexical variety is distributed across the text*.
+
+TTR and Guiraud only care about how many distinct word forms there are overall in the texts. They are both **global** measures of variety.
+
+MTLD is sensitive to how repetition is patterned through text "time" (think of reading the text as your measure of text "time"). A higher MTLD in the mystery text means that it sustains lexical variety more consistently across its length while Misselden's lower MTLD means that *The Circle* includes repetition-heavy chunks earlier on and more often (even though it globally ends up with more unique token types).
+
+Give this kind of result, we expect that in *The Circle*, Misselden includes lots of repeated terms and phrases within sections (local repetition as he perhaps defines and explains a given concept/idea), but overall introduces more terms. The mystery text, instead, distributes its vocabulary more evenly. A69858 uses fewer unique words in total, but sustain more lexical variety within any given passage.
+
+## Measures of Syntactic Complexity
+
+So much for vocabulary measures! What if we want to understand the complexity (or lack thereof) of the *syntax* of a text?
+
+The core idea that we will use for this is to measure structure via **frequency counts** (e.g., number of clauses, number of dependent clauses), **ratios** (e.g., clauses per sentence; dependent clauses per clause), or **length indices** (e.g., mean length of clause in words).
+
+Note: research in syntax complexity is particularly well-represented in second language acquisition research (see, for example [here](https://aclanthology.org/P11-1073.pdf) for a strong discussion).
+
+We are still working with the same two texts as above!
+
+``` R
+texts_df <- tibble(doc_id = c("Circle of Commerce", "Mystery Text"),text = c(circle, centre))
+
+texts_df
+```
+
+We are going to use something new [UDPipe](https://cran.r-project.org/web/packages/udpipe/vignettes/udpipe-annotation.html) to: tokenize, do parts of speech tagging, lemmatize, and do dependency parsing. Note: for Early Modern texts there is a package out of Northwestern ([MorphAdorner](https://morphadorner.northwestern.edu/)) that performs better. Since I don't have any Early Modernists this semester, I am going to stick with a more generalizable workflow.
+
+``` R
+#| message: true
+
+#Load an English UD (= Univesal Dependencies) model ONCE
+
+#model_info <- udpipe_download_model(language = "english-ewt")
+#ud_model <- udpipe_load_model(model_info$file_model)
+```
+
+I chose `english-ewt` because it's widely adopted and well-documented for English prose. It captures the **core** syntactic relations and it does a decent job on pre-Modern texts. I would **not** use this for my own research, but that's a niche issue.
+
+Now, let's annotate both texts using UDPipe:
+
+``` R
+anno_df <- texts_df %>%
+  mutate(
+    anno = map(text, ~ udpipe_annotate(ud_model, x = .x) %>%
+                 as.data.frame() %>%
+                 rename(ud_doc_id = doc_id))   # <- rename inside
+  ) %>%
+  select(doc_id, anno) %>%
+  unnest(anno) %>%
+  select(
+    doc_id,
+    paragraph_id,
+    sentence_id,
+    token_id,
+    token,
+    lemma,
+    upos,
+    feats,
+    head_token_id,
+    dep_rel
+  )
+
+anno_df %>% glimpse()
+```
+
+Let's define transparent syntactic proxies: COME BACK AND FILL
+
+``` R
+syntax_df <- anno_df %>%
+mutate(
+is_word = upos != "PUNCT",
+
+
+# Clause proxy: finite verbs
+is_clause = (upos %in% c("VERB", "AUX")) &
+            str_detect(feats, "VerbForm=Fin"),
+
+# Dependent clause proxy
+is_dep_clause = dep_rel %in% c(
+  "advcl", "ccomp", "xcomp", "acl", "relcl"
+),
+
+# Coordination proxy
+is_coord = dep_rel %in% c("conj", "cc"),
+
+# Nominal complexity proxy
+is_complex_nominal = dep_rel %in% c(
+  "amod", "nmod", "compound", "appos"
+)
+
+)
+```
+
+Sentence level summaries: COME BACK AND FILL
+
+``` r
+sentence_df <- syntax_df %>%
+  filter(is_word) %>%
+  group_by(doc_id, sentence_id) %>%
+  summarise(
+    words          = n(),
+    clauses        = sum(is_clause),
+    dep_clauses    = sum(is_dep_clause),
+    .groups = "drop"
+  )
+
+sentence_df
+```
+
+**Mean length of sentence:**
+
+``` R
+mls_df <- sentence_df %>%
+group_by(doc_id) %>%
+summarise(
+MLS = mean(words),
+.groups = "drop"
+)
+
+mls_df
+```
+
+**Overall Sentence Complexity: C/S--Clauses per sentence**
+
+``` R
+clausal_density_df <- sentence_df %>%
+group_by(doc_id) %>%
+summarise(
+sentences = n(),
+clauses   = sum(clauses),
+C_per_S   = clauses / sentences,
+.groups = "drop"
+)
+
+clausal_density_df
+```
