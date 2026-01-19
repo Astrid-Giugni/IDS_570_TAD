@@ -30,3 +30,8 @@ website:
             text: "Week 02: Basics"
           - href: week-03-dictionaries.qmd
             text: "Week 03: Dictionaries"
+          - href: week-04-representation.qmd
+            text: "Week 04: Text Representation (1)"
+          - href: week-05-representation.qmd
+            text: "Week 05: Text Representation (2)"
+          
