@@ -120,9 +120,9 @@ ggplot(ttr_results, aes(x = author, y = ttr, fill = author)) +
   ylim(0, max(ttr_results$ttr) * 1.15)
 ```
 
-From this first measure, we see that Misselden's text has a higher TTR than the unknown one. What does this mean, *exactly*? Well, we can see that in *The Circle of Commerce* about 14.1% of the words are new word forms (that is, a word string–after normalization–that has not appeared before in exactly that form in the text so far), while for the "mystery" text, only 11.6% of the words are new word forms. That is, TTR is a measure of "non-repetition" of word forms. Another way to think about it is that for *The Circle of Commerce*, if you encounter any random word in the text, that's a 14.1% chance that it's a word type you haven't seen before. So, *The Circle of Commerce* has greater lexical variety than A69858: it repeats itself slightly less than A69858.
+From this first measure, we see that Misselden's text has a lower TTR than the unknown one. What does this mean, *exactly*? Well, we can see that in *The Circle of Commerce* only 14.1% of the words are new word forms (that is, a word string–after normalization–that has not appeared before in exactly that form in the text so far), while for the "mystery" text, 22.2% of the words are new word forms. That is, TTR is a measure of "non-repetition" of word forms. Another way to think about it is that for *The Circle of Commerce*, if you encounter any random word in the text, that's a 14.1% chance that it's a word type you haven't seen before. So, *The Circle of Commerce* has lower lexical variety than A69858: it repeats itself more than A69858.
 
-**Warning:** longer texts will *almost always* have a lower TTR score than shorter texts, even if they have a richer vocabulary (can you see why?). Earlier, we saw that A6858 has, in total, 36285 words, while *Circle of Commerce* has, in total, 33894. The two texts aren't substantially different in length (2,391 words, so about 7%), but we need to double check with a length-corrected measure (such as Guiraud and MTLD).
+**Warning:** longer texts will *almost always* have a lower TTR score than shorter texts, even if they have a richer vocabulary (can you see why?). Earlier, we saw that A6858 has, in total, 5942 words, while *Circle of Commerce* has, in total, 33894. The two texts are substantially different in length, so we need to double check with a length-corrected measure (such as Guiraud and MTLD).
 
 **Why you might still want to compute TTR:** it's a standard across disciplines and you will encounter it in publications, so you need to know what you are looking at. Anyone reading a corpus analysis will recognize it and be able to understand what it represents. TTR is a standard measure of lexical variety. It's easy to audit and easy to reproduce. It's also a good first diagnostic check.
 
@@ -181,9 +181,9 @@ ggplot(guiraud_results, aes(x = author, y = guiraud, fill = author)) +
   ylim(0, max(guiraud_results$guiraud) * 1.15)
 ```
 
-This result confirms what we noticed with TTR: *The Circle* has a more varied vocabulary than the mystery text even when we partially account for the length of the text. Great!
+This result gives a very different picture from what we noticed with TTR: *The Circle* has a more varied vocabulary than the mystery text when we partially account for the length of the text.
 
-**However**, you want to make sure that when you compare texts using the Guiraud Index, you are looking at texts that are of similar genre and (though less so) similar length. Diferrent types of texts are associated with different demands onn vocabulary and rhetorical strategies (for example, a legal argument will require different vocabulary choice than a news report of the same court proceeding). Because the index still depends on text length and genre, there is no universal ‘benchmark’ scale. Instead, values should be interpreted relatively, as we are doing here.
+**However**, you want to make sure that when you compare texts using the Guiraud Index, you are looking at texts that are of similar genre and (though less so) similar length. Diferent types of texts are associated with different demands on vocabulary and rhetorical strategies (for example, a legal argument will require different vocabulary choice than a news report of the same court proceeding). Because the index still depends on text length and genre, there is no universal ‘benchmark’ scale. Instead, values should be interpreted relatively, as we are doing here.
 
 This leads us to:
 
@@ -293,13 +293,13 @@ ggplot(mtld_results, aes(x = author, y = mtld, fill = author)) +
   ylim(0, max(mtld_results$mtld) * 1.15)
 ```
 
-Well, this is interesting and important in understanding how these measures work. Unlike TTR and Guiraud, MTLD assigns a greater lexical variety to our mystery text. The two documents are of similar length, so we can't just attribute it to that. What MTLD is picking up is a difference in how *lexical variety is distributed across the text*.
+Well, this is interesting and important in understanding how these measures work. Unlike Guiraud, but like TTR, MTLD assigns a greater lexical variety to our mystery text. What MTLD is picking up is a difference in how *lexical variety is distributed across the text*.
 
 TTR and Guiraud only care about how many distinct word forms there are overall in the texts. They are both **global** measures of variety.
 
-MTLD is sensitive to how repetition is patterned through text "time" (think of reading the text as your measure of text "time"). A higher MTLD in the mystery text means that it sustains lexical variety more consistently across its length while Misselden's lower MTLD means that *The Circle* includes repetition-heavy chunks earlier on and more often (even though it globally ends up with more unique token types).
+MTLD is sensitive to how repetition is patterned through text "time" (think of reading the text as your measure of text "time"). A higher MTLD in the mystery text means that it sustains lexical variety more consistently across its length while Misselden's lower MTLD means that *The Circle* includes repetition-heavy chunks earlier on and more often (even though it globally, when adjusted for length, ends up with more unique token types).
 
-Give this kind of result, we expect that in *The Circle*, Misselden includes lots of repeated terms and phrases within sections (local repetition as he perhaps defines and explains a given concept/idea), but overall introduces more terms. The mystery text, instead, distributes its vocabulary more evenly. A69858 uses fewer unique words in total, but sustain more lexical variety within any given passage.
+Give this kind of result, we expect that in *The Circle*, Misselden includes lots of repeated terms and phrases within sections (local repetition as he perhaps defines and explains a given concept/idea), but overall introduces more terms per unit of text length. The mystery text, instead, distributes its vocabulary more evenly. A69858 uses fewer unique words in total, but sustain more lexical variety within any given passage.
 
 ## Measures of Syntactic Complexity
 
@@ -323,7 +323,8 @@ texts_df
 We are going to use something new [UDPipe](https://cran.r-project.org/web/packages/udpipe/vignettes/udpipe-annotation.html) to: tokenize, do parts of speech tagging, lemmatize, and do dependency parsing. Note: for Early Modern texts there is a package out of Northwestern ([MorphAdorner](https://morphadorner.northwestern.edu/)) that performs better. Since I don't have any Early Modernists this semester, I am going to stick with a more generalizable workflow.
 
 ```{r}
-#| message: true
+#| message: false
+#| warning: false
 
 #Load an English UD (= Univesal Dependencies) model ONCE
 
