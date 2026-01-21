@@ -624,11 +624,6 @@ all_measures %>%
 And let's visualize it
 
 ``` R
-#| label: fig-syntactic-profile
-#| fig-width: 12
-#| fig-height: 8
-#| fig-cap: "Complete syntactic complexity comparison"
-
 # Reshape for plotting
 syntax_long <- all_measures %>%  # ← Added %>%
   pivot_longer(
