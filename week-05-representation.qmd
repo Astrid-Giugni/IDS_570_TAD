@@ -50,13 +50,13 @@ theme_set(theme_minimal(base_size = 14))
 
 # Read the text files
 circle <- read_file("texts/A07594__Circle_of_Commerce.txt")
-centre <- read_file("texts/A06785.txt")
+mystery <- read_file("texts/A69858.txt")
 
 # Create a tidy data frame with both texts
 texts_df <- tibble(
   document = c("Circle of Commerce", "A69858"),
   author = c("Misselden", "Unknown"),
-  text = c(circle, centre)
+  text = c(circle, mystery)
 )
 
 # Display basic information
@@ -311,8 +311,8 @@ Note: research in syntax complexity is particularly well-represented in second l
 
 We are still working with the same two texts as above!
 
-``` r
-texts_df <- tibble(doc_id = c("Circle of Commerce", "A69858"),
+``` R
+texts_df <- tibble(document = c("Circle of Commerce", "A69858"),
                    author = c("Misselden", "Unknown"),
                    text = c(circle, mystery)
                    )
@@ -327,8 +327,8 @@ We are going to use something new [UDPipe](https://cran.r-project.org/web/packag
 
 #Load an English UD (= Univesal Dependencies) model ONCE
 
-#model_info <- udpipe_download_model(language = "english-ewt")
-#ud_model <- udpipe_load_model(model_info$file_model)
+model_info <- udpipe_download_model(language = "english-ewt")
+ud_model <- udpipe_load_model(model_info$file_model)
 ```
 
 I chose `english-ewt` because it's widely adopted and well-documented for English prose. It captures the **core** syntactic relations and it does a decent job on pre-Modern texts. I would **not** use this for my own research, but that's a niche issue.
@@ -341,15 +341,15 @@ anno_df <- texts_df %>%
     #Parse each text with Universal Dependecies parser
     anno = map(text, ~ udpipe_annotate(ud_model, x = .x) %>%
                  as.data.frame() %>%
-                 rename(ud_doc_id = doc_id))   #Avoid doc_id conflic
+                 rename(ud_document = document))   #Avoid document conflic
   ) %>%
-  #keep only the doc_id and he parsed annotations
-  select(doc_id, anno) %>%
+  #keep only the document and he parsed annotations
+  select(document, anno) %>%
   #expand the nested annotations into rows
   unnest(anno) %>%
   #select columns for syntactic analysis
   select(
-    doc_id,
+    document,
     paragraph_id,
     sentence_id,
     token_id,
@@ -469,7 +469,7 @@ Let's check what we did:
 ``` r
 # looking at the first 20 rows in the data frame
 syntax_df %>% 
-  select(doc_id, token, upos, is_clause, is_dep_clause) %>%
+  select(document, token, upos, is_clause, is_dep_clause) %>%
   head(20)
 ```
 
@@ -490,7 +490,7 @@ Before we jump into the details of these measures, we need to aggregate at the s
 ``` r
 sentence_df <- syntax_df %>%
   filter(is_word) %>%           #count words (not punctuation)
-  group_by(doc_id, sentence_id) %>%   #group by document and sentence
+  group_by(document, sentence_id) %>%   #group by document and sentence
   summarise(
     words          = n(),   #number of words per sentence
     clauses        = sum(is_clause), # number of clauses per sentence
@@ -505,7 +505,7 @@ sentence_df
 
 ``` r
 mls_df <- sentence_df %>%
-group_by(doc_id) %>%
+group_by(document) %>%
 summarise(
 MLS = mean(words), # Average words per sentence
 .groups = "drop"
@@ -520,7 +520,7 @@ mls_df
 ``` r
 #Calculate clauses per sentence
 clausal_density_df <- sentence_df %>%
-group_by(doc_id) %>%
+group_by(document) %>%
 summarise(
 sentences = n(),
 clauses   = sum(clauses),
@@ -538,7 +538,7 @@ It contains multiple embedded dependent clauses (“Although…”, “that the 
 
 ``` r
 subordination_df <- sentence_df %>%
-group_by(doc_id) %>%
+group_by(document) %>%
 summarise(
 clauses = sum(clauses),
 dep_clauses = sum(dep_clauses),
@@ -561,7 +561,7 @@ DC/S (Dependent Clauses per Sentence): How many dependent clauses in each senten
 
 ``` r
 coordination_df <- syntax_df %>%
-group_by(doc_id) %>%
+group_by(document) %>%
 summarise(
 coord_relations = sum(is_coord),
 clauses         = sum(is_clause),
@@ -582,9 +582,9 @@ Coord/S (Coordination per Sentence): Total number of coordination markers divide
 
 **5. Phrasal Complexity (CN/C and CN/S):** writing increases in complexity not just through clauses, but through elaborated phrases. This is especially common in specialized or technical writing. Noun phrases are phrases built around a noun (or pronoun) that act as a unit in a sentence (if you are rusty on noun phrases aka nominal phrases, check this [wikipedia entry](https://en.wikipedia.org/wiki/Noun_phrase)).
 
-``` R
+``` r
 nominal_df <- syntax_df %>%
-group_by(doc_id) %>%
+group_by(document) %>%
 summarise(
 complex_nominals = sum(is_complex_nominal),
 clauses          = sum(is_clause),
@@ -605,13 +605,13 @@ As a way to understand the difference between clausal and phrasal complexity, lo
 
 **Let's bring everything together:**
 
-``` R
+``` r
 # Combine all measures
 all_measures <- mls_df %>%  # ← Added mls_df %>%
-  left_join(clausal_density_df %>% select(doc_id, C_per_S), by = "doc_id") %>%
-  left_join(subordination_df %>% select(doc_id, DC_per_C, DC_per_S), by = "doc_id") %>%
-  left_join(coordination_df %>% select(doc_id, Coord_per_C, Coord_per_S), by = "doc_id") %>%
-  left_join(nominal_df %>% select(doc_id, CN_per_C, CN_per_S), by = "doc_id")
+  left_join(clausal_density_df %>% select(document, C_per_S), by = "document") %>%
+  left_join(subordination_df %>% select(document, DC_per_C, DC_per_S), by = "document") %>%
+  left_join(coordination_df %>% select(document, Coord_per_C, Coord_per_S), by = "document") %>%
+  left_join(nominal_df %>% select(document, CN_per_C, CN_per_S), by = "document")
 
 all_measures %>%
   knitr::kable(
@@ -623,11 +623,11 @@ all_measures %>%
 
 And let's visualize it
 
-``` R
+``` r
 # Reshape for plotting
 syntax_long <- all_measures %>%  # ← Added %>%
   pivot_longer(
-    cols = -doc_id,
+    cols = -document,
     names_to = "Measure",
     values_to = "Value"
   ) %>%
@@ -642,7 +642,7 @@ syntax_long <- all_measures %>%  # ← Added %>%
   )
 
 # Plot
-ggplot(syntax_long, aes(x = Measure, y = Value, fill = doc_id)) +
+ggplot(syntax_long, aes(x = Measure, y = Value, fill = document)) +
   geom_col(position = "dodge", width = 0.7) +
   facet_wrap(~Category, scales = "free", ncol = 2) +
   scale_fill_brewer(palette = "Set2") +
