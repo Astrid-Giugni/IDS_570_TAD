@@ -11,7 +11,7 @@ execute:
 
 ## Measures of Lexical Complexity
 
-In this tutorial, we'll explore three measures of **lexical complexity** (also called lexical diversity or lexical richness) using two historical texts; one you know well by now, the other one is a mystery text that you can find on Canvas:
+In this tutorial, we'll explore three measures of **lexical complexity** (also called lexical diversity or lexical richness) using two historical texts; one you know well by now, the other one is a new mystery text that you can find on Canvas:
 
 1.  "The Circle of Commerce" by Edward Misselden (1623)
 2.  "A69858.text"
