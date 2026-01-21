@@ -65,7 +65,7 @@ texts_df %>%
   knitr::kable(caption = "Our Two Texts")
 ```
 
-Now that we have our two texts loaded, let start with **Type-Toke Ratio (TTR)**. TTR is the simplest measure of lexical diversity. It's calculated as:
+Now that we have our two texts loaded, let start with **Type-Token Ratio (TTR)**. TTR is the simplest measure of lexical diversity. It's calculated as:
 
 $$\text{TTR} = \frac{\text{Types (unique words)}}{\text{Tokens (total words)}}$$
 
@@ -122,7 +122,7 @@ ggplot(ttr_results, aes(x = author, y = ttr, fill = author)) +
 
 From this first measure, we see that Misselden's text has a lower TTR than the unknown one. What does this mean, *exactly*? Well, we can see that in *The Circle of Commerce* only 14.1% of the words are new word forms (that is, a word string–after normalization–that has not appeared before in exactly that form in the text so far), while for the "mystery" text, 22.2% of the words are new word forms. That is, TTR is a measure of "non-repetition" of word forms. Another way to think about it is that for *The Circle of Commerce*, if you encounter any random word in the text, that's a 14.1% chance that it's a word type you haven't seen before. So, *The Circle of Commerce* has lower lexical variety than A69858: it repeats itself more than A69858.
 
-**Warning:** longer texts will *almost always* have a lower TTR score than shorter texts, even if they have a richer vocabulary (can you see why?). Earlier, we saw that A6858 has, in total, 5942 words, while *Circle of Commerce* has, in total, 33894. The two texts are substantially different in length, so we need to double check with a length-corrected measure (such as Guiraud and MTLD).
+**Warning:** longer texts will *almost always* have a lower TTR score than shorter texts, even if they have a richer vocabulary (can you see why?). Earlier, we saw that A69858 has, in total, 5942 words, while *Circle of Commerce* has, in total, 33894. The two texts are substantially different in length, so we need to double check with a length-corrected measure (such as Guiraud and MTLD).
 
 **Why you might still want to compute TTR:** it's a standard across disciplines and you will encounter it in publications, so you need to know what you are looking at. Anyone reading a corpus analysis will recognize it and be able to understand what it represents. TTR is a standard measure of lexical variety. It's easy to audit and easy to reproduce. It's also a good first diagnostic check.
 
@@ -191,7 +191,7 @@ This leads us to:
 
 What is MTLD?
 
-**MTLD** is the most sophisticated measure we'll use. It was designed to account for the problems of the measures above. TTR and Guiraud essentially ask: given a text of length N, how many distinct word forms does it contain? MTD instead asks: how long can a text continue before its lexical diversity drops below a fixed threshold? It works by:
+**MTLD** is the most sophisticated measure we'll use. It was designed to account for the problems of the measures above. TTR and Guiraud essentially ask: given a text of length N, how many distinct word forms does it contain? MTLD instead asks: how long can a text continue before its lexical diversity drops below a fixed threshold? It works by:
 
 1.  Reading through the text sequentially
 2.  Calculating a running TTR as it goes
@@ -268,7 +268,7 @@ mtld_results %>%
   )
 ```
 
-An `R` coding note for those of you who are new to coding. The MTLD computation using `koRups` is being put together in the curly brackets that define all the steps that the new function we are defining, `calculate_mtld`, will perform. **NB:** `calculate_mtld`does not actually compute MTLD, it just takes a text string (our Tidy data), converts it to a file for `koRpus`, calls in `koRpus` to compute MTLD, and then returns everything to Tidy.
+An `R` coding note for those of you who are new to coding. The MTLD computation using `koRpus` is being put together in the curly brackets that define all the steps that the new function we are defining, `calculate_mtld`, will perform. **NB:** `calculate_mtld`does not actually compute MTLD, it just takes a text string (our Tidy data), converts it to a file for `koRpus`, calls in `koRpus` to compute MTLD, and then returns everything to Tidy.
 
 Let's visualize the results:
 
@@ -396,7 +396,7 @@ mutate(
 is_word = upos != "PUNCT", #<--is it a word (and not punctuation?)
 
 
-# Is this an indipendent clause? finite verbs are proxy for indipendent clauses
+# Is this an independent clause? finite verbs are proxy for indipendent clauses
 is_clause = (upos %in% c("VERB", "AUX")) &
             str_detect(coalesce(feats, ""), "VerbForm=Fin"),
 
@@ -423,7 +423,7 @@ is_complex_nominal = dep_rel %in% c(
 )
 ```
 
-A quick note about punctuation: we filter out punctuation because punctuation itself doesn't add to a sentence complexity. Think of the following
+A quick note about punctuation: we filter out punctuation because punctuation itself doesn't add to a sentence complexity. While someone typing: \[I "like" lemon tea\] changes the meaning from \[I like lemon tea\], it doesn't add to syntactic complexity.
 
 If you want to know a bit more about clauses, you can find the [full list here](https://universaldependencies.org/u/dep/all.html). But a quick summary for our needs is below:
 
@@ -577,9 +577,11 @@ coordination_df
 
 These are "densities" of coordination:
 
-Coord/C (Coordination per Clause): Total number of coordination (“and”, “or”, “but”…) markers divided by number of clauses.
+Coord/C (Coordination per Clause): Total number of coordination (“and”, “or”, “but”…) **markers** divided by number of clauses.
 
-Coord/S (Coordination per Sentence): Total number of coordination markers divided by number of sentences.
+Coord/S (Coordination per Sentence): Total number of coordination **markers** divided by number of sentences.
+
+Note: our coordination measure looks high (\>2). I bolded "markers" in "coordination markers" because what we are counting is *any* coordination marker, including in, for example, noun phrases ("trade and commerce") or in a list of coordinated adjectives ("lawful, honest, and profitable"). So you are not just counting the number of coordinated clauses, but rather the frequency of parallel syntactic structures.
 
 **5. Phrasal Complexity (CN/C and CN/S):** writing increases in complexity not just through clauses, but through elaborated phrases. This is especially common in specialized or technical writing. Noun phrases are phrases built around a noun (or pronoun) that act as a unit in a sentence (if you are rusty on noun phrases aka nominal phrases, check this [wikipedia entry](https://en.wikipedia.org/wiki/Noun_phrase)).
 
