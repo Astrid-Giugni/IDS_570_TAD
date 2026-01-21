@@ -397,7 +397,7 @@ is_word = upos != "PUNCT", #<--is it a word (and not punctuation?)
 
 # Is this an indipendent clause? finite verbs are proxy for indipendent clauses
 is_clause = (upos %in% c("VERB", "AUX")) &
-            str_detect(feats, "VerbForm=Fin"),
+            str_detect(coalesce(feats, ""), "VerbForm=Fin"),
 
 # Dependent clause? 
 is_dep_clause = dep_rel %in% c(
@@ -405,7 +405,7 @@ is_dep_clause = dep_rel %in% c(
   "ccomp", # clausal complement
   "xcomp", #open clausal complement
   "acl", #adnomial clause
-  "relcl" #relative clause
+  "acl:relcl" #relative clause
 ),
 
 # Is this coordination? That is, does it use "and" "or" etc.?
@@ -418,6 +418,7 @@ is_complex_nominal = dep_rel %in% c(
   "compound", # compound ("lemon tea")
   "appos" #apposition ("team my favorite")
 )
+
 )
 ```
 
@@ -511,7 +512,7 @@ MLS = mean(words), # Average words per sentence
 )
 
 # Let's take a look
-mls_df
+mls_df 
 ```
 
 **2. Overall Sentence Complexity (C/S = Clauses per sentence):** while longer sentences *tend* to be more complex, that's not the only way complexity works. A short sentence in English, such as "The dog I saw bit my cousin," can be structurally complex. The next step is to count clauses. More clauses allow for the possibility of more syntactic complexity via coordination and subordination.
