@@ -1,9 +1,7 @@
 ---
-title: "week-05-representation.qmd"
-editor: visual
+title: "Week 05: Text Representation (2)"
 format: html
 execute:
-  eval: true
   echo: true
   warning: false
   message: false
@@ -183,7 +181,7 @@ ggplot(guiraud_results, aes(x = author, y = guiraud, fill = author)) +
 
 This result gives a very different picture from what we noticed with TTR: *The Circle* has a more varied vocabulary than the mystery text when we partially account for the length of the text.
 
-**However**, you want to make sure that when you compare texts using the Guiraud Index, you are looking at texts that are of similar genre and (though less so) similar length. Diferent types of texts are associated with different demands on vocabulary and rhetorical strategies (for example, a legal argument will require different vocabulary choice than a news report of the same court proceeding). Because the index still depends on text length and genre, there is no universal ‘benchmark’ scale. Instead, values should be interpreted relatively, as we are doing here.
+**However**, you want to make sure that when you compare texts using the Guiraud Index, you are looking at texts that are of similar genre and (though less so) similar length. Different types of texts are associated with different demands on vocabulary and rhetorical strategies (for example, a legal argument will require different vocabulary choice than a news report of the same court proceeding). Because the index still depends on text length and genre, there is no universal ‘benchmark’ scale. Instead, values should be interpreted relatively, as we are doing here.
 
 This leads us to:
 
@@ -417,7 +415,7 @@ is_complex_nominal = dep_rel %in% c(
   "amod", # adjective modifier ("big cup")
   "nmod", #nominal modifier ("cup of tea")
   "compound", # compound ("lemon tea")
-  "appos" #apposition ("team my favorite")
+  "appos" #apposition ("tea, my favorite!")
 )
 
 )
