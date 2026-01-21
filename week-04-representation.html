@@ -244,6 +244,12 @@ window.Quarto = {
  <span class="menu-text">Week 04: Text Representation (1)</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./week-05-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 05: Text Representation (2)</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -286,9 +292,9 @@ window.Quarto = {
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda.textstats)</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>txt_circle    <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"D:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A07594__Circle_of_Commerce.txt"</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>txt_free      <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"D:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/B14801__Free_Trade.txt"</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>txt_third     <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"D:/Users/astri/Desktop/R-work/IDS_570_TAD/texts/A06785.txt"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>txt_circle    <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"texts/A07594__Circle_of_Commerce.txt"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>txt_free      <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"texts/B14801__Free_Trade.txt"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>txt_third     <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"texts/A06785.txt"</span>)</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>texts <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Circle_of_Commerce"</span> <span class="ot">=</span> txt_circle,</span>
@@ -533,8 +539,8 @@ docs                   croesvs king     lydia    ſonne
 </div>
 </div>
 </div>
-<section id="warning-and-an-task-for-you" class="level5">
-<h5 class="anchored" data-anchor-id="warning-and-an-task-for-you">WARNING and an task for you:</h5>
+<section id="warning-and-a-task-for-you" class="level5">
+<h5 class="anchored" data-anchor-id="warning-and-a-task-for-you">WARNING and a task for you:</h5>
 <p>The visualization above isn’t <em>quite</em> right. I don’t mean that it’s technically wrong: the code is correct and the visualization is displaying the correct terms for each document. However, I made some choices along the way that resulted in some less than illuminating results.</p>
 <ul>
 <li><p>What would you change? Why? Hint: think through the discussion about how TF-IDF is computed and what it captures.</p></li>
