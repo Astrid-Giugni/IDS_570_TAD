@@ -14,7 +14,7 @@ In this tutorial, we'll explore three measures of **lexical complexity** (also c
 1.  "The Circle of Commerce" by Edward Misselden (1623)
 2.  "A69858.txt"
 
-We want to see see if the two texts differ in terms of vocabulary diversity in a meaningful way.
+We want to see if the two texts differ in terms of vocabulary diversity in a meaningful way.
 
 What is Lexical Complexity? Lexical complexity measures how varied a writer's vocabulary is. A text with high lexical diversity uses many different words, while a text with low diversity repeats the same words frequently. We'll learn three different, but well-validated, measures:
 
