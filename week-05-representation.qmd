@@ -14,7 +14,7 @@ execute:
 In this tutorial, we'll explore three measures of **lexical complexity** (also called lexical diversity or lexical richness) using two historical texts; one you know well by now, the other one is a new mystery text that you can find on Canvas:
 
 1.  "The Circle of Commerce" by Edward Misselden (1623)
-2.  "A69858.text"
+2.  "A69858.txt"
 
 We want to see see if the two texts differ in terms of vocabulary diversity in a meaningful way.
 
@@ -311,7 +311,7 @@ Note: research in syntax complexity is particularly well-represented in second l
 
 We are still working with the same two texts as above!
 
-``` R
+```{r}
 texts_df <- tibble(document = c("Circle of Commerce", "A69858"),
                    author = c("Misselden", "Unknown"),
                    text = c(circle, mystery)
@@ -322,7 +322,7 @@ texts_df
 
 We are going to use something new [UDPipe](https://cran.r-project.org/web/packages/udpipe/vignettes/udpipe-annotation.html) to: tokenize, do parts of speech tagging, lemmatize, and do dependency parsing. Note: for Early Modern texts there is a package out of Northwestern ([MorphAdorner](https://morphadorner.northwestern.edu/)) that performs better. Since I don't have any Early Modernists this semester, I am going to stick with a more generalizable workflow.
 
-``` r
+```{r}
 #| message: true
 
 #Load an English UD (= Univesal Dependencies) model ONCE
@@ -335,19 +335,19 @@ I chose `english-ewt` because it's widely adopted and well-documented for Englis
 
 Now, let's annotate both texts using UDPipe:
 
-``` r
+```{r}
 anno_df <- texts_df %>%
   mutate(
-    #Parse each text with Universal Dependecies parser
-    anno = map(text, ~ udpipe_annotate(ud_model, x = .x) %>%
-                 as.data.frame() %>%
-                 rename(ud_document = document))   #Avoid document conflic
+    # Parse each text with the UD parser; set doc_id to our document name
+    anno = map2(text, document, ~ udpipe_annotate(ud_model, x = .x, doc_id = .y) %>%
+      as.data.frame())
   ) %>%
-  #keep only the document and he parsed annotations
-  select(document, anno) %>%
-  #expand the nested annotations into rows
+  # Keep only parsed annotations, then unnest into rows
+  select(anno) %>%
   unnest(anno) %>%
-  #select columns for syntactic analysis
+  # Use the UD doc_id as our document label (and drop any duplicates cleanly)
+  rename(document = doc_id) %>%
+  # Select columns for syntactic analysis
   select(
     document,
     paragraph_id,
@@ -355,10 +355,10 @@ anno_df <- texts_df %>%
     token_id,
     token,
     lemma,
-    upos, #parts of speech
-    feats, #grammatical features (eg, tense of a verb)
-    head_token_id, #what the word is dependent on (*)
-    dep_rel #dependency relation type
+    upos,          # part of speech
+    feats,         # grammatical features (e.g., verb form)
+    head_token_id, # head of dependency relation
+    dep_rel        # dependency relation type
   )
 
 anno_df %>% glimpse()
@@ -366,7 +366,7 @@ anno_df %>% glimpse()
 
 For `head_token_id`, what we are doing at (\*) is important in creating a dependency tree. Here's a toy example:
 
-``` r
+```{r}
 # Create an example parsed sentence
 example_sentence <- tibble(
   token = c("The", "big", "dog", "barks"),
@@ -389,7 +389,7 @@ example_sentence %>%
 
 There will be grammar: we are going to define some syntactic complexity features by using dependency relations. In the code below, we are going to create binary flags for different syntactic structures.
 
-``` r
+```{r}
 syntax_df <- anno_df %>%
 mutate(
 is_word = upos != "PUNCT", #<--is it a word (and not punctuation?)
@@ -418,7 +418,6 @@ is_complex_nominal = dep_rel %in% c(
   "compound", # compound ("lemon tea")
   "appos" #apposition ("team my favorite")
 )
-
 )
 ```
 
@@ -426,7 +425,7 @@ A quick note about punctuation: we filter out punctuation because punctuation it
 
 If you want to know a bit more about clauses, you can find the [full list here](https://universaldependencies.org/u/dep/all.html). But a quick summary for our needs is below:
 
-``` r
+```{r}
 #| label: tbl-clause-types
 #| echo: false
 
@@ -466,7 +465,7 @@ tibble(
 
 Let's check what we did:
 
-``` r
+```{r}
 # looking at the first 20 rows in the data frame
 syntax_df %>% 
   select(document, token, upos, is_clause, is_dep_clause) %>%
@@ -487,7 +486,7 @@ Now that we have parsed our texts and identified syntactic features, we can meas
 
 Before we jump into the details of these measures, we need to aggregate at the sentence level and count syntactic features for each individual sentence:
 
-``` r
+```{r}
 sentence_df <- syntax_df %>%
   filter(is_word) %>%           #count words (not punctuation)
   group_by(document, sentence_id) %>%   #group by document and sentence
@@ -503,7 +502,7 @@ sentence_df
 
 **1. Mean length of sentence:** now we measure the average sentence length by number of words. The assumption behind this step is that longer sentences tend to be more syntactically complex.
 
-``` r
+```{r}
 mls_df <- sentence_df %>%
 group_by(document) %>%
 summarise(
@@ -512,12 +511,12 @@ MLS = mean(words), # Average words per sentence
 )
 
 # Let's take a look
-mls_df 
+mls_df
 ```
 
 **2. Overall Sentence Complexity (C/S = Clauses per sentence):** while longer sentences *tend* to be more complex, that's not the only way complexity works. A short sentence in English, such as "The dog I saw bit my cousin," can be structurally complex. The next step is to count clauses. More clauses allow for the possibility of more syntactic complexity via coordination and subordination.
 
-``` r
+```{r}
 #Calculate clauses per sentence
 clausal_density_df <- sentence_df %>%
 group_by(document) %>%
@@ -536,7 +535,7 @@ clausal_density_df
 
 It contains multiple embedded dependent clauses (“Although…”, “that the shortage…”, “because…”, “unless…”, “that he would…”, “after he had…”), demonstrating how subordination creates a layered, hierarchical structure that is characteristic of complex syntax."
 
-``` r
+```{r}
 subordination_df <- sentence_df %>%
 group_by(document) %>%
 summarise(
@@ -559,7 +558,7 @@ DC/S (Dependent Clauses per Sentence): How many dependent clauses in each senten
 
 **4. Coordination (Coord/C and Coord/S):** we are next going to measure how much the author use \*\*coordination\*\* (linking clauses with "and", "but", "or"). This is a measure of how "horizontal," rather than hierarchical subordination.
 
-``` r
+```{r}
 coordination_df <- syntax_df %>%
 group_by(document) %>%
 summarise(
@@ -582,7 +581,7 @@ Coord/S (Coordination per Sentence): Total number of coordination markers divide
 
 **5. Phrasal Complexity (CN/C and CN/S):** writing increases in complexity not just through clauses, but through elaborated phrases. This is especially common in specialized or technical writing. Noun phrases are phrases built around a noun (or pronoun) that act as a unit in a sentence (if you are rusty on noun phrases aka nominal phrases, check this [wikipedia entry](https://en.wikipedia.org/wiki/Noun_phrase)).
 
-``` r
+```{r}
 nominal_df <- syntax_df %>%
 group_by(document) %>%
 summarise(
@@ -605,7 +604,7 @@ As a way to understand the difference between clausal and phrasal complexity, lo
 
 **Let's bring everything together:**
 
-``` r
+```{r}
 # Combine all measures
 all_measures <- mls_df %>%  # ← Added mls_df %>%
   left_join(clausal_density_df %>% select(document, C_per_S), by = "document") %>%
@@ -623,7 +622,7 @@ all_measures %>%
 
 And let's visualize it
 
-``` r
+```{r}
 # Reshape for plotting
 syntax_long <- all_measures %>%  # ← Added %>%
   pivot_longer(
