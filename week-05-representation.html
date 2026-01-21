@@ -285,7 +285,7 @@ window.Quarto = {
 <p>In this tutorial, we’ll explore three measures of <strong>lexical complexity</strong> (also called lexical diversity or lexical richness) using two historical texts; one you know well by now, the other one is a new mystery text that you can find on Canvas:</p>
 <ol type="1">
 <li>“The Circle of Commerce” by Edward Misselden (1623)</li>
-<li>“A69858.text”</li>
+<li>“A69858.txt”</li>
 </ol>
 <p>We want to see see if the two texts differ in terms of vocabulary diversity in a meaningful way.</p>
 <p>What is Lexical Complexity? Lexical complexity measures how varied a writer’s vocabulary is. A text with high lexical diversity uses many different words, while a text with low diversity repeats the same words frequently. We’ll learn three different, but well-validated, measures:</p>
@@ -314,13 +314,13 @@ window.Quarto = {
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read the text files</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>circle <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"texts/A07594__Circle_of_Commerce.txt"</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>centre <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"texts/A06785.txt"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>mystery <span class="ot">&lt;-</span> <span class="fu">read_file</span>(<span class="st">"texts/A69858.txt"</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a tidy data frame with both texts</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>texts_df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">document =</span> <span class="fu">c</span>(<span class="st">"Circle of Commerce"</span>, <span class="st">"A69858"</span>),</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">author =</span> <span class="fu">c</span>(<span class="st">"Misselden"</span>, <span class="st">"Unknown"</span>),</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">text =</span> <span class="fu">c</span>(circle, centre)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">text =</span> <span class="fu">c</span>(circle, mystery)</span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Display basic information</span></span>
@@ -390,9 +390,9 @@ window.Quarto = {
 <tr class="odd">
 <td style="text-align: left;">A69858</td>
 <td style="text-align: left;">Unknown</td>
-<td style="text-align: right;">36285</td>
-<td style="text-align: right;">4225</td>
-<td style="text-align: right;">0.116</td>
+<td style="text-align: right;">5942</td>
+<td style="text-align: right;">1317</td>
+<td style="text-align: right;">0.222</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Circle of Commerce</td>
@@ -481,9 +481,9 @@ window.Quarto = {
 <tr class="odd">
 <td style="text-align: left;">A69858</td>
 <td style="text-align: left;">Unknown</td>
-<td style="text-align: right;">36285</td>
-<td style="text-align: right;">4225</td>
-<td style="text-align: right;">22.180</td>
+<td style="text-align: right;">5942</td>
+<td style="text-align: right;">1317</td>
+<td style="text-align: right;">17.085</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Circle of Commerce</td>
@@ -613,7 +613,7 @@ Language: "en"</code></pre>
 <tr class="even">
 <td style="text-align: left;">A69858</td>
 <td style="text-align: left;">Unknown</td>
-<td style="text-align: right;">71.90</td>
+<td style="text-align: right;">84.17</td>
 </tr>
 </tbody>
 </table>
@@ -656,139 +656,284 @@ Language: "en"</code></pre>
 <p>The core idea that we will use for this is to measure structure via <strong>frequency counts</strong> (e.g., number of clauses, number of dependent clauses), <strong>ratios</strong> (e.g., clauses per sentence; dependent clauses per clause), or <strong>length indices</strong> (e.g., mean length of clause in words).</p>
 <p>Note: research in syntax complexity is particularly well-represented in second language acquisition research (see, for example <a href="https://aclanthology.org/P11-1073.pdf">here</a> for a strong discussion).</p>
 <p>We are still working with the same two texts as above!</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>texts_df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">doc_id =</span> <span class="fu">c</span>(<span class="st">"Circle of Commerce"</span>, <span class="st">"A69858"</span>),</span>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>texts_df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">document =</span> <span class="fu">c</span>(<span class="st">"Circle of Commerce"</span>, <span class="st">"A69858"</span>),</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">author =</span> <span class="fu">c</span>(<span class="st">"Misselden"</span>, <span class="st">"Unknown"</span>),</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">text =</span> <span class="fu">c</span>(circle, mystery)</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                   )</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>texts_df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 3
+  document           author    text                                             
+  &lt;chr&gt;              &lt;chr&gt;     &lt;chr&gt;                                            
+1 Circle of Commerce Misselden "THE CIRCLE OF COMMERCE. The Prooeme. HERODOTVS …
+2 A69858             Unknown   "THe Author craves leave in the first place, to …</code></pre>
+</div>
+</div>
 <p>We are going to use something new <a href="https://cran.r-project.org/web/packages/udpipe/vignettes/udpipe-annotation.html">UDPipe</a> to: tokenize, do parts of speech tagging, lemmatize, and do dependency parsing. Note: for Early Modern texts there is a package out of Northwestern (<a href="https://morphadorner.northwestern.edu/">MorphAdorner</a>) that performs better. Since I don’t have any Early Modernists this semester, I am going to stick with a more generalizable workflow.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: true</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Load an English UD (= Univesal Dependencies) model ONCE</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">#model_info &lt;- udpipe_download_model(language = "english-ewt")</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">#ud_model &lt;- udpipe_load_model(model_info$file_model)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Load an English UD (= Univesal Dependencies) model ONCE</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>model_info <span class="ot">&lt;-</span> <span class="fu">udpipe_download_model</span>(<span class="at">language =</span> <span class="st">"english-ewt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Downloading udpipe model from https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/english-ewt-ud-2.5-191206.udpipe to D:/Users/astri/Desktop/R-work/IDS_570_TAD/english-ewt-ud-2.5-191206.udpipe</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code> - This model has been trained on version 2.5 of data from https://universaldependencies.org</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code> - The model is distributed under the CC-BY-SA-NC license: https://creativecommons.org/licenses/by-nc-sa/4.0</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code> - Visit https://github.com/jwijffels/udpipe.models.ud.2.5 for model license details.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code> - For a list of all models and their licenses (most models you can download with this package have either a CC-BY-SA or a CC-BY-SA-NC license) read the documentation at ?udpipe_download_model. For building your own models: visit the documentation by typing vignette('udpipe-train', package = 'udpipe')</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Downloading finished, model stored at 'D:/Users/astri/Desktop/R-work/IDS_570_TAD/english-ewt-ud-2.5-191206.udpipe'</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>ud_model <span class="ot">&lt;-</span> <span class="fu">udpipe_load_model</span>(model_info<span class="sc">$</span>file_model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <p>I chose <code>english-ewt</code> because it’s widely adopted and well-documented for English prose. It captures the <strong>core</strong> syntactic relations and it does a decent job on pre-Modern texts. I would <strong>not</strong> use this for my own research, but that’s a niche issue.</p>
 <p>Now, let’s annotate both texts using UDPipe:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>anno_df <span class="ot">&lt;-</span> texts_df <span class="sc">%&gt;%</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Parse each text with Universal Dependecies parser</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">anno =</span> <span class="fu">map</span>(text, <span class="sc">~</span> <span class="fu">udpipe_annotate</span>(ud_model, <span class="at">x =</span> .x) <span class="sc">%&gt;%</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">rename</span>(<span class="at">ud_doc_id =</span> doc_id))   <span class="co">#Avoid doc_id conflic</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">#keep only the doc_id and he parsed annotations</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(doc_id, anno) <span class="sc">%&gt;%</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">#expand the nested annotations into rows</span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(anno) <span class="sc">%&gt;%</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="co">#select columns for syntactic analysis</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    doc_id,</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    paragraph_id,</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    sentence_id,</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    token_id,</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    token,</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    lemma,</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    upos, <span class="co">#parts of speech</span></span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    feats, <span class="co">#grammatical features (eg, tense of a verb)</span></span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    head_token_id, <span class="co">#what the word is dependent on (*)</span></span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    dep_rel <span class="co">#dependency relation type</span></span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>anno_df <span class="sc">%&gt;%</span> <span class="fu">glimpse</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>anno_df <span class="ot">&lt;-</span> texts_df <span class="sc">%&gt;%</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Parse each text with the UD parser; set doc_id to our document name</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">anno =</span> <span class="fu">map2</span>(text, document, <span class="sc">~</span> <span class="fu">udpipe_annotate</span>(ud_model, <span class="at">x =</span> .x, <span class="at">doc_id =</span> .y) <span class="sc">%&gt;%</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as.data.frame</span>())</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Keep only parsed annotations, then unnest into rows</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(anno) <span class="sc">%&gt;%</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(anno) <span class="sc">%&gt;%</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Use the UD doc_id as our document label (and drop any duplicates cleanly)</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">document =</span> doc_id) <span class="sc">%&gt;%</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Select columns for syntactic analysis</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    document,</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    paragraph_id,</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    sentence_id,</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    token_id,</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    token,</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    lemma,</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    upos,          <span class="co"># part of speech</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    feats,         <span class="co"># grammatical features (e.g., verb form)</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>    head_token_id, <span class="co"># head of dependency relation</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>    dep_rel        <span class="co"># dependency relation type</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>anno_df <span class="sc">%&gt;%</span> <span class="fu">glimpse</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 47,121
+Columns: 10
+$ document      &lt;chr&gt; "Circle of Commerce", "Circle of Commerce", "Circle of C…
+$ paragraph_id  &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+$ sentence_id   &lt;int&gt; 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,…
+$ token_id      &lt;chr&gt; "1", "2", "3", "4", "5", "1", "2", "3", "1", "2", "3", "…
+$ token         &lt;chr&gt; "THE", "CIRCLE", "OF", "COMMERCE", ".", "The", "Prooeme"…
+$ lemma         &lt;chr&gt; "the", "circle", "of", "Commerce", ".", "the", "Prooeme"…
+$ upos          &lt;chr&gt; "DET", "NOUN", "ADP", "PROPN", "PUNCT", "DET", "NOUN", "…
+$ feats         &lt;chr&gt; "Definite=Def|PronType=Art", "Number=Sing", NA, "Number=…
+$ head_token_id &lt;chr&gt; "2", "0", "4", "2", "2", "2", "0", "2", "6", "4", "4", "…
+$ dep_rel       &lt;chr&gt; "det", "root", "case", "nmod", "punct", "det", "root", "…</code></pre>
+</div>
+</div>
 <p>For <code>head_token_id</code>, what we are doing at (*) is important in creating a dependency tree. Here’s a toy example:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create an example parsed sentence</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>example_sentence <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">token =</span> <span class="fu">c</span>(<span class="st">"The"</span>, <span class="st">"big"</span>, <span class="st">"dog"</span>, <span class="st">"barks"</span>),</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">token_id =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>),</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">head_token_id =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">0</span>),</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Relationship =</span> <span class="fu">c</span>(</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'"The" depends on word #3 (dog)'</span>,</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'"big" depends on word #3 (dog)'</span>,</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'"dog" depends on word #4 (barks)'</span>,</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'"barks" is the ROOT (doesn</span><span class="sc">\'</span><span class="st">t depend on anything)'</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>example_sentence <span class="sc">%&gt;%</span></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">'Example: Dependency structure of "The big dog barks"'</span>,</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">align =</span> <span class="fu">c</span>(<span class="st">"l"</span>, <span class="st">"c"</span>, <span class="st">"c"</span>, <span class="st">"l"</span>)</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create an example parsed sentence</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>example_sentence <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">token =</span> <span class="fu">c</span>(<span class="st">"The"</span>, <span class="st">"big"</span>, <span class="st">"dog"</span>, <span class="st">"barks"</span>),</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">token_id =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>),</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">head_token_id =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">0</span>),</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Relationship =</span> <span class="fu">c</span>(</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'"The" depends on word #3 (dog)'</span>,</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'"big" depends on word #3 (dog)'</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'"dog" depends on word #4 (barks)'</span>,</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'"barks" is the ROOT (doesn</span><span class="sc">\'</span><span class="st">t depend on anything)'</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>example_sentence <span class="sc">%&gt;%</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">'Example: Dependency structure of "The big dog barks"'</span>,</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">align =</span> <span class="fu">c</span>(<span class="st">"l"</span>, <span class="st">"c"</span>, <span class="st">"c"</span>, <span class="st">"l"</span>)</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Example: Dependency structure of “The big dog barks”</caption>
+<colgroup>
+<col style="width: 7%">
+<col style="width: 12%">
+<col style="width: 18%">
+<col style="width: 61%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">token</th>
+<th style="text-align: center;">token_id</th>
+<th style="text-align: center;">head_token_id</th>
+<th style="text-align: left;">Relationship</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">The</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: left;">“The” depends on word #3 (dog)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">big</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: left;">“big” depends on word #3 (dog)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">dog</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: left;">“dog” depends on word #4 (barks)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">barks</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;">“barks” is the ROOT (doesn’t depend on anything)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>There will be grammar: we are going to define some syntactic complexity features by using dependency relations. In the code below, we are going to create binary flags for different syntactic structures.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>syntax_df <span class="ot">&lt;-</span> anno_df <span class="sc">%&gt;%</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="at">is_word =</span> upos <span class="sc">!=</span> <span class="st">"PUNCT"</span>, <span class="co">#&lt;--is it a word (and not punctuation?)</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Is this an indipendent clause? finite verbs are proxy for indipendent clauses</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="at">is_clause =</span> (upos <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"VERB"</span>, <span class="st">"AUX"</span>)) <span class="sc">&amp;</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>            <span class="fu">str_detect</span>(feats, <span class="st">"VerbForm=Fin"</span>),</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Dependent clause? </span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="at">is_dep_clause =</span> dep_rel <span class="sc">%in%</span> <span class="fu">c</span>(</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"advcl"</span>, <span class="co">#adverbial clause </span></span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ccomp"</span>, <span class="co"># clausal complement</span></span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"xcomp"</span>, <span class="co">#open clausal complement</span></span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"acl"</span>, <span class="co">#adnomial clause</span></span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"relcl"</span> <span class="co">#relative clause</span></span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>),</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Is this coordination? That is, does it use "and" "or" etc.?</span></span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="at">is_coord =</span> dep_rel <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"conj"</span>, <span class="st">"cc"</span>),</span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Nominal complexity: these relations make noun phrases more complex</span></span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="at">is_complex_nominal =</span> dep_rel <span class="sc">%in%</span> <span class="fu">c</span>(</span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"amod"</span>, <span class="co"># adjective modifier ("big cup")</span></span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"nmod"</span>, <span class="co">#nominal modifier ("cup of tea")</span></span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"compound"</span>, <span class="co"># compound ("lemon tea")</span></span>
-<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"appos"</span> <span class="co">#apposition ("team my favorite")</span></span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>syntax_df <span class="ot">&lt;-</span> anno_df <span class="sc">%&gt;%</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="at">is_word =</span> upos <span class="sc">!=</span> <span class="st">"PUNCT"</span>, <span class="co">#&lt;--is it a word (and not punctuation?)</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Is this an indipendent clause? finite verbs are proxy for indipendent clauses</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="at">is_clause =</span> (upos <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"VERB"</span>, <span class="st">"AUX"</span>)) <span class="sc">&amp;</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>            <span class="fu">str_detect</span>(<span class="fu">coalesce</span>(feats, <span class="st">""</span>), <span class="st">"VerbForm=Fin"</span>),</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Dependent clause? </span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="at">is_dep_clause =</span> dep_rel <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"advcl"</span>, <span class="co">#adverbial clause </span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ccomp"</span>, <span class="co"># clausal complement</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"xcomp"</span>, <span class="co">#open clausal complement</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"acl"</span>, <span class="co">#adnomial clause</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"acl:relcl"</span> <span class="co">#relative clause</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>),</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Is this coordination? That is, does it use "and" "or" etc.?</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="at">is_coord =</span> dep_rel <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"conj"</span>, <span class="st">"cc"</span>),</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Nominal complexity: these relations make noun phrases more complex</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a><span class="at">is_complex_nominal =</span> dep_rel <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"amod"</span>, <span class="co"># adjective modifier ("big cup")</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"nmod"</span>, <span class="co">#nominal modifier ("cup of tea")</span></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"compound"</span>, <span class="co"># compound ("lemon tea")</span></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"appos"</span> <span class="co">#apposition ("team my favorite")</span></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <p>A quick note about punctuation: we filter out punctuation because punctuation itself doesn’t add to a sentence complexity. Think of the following</p>
 <p>If you want to know a bit more about clauses, you can find the <a href="https://universaldependencies.org/u/dep/all.html">full list here</a>. But a quick summary for our needs is below:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-clause-types</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Relation =</span> <span class="fu">c</span>(<span class="st">"advcl"</span>, <span class="st">"ccomp"</span>, <span class="st">"xcomp"</span>, <span class="st">"acl"</span>, <span class="st">"relcl"</span>),</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Full Name</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Adverbial clause"</span>,</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Clausal complement"</span>,</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Open clausal complement"</span>,</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Adnominal clause"</span>,</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Relative clause"</span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">What It Modifies</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Verb/predicate"</span>,</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Verb (as object)"</span>,</span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Verb (shares subject)"</span>,</span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Noun"</span>,</span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Noun"</span></span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">Example =</span> <span class="fu">c</span>(</span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"I left **because I was tired**"</span>,</span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"She said **that he arrived**"</span>,</span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"I want **to leave**"</span>,</span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The dog **sleeping there**"</span>,</span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The book **that I read**"</span></span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">UD Documentation</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">"[advcl](https://universaldependencies.org/u/dep/advcl.html)"</span>,</span>
-<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">"[ccomp](https://universaldependencies.org/u/dep/ccomp.html)"</span>,</span>
-<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">"[xcomp](https://universaldependencies.org/u/dep/xcomp.html)"</span>,</span>
-<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">"[acl](https://universaldependencies.org/u/dep/acl.html)"</span>,</span>
-<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">"[acl:relcl](https://universaldependencies.org/u/dep/acl-relcl.html)"</span></span>
-<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
-<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">align =</span> <span class="fu">c</span>(<span class="st">"l"</span>, <span class="st">"l"</span>, <span class="st">"l"</span>, <span class="st">"l"</span>, <span class="st">"l"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div id="tbl-clause-types" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-clause-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1
+</figcaption>
+<div aria-describedby="tbl-clause-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Relation</th>
+<th style="text-align: left;">Full Name</th>
+<th style="text-align: left;">What It Modifies</th>
+<th style="text-align: left;">Example</th>
+<th style="text-align: left;">UD Documentation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">advcl</td>
+<td style="text-align: left;">Adverbial clause</td>
+<td style="text-align: left;">Verb/predicate</td>
+<td style="text-align: left;">I left <strong>because I was tired</strong></td>
+<td style="text-align: left;"><a href="https://universaldependencies.org/u/dep/advcl.html">advcl</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ccomp</td>
+<td style="text-align: left;">Clausal complement</td>
+<td style="text-align: left;">Verb (as object)</td>
+<td style="text-align: left;">She said <strong>that he arrived</strong></td>
+<td style="text-align: left;"><a href="https://universaldependencies.org/u/dep/ccomp.html">ccomp</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">xcomp</td>
+<td style="text-align: left;">Open clausal complement</td>
+<td style="text-align: left;">Verb (shares subject)</td>
+<td style="text-align: left;">I want <strong>to leave</strong></td>
+<td style="text-align: left;"><a href="https://universaldependencies.org/u/dep/xcomp.html">xcomp</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">acl</td>
+<td style="text-align: left;">Adnominal clause</td>
+<td style="text-align: left;">Noun</td>
+<td style="text-align: left;">The dog <strong>sleeping there</strong></td>
+<td style="text-align: left;"><a href="https://universaldependencies.org/u/dep/acl.html">acl</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">relcl</td>
+<td style="text-align: left;">Relative clause</td>
+<td style="text-align: left;">Noun</td>
+<td style="text-align: left;">The book <strong>that I read</strong></td>
+<td style="text-align: left;"><a href="https://universaldependencies.org/u/dep/acl-relcl.html">acl:relcl</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
 <p>Let’s check what we did:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># looking at the first 20 rows in the data frame</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>syntax_df <span class="sc">%&gt;%</span> </span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(doc_id, token, upos, is_clause, is_dep_clause) <span class="sc">%&gt;%</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># looking at the first 20 rows in the data frame</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>syntax_df <span class="sc">%&gt;%</span> </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(document, token, upos, is_clause, is_dep_clause) <span class="sc">%&gt;%</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 20 × 5
+   document           token     upos  is_clause is_dep_clause
+   &lt;chr&gt;              &lt;chr&gt;     &lt;chr&gt; &lt;lgl&gt;     &lt;lgl&gt;        
+ 1 Circle of Commerce THE       DET   FALSE     FALSE        
+ 2 Circle of Commerce CIRCLE    NOUN  FALSE     FALSE        
+ 3 Circle of Commerce OF        ADP   FALSE     FALSE        
+ 4 Circle of Commerce COMMERCE  PROPN FALSE     FALSE        
+ 5 Circle of Commerce .         PUNCT FALSE     FALSE        
+ 6 Circle of Commerce The       DET   FALSE     FALSE        
+ 7 Circle of Commerce Prooeme   NOUN  FALSE     FALSE        
+ 8 Circle of Commerce .         PUNCT FALSE     FALSE        
+ 9 Circle of Commerce HERODOTVS NOUN  FALSE     FALSE        
+10 Circle of Commerce in        ADP   FALSE     FALSE        
+11 Circle of Commerce his       PRON  FALSE     FALSE        
+12 Circle of Commerce CLIO      NOUN  FALSE     FALSE        
+13 Circle of Commerce ,         PUNCT FALSE     FALSE        
+14 Circle of Commerce reportes  VERB  TRUE      FALSE        
+15 Circle of Commerce that      SCONJ FALSE     FALSE        
+16 Circle of Commerce CROESVS   PROPN FALSE     FALSE        
+17 Circle of Commerce King      PROPN FALSE     FALSE        
+18 Circle of Commerce of        ADP   FALSE     FALSE        
+19 Circle of Commerce LYDIA     PROPN FALSE     FALSE        
+20 Circle of Commerce had       VERB  TRUE      TRUE         </code></pre>
+</div>
+</div>
 <p>Now that we have parsed our texts and identified syntactic features, we can measure complexity. Let’s do this through five measures. <strong>Important:</strong> these measures are meant for <em>relative comparison</em> between documents!</p>
 <ol type="1">
 <li><p>Calculate Mean Length of Sentence (MLS): how long are sentences on average?</p></li>
@@ -798,140 +943,266 @@ Language: "en"</code></pre>
 <li><p>Phrasal Complexity (CN/C, CN/S): how complex are noun phrases?</p></li>
 </ol>
 <p>Before we jump into the details of these measures, we need to aggregate at the sentence level and count syntactic features for each individual sentence:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>sentence_df <span class="ot">&lt;-</span> syntax_df <span class="sc">%&gt;%</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(is_word) <span class="sc">%&gt;%</span>           <span class="co">#count words (not punctuation)</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(doc_id, sentence_id) <span class="sc">%&gt;%</span>   <span class="co">#group by document and sentence</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">words          =</span> <span class="fu">n</span>(),   <span class="co">#number of words per sentence</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">clauses        =</span> <span class="fu">sum</span>(is_clause), <span class="co"># number of clauses per sentence</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">dep_clauses    =</span> <span class="fu">sum</span>(is_dep_clause), <span class="co">#number of dependent clauses per sentence</span></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>sentence_df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>sentence_df <span class="ot">&lt;-</span> syntax_df <span class="sc">%&gt;%</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(is_word) <span class="sc">%&gt;%</span>           <span class="co">#count words (not punctuation)</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(document, sentence_id) <span class="sc">%&gt;%</span>   <span class="co">#group by document and sentence</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">words          =</span> <span class="fu">n</span>(),   <span class="co">#number of words per sentence</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">clauses        =</span> <span class="fu">sum</span>(is_clause), <span class="co"># number of clauses per sentence</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">dep_clauses    =</span> <span class="fu">sum</span>(is_dep_clause), <span class="co">#number of dependent clauses per sentence</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>sentence_df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1,872 × 5
+   document sentence_id words clauses dep_clauses
+   &lt;chr&gt;          &lt;int&gt; &lt;int&gt;   &lt;int&gt;       &lt;int&gt;
+ 1 A69858             1    29       1           2
+ 2 A69858             2    44       3           2
+ 3 A69858             3    45       6           5
+ 4 A69858             4    28       1           3
+ 5 A69858             5     6       0           0
+ 6 A69858             6    39       1           0
+ 7 A69858             7    23       0           2
+ 8 A69858             8    64       7           5
+ 9 A69858             9    35       3           3
+10 A69858            10    27       1           2
+# ℹ 1,862 more rows</code></pre>
+</div>
+</div>
 <p><strong>1. Mean length of sentence:</strong> now we measure the average sentence length by number of words. The assumption behind this step is that longer sentences tend to be more syntactically complex.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>mls_df <span class="ot">&lt;-</span> sentence_df <span class="sc">%&gt;%</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">group_by</span>(doc_id) <span class="sc">%&gt;%</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="at">MLS =</span> <span class="fu">mean</span>(words), <span class="co"># Average words per sentence</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Let's take a look</span></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>mls_df </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>mls_df <span class="ot">&lt;-</span> sentence_df <span class="sc">%&gt;%</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">group_by</span>(document) <span class="sc">%&gt;%</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="at">MLS =</span> <span class="fu">mean</span>(words), <span class="co"># Average words per sentence</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Let's take a look</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>mls_df </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  document             MLS
+  &lt;chr&gt;              &lt;dbl&gt;
+1 A69858              22.9
+2 Circle of Commerce  21.2</code></pre>
+</div>
+</div>
 <p><strong>2. Overall Sentence Complexity (C/S = Clauses per sentence):</strong> while longer sentences <em>tend</em>&nbsp;to be more complex, that’s not the only way complexity works. A short sentence in English, such as “The dog I saw bit my cousin,” can be structurally complex. The next step is to count clauses. More clauses allow for the possibility of more syntactic complexity via coordination and subordination.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Calculate clauses per sentence</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>clausal_density_df <span class="ot">&lt;-</span> sentence_df <span class="sc">%&gt;%</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">group_by</span>(doc_id) <span class="sc">%&gt;%</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="at">sentences =</span> <span class="fu">n</span>(),</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="at">clauses   =</span> <span class="fu">sum</span>(clauses),</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="at">C_per_S   =</span> clauses <span class="sc">/</span> sentences,</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Let's check and how do they compare?</span></span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>clausal_density_df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Calculate clauses per sentence</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>clausal_density_df <span class="ot">&lt;-</span> sentence_df <span class="sc">%&gt;%</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">group_by</span>(document) <span class="sc">%&gt;%</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="at">sentences =</span> <span class="fu">n</span>(),</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="at">clauses   =</span> <span class="fu">sum</span>(clauses),</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="at">C_per_S   =</span> clauses <span class="sc">/</span> sentences,</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Let's check and how do they compare?</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>clausal_density_df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 4
+  document           sentences clauses C_per_S
+  &lt;chr&gt;                  &lt;int&gt;   &lt;int&gt;   &lt;dbl&gt;
+1 A69858                   262     451    1.72
+2 Circle of Commerce      1610    2581    1.60</code></pre>
+</div>
+</div>
 <p><strong>3. Subordination (DC/C and DC/S):</strong> this measures how much the author of the text uses dependent clauses (subordination). Subordination creates hierarchical, embedded structures. For example, think of this (monster) sentence: “Although the merchants insisted that the shortage was temporary, and because the city council feared that the unrest would spread unless action were taken immediately, the King decided that he would issue new regulations after he had consulted his advisors.”</p>
 <p>It contains multiple embedded dependent clauses (“Although…”, “that the shortage…”, “because…”, “unless…”, “that he would…”, “after he had…”), demonstrating how subordination creates a layered, hierarchical structure that is characteristic of complex syntax.”</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>subordination_df <span class="ot">&lt;-</span> sentence_df <span class="sc">%&gt;%</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">group_by</span>(doc_id) <span class="sc">%&gt;%</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="at">clauses =</span> <span class="fu">sum</span>(clauses),</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="at">dep_clauses =</span> <span class="fu">sum</span>(dep_clauses),</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="at">sentences =</span> <span class="fu">n</span>(),</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="at">DC_per_C =</span> dep_clauses <span class="sc">/</span> <span class="fu">pmax</span>(clauses, <span class="dv">1</span>), <span class="co">#avoid division by 0 (shouldn't happen, but if no clauses were detected in the sentence, we still want it to run)</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="at">DC_per_S =</span> dep_clauses <span class="sc">/</span> sentences,</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>subordination_df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>subordination_df <span class="ot">&lt;-</span> sentence_df <span class="sc">%&gt;%</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">group_by</span>(document) <span class="sc">%&gt;%</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="at">clauses =</span> <span class="fu">sum</span>(clauses),</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="at">dep_clauses =</span> <span class="fu">sum</span>(dep_clauses),</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="at">sentences =</span> <span class="fu">n</span>(),</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a><span class="at">DC_per_C =</span> dep_clauses <span class="sc">/</span> <span class="fu">pmax</span>(clauses, <span class="dv">1</span>), <span class="co">#avoid division by 0 (shouldn't happen, but if no clauses were detected in the sentence, we still want it to run)</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="at">DC_per_S =</span> dep_clauses <span class="sc">/</span> sentences,</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>subordination_df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 6
+  document           clauses dep_clauses sentences DC_per_C DC_per_S
+  &lt;chr&gt;                &lt;int&gt;       &lt;int&gt;     &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1 A69858                 451         306       262    0.678     1.17
+2 Circle of Commerce    2581        1795      1610    0.695     1.11</code></pre>
+</div>
+</div>
 <p>What do these measures mean?</p>
 <p>DC/C (Dependent Clauses per Clause): What proportion of clauses are dependent? Higher value means that there is more subordination relative to total clauses.</p>
 <p>DC/S (Dependent Clauses per Sentence): How many dependent clauses in each sentence on average? The higher the measure, the more embeddings/subordination per sentence.</p>
 <p><strong>4. Coordination (Coord/C and Coord/S):</strong> we are next going to measure how much the author use **coordination** (linking clauses with “and”, “but”, “or”). This is a measure of how “horizontal,” rather than hierarchical subordination.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>coordination_df <span class="ot">&lt;-</span> syntax_df <span class="sc">%&gt;%</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">group_by</span>(doc_id) <span class="sc">%&gt;%</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="at">coord_relations =</span> <span class="fu">sum</span>(is_coord),</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="at">clauses         =</span> <span class="fu">sum</span>(is_clause),</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="at">sentences       =</span> <span class="fu">n_distinct</span>(sentence_id),</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="at">Coord_per_C     =</span> coord_relations <span class="sc">/</span> <span class="fu">pmax</span>(clauses, <span class="dv">1</span>),</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="at">Coord_per_S     =</span> coord_relations <span class="sc">/</span> sentences,</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>coordination_df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>coordination_df <span class="ot">&lt;-</span> syntax_df <span class="sc">%&gt;%</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">group_by</span>(document) <span class="sc">%&gt;%</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="at">coord_relations =</span> <span class="fu">sum</span>(is_coord),</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="at">clauses         =</span> <span class="fu">sum</span>(is_clause),</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="at">sentences       =</span> <span class="fu">n_distinct</span>(sentence_id),</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="at">Coord_per_C     =</span> coord_relations <span class="sc">/</span> <span class="fu">pmax</span>(clauses, <span class="dv">1</span>),</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="at">Coord_per_S     =</span> coord_relations <span class="sc">/</span> sentences,</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>coordination_df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 6
+  document           coord_relations clauses sentences Coord_per_C Coord_per_S
+  &lt;chr&gt;                        &lt;int&gt;   &lt;int&gt;     &lt;int&gt;       &lt;dbl&gt;       &lt;dbl&gt;
+1 A69858                         691     451       262        1.53        2.64
+2 Circle of Commerce            4071    2581      1611        1.58        2.53</code></pre>
+</div>
+</div>
 <p>These are “densities” of coordination:</p>
 <p>Coord/C (Coordination per Clause): Total number of coordination (“and”, “or”, “but”…) markers divided by number of clauses.</p>
 <p>Coord/S (Coordination per Sentence): Total number of coordination markers divided by number of sentences.</p>
 <p><strong>5. Phrasal Complexity (CN/C and CN/S):</strong> writing increases in complexity not just through clauses, but through elaborated phrases. This is especially common in specialized or technical writing. Noun phrases are phrases built around a noun (or pronoun) that act as a unit in a sentence (if you are rusty on noun phrases aka nominal phrases, check this <a href="https://en.wikipedia.org/wiki/Noun_phrase">wikipedia entry</a>).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>nominal_df <span class="ot">&lt;-</span> syntax_df <span class="sc">%&gt;%</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">group_by</span>(doc_id) <span class="sc">%&gt;%</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="at">complex_nominals =</span> <span class="fu">sum</span>(is_complex_nominal),</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="at">clauses          =</span> <span class="fu">sum</span>(is_clause),</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="at">sentences        =</span> <span class="fu">n_distinct</span>(sentence_id),</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="at">CN_per_C         =</span> complex_nominals <span class="sc">/</span> <span class="fu">pmax</span>(clauses, <span class="dv">1</span>),</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="at">CN_per_S         =</span> complex_nominals <span class="sc">/</span> sentences,</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>nominal_df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>nominal_df <span class="ot">&lt;-</span> syntax_df <span class="sc">%&gt;%</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">group_by</span>(document) <span class="sc">%&gt;%</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="at">complex_nominals =</span> <span class="fu">sum</span>(is_complex_nominal),</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="at">clauses          =</span> <span class="fu">sum</span>(is_clause),</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="at">sentences        =</span> <span class="fu">n_distinct</span>(sentence_id),</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="at">CN_per_C         =</span> complex_nominals <span class="sc">/</span> <span class="fu">pmax</span>(clauses, <span class="dv">1</span>),</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="at">CN_per_S         =</span> complex_nominals <span class="sc">/</span> sentences,</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>nominal_df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 6
+  document           complex_nominals clauses sentences CN_per_C CN_per_S
+  &lt;chr&gt;                         &lt;int&gt;   &lt;int&gt;     &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1 A69858                          994     451       262     2.20     3.79
+2 Circle of Commerce             5828    2581      1611     2.26     3.62</code></pre>
+</div>
+</div>
 <p>As a way to understand the difference between clausal and phrasal complexity, look over this example:</p>
 <ul>
 <li><p>More clauses: The ship was large and fast and was in port. (Not great construction, but plenty of phrases).</p></li>
 <li><p>More complex phrase: The large fast ship was in port.</p></li>
 </ul>
 <p><strong>Let’s bring everything together:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine all measures</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>all_measures <span class="ot">&lt;-</span> mls_df <span class="sc">%&gt;%</span>  <span class="co"># ← Added mls_df %&gt;%</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(clausal_density_df <span class="sc">%&gt;%</span> <span class="fu">select</span>(doc_id, C_per_S), <span class="at">by =</span> <span class="st">"doc_id"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(subordination_df <span class="sc">%&gt;%</span> <span class="fu">select</span>(doc_id, DC_per_C, DC_per_S), <span class="at">by =</span> <span class="st">"doc_id"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(coordination_df <span class="sc">%&gt;%</span> <span class="fu">select</span>(doc_id, Coord_per_C, Coord_per_S), <span class="at">by =</span> <span class="st">"doc_id"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(nominal_df <span class="sc">%&gt;%</span> <span class="fu">select</span>(doc_id, CN_per_C, CN_per_S), <span class="at">by =</span> <span class="st">"doc_id"</span>)</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>all_measures <span class="sc">%&gt;%</span></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">digits =</span> <span class="dv">2</span>,</span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Document"</span>, <span class="st">"MLS"</span>, <span class="st">"C/S"</span>, <span class="st">"DC/C"</span>, <span class="st">"DC/S"</span>, </span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"Coord/C"</span>, <span class="st">"Coord/S"</span>, <span class="st">"CN/C"</span>, <span class="st">"CN/S"</span>)</span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine all measures</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>all_measures <span class="ot">&lt;-</span> mls_df <span class="sc">%&gt;%</span>  <span class="co"># ← Added mls_df %&gt;%</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(clausal_density_df <span class="sc">%&gt;%</span> <span class="fu">select</span>(document, C_per_S), <span class="at">by =</span> <span class="st">"document"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(subordination_df <span class="sc">%&gt;%</span> <span class="fu">select</span>(document, DC_per_C, DC_per_S), <span class="at">by =</span> <span class="st">"document"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(coordination_df <span class="sc">%&gt;%</span> <span class="fu">select</span>(document, Coord_per_C, Coord_per_S), <span class="at">by =</span> <span class="st">"document"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(nominal_df <span class="sc">%&gt;%</span> <span class="fu">select</span>(document, CN_per_C, CN_per_S), <span class="at">by =</span> <span class="st">"document"</span>)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>all_measures <span class="sc">%&gt;%</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">digits =</span> <span class="dv">2</span>,</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Document"</span>, <span class="st">"MLS"</span>, <span class="st">"C/S"</span>, <span class="st">"DC/C"</span>, <span class="st">"DC/S"</span>, </span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"Coord/C"</span>, <span class="st">"Coord/S"</span>, <span class="st">"CN/C"</span>, <span class="st">"CN/S"</span>)</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 28%">
+<col style="width: 9%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 7%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Document</th>
+<th style="text-align: right;">MLS</th>
+<th style="text-align: right;">C/S</th>
+<th style="text-align: right;">DC/C</th>
+<th style="text-align: right;">DC/S</th>
+<th style="text-align: right;">Coord/C</th>
+<th style="text-align: right;">Coord/S</th>
+<th style="text-align: right;">CN/C</th>
+<th style="text-align: right;">CN/S</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">A69858</td>
+<td style="text-align: right;">22.85</td>
+<td style="text-align: right;">1.72</td>
+<td style="text-align: right;">0.68</td>
+<td style="text-align: right;">1.17</td>
+<td style="text-align: right;">1.53</td>
+<td style="text-align: right;">2.64</td>
+<td style="text-align: right;">2.20</td>
+<td style="text-align: right;">3.79</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Circle of Commerce</td>
+<td style="text-align: right;">21.23</td>
+<td style="text-align: right;">1.60</td>
+<td style="text-align: right;">0.70</td>
+<td style="text-align: right;">1.11</td>
+<td style="text-align: right;">1.58</td>
+<td style="text-align: right;">2.53</td>
+<td style="text-align: right;">2.26</td>
+<td style="text-align: right;">3.62</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>And let’s visualize it</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape for plotting</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>syntax_long <span class="ot">&lt;-</span> all_measures <span class="sc">%&gt;%</span>  <span class="co"># ← Added %&gt;%</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="sc">-</span>doc_id,</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"Measure"</span>,</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"Value"</span></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">Category =</span> <span class="fu">case_when</span>(</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>      Measure <span class="sc">==</span> <span class="st">"MLS"</span> <span class="sc">~</span> <span class="st">"Sentence Length"</span>,</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>      Measure <span class="sc">==</span> <span class="st">"C_per_S"</span> <span class="sc">~</span> <span class="st">"Clausal Density"</span>,</span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>      Measure <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"DC_per_C"</span>, <span class="st">"DC_per_S"</span>) <span class="sc">~</span> <span class="st">"Subordination"</span>,</span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>      Measure <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Coord_per_C"</span>, <span class="st">"Coord_per_S"</span>) <span class="sc">~</span> <span class="st">"Coordination"</span>,</span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>      Measure <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"CN_per_C"</span>, <span class="st">"CN_per_S"</span>) <span class="sc">~</span> <span class="st">"Phrasal Complexity"</span></span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(syntax_long, <span class="fu">aes</span>(<span class="at">x =</span> Measure, <span class="at">y =</span> Value, <span class="at">fill =</span> doc_id)) <span class="sc">+</span></span>
-<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>, <span class="at">width =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>Category, <span class="at">scales =</span> <span class="st">"free"</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Set2"</span>) <span class="sc">+</span></span>
-<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Syntactic Complexity: Complete Profile"</span>,</span>
-<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Comparing multiple dimensions of syntactic complexity"</span>,</span>
-<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
-<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Value"</span>,</span>
-<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Document"</span></span>
-<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
-<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
-<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"top"</span></span>
-<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape for plotting</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>syntax_long <span class="ot">&lt;-</span> all_measures <span class="sc">%&gt;%</span>  <span class="co"># ← Added %&gt;%</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="sc">-</span>document,</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"Measure"</span>,</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"Value"</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">Category =</span> <span class="fu">case_when</span>(</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>      Measure <span class="sc">==</span> <span class="st">"MLS"</span> <span class="sc">~</span> <span class="st">"Sentence Length"</span>,</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>      Measure <span class="sc">==</span> <span class="st">"C_per_S"</span> <span class="sc">~</span> <span class="st">"Clausal Density"</span>,</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>      Measure <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"DC_per_C"</span>, <span class="st">"DC_per_S"</span>) <span class="sc">~</span> <span class="st">"Subordination"</span>,</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>      Measure <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Coord_per_C"</span>, <span class="st">"Coord_per_S"</span>) <span class="sc">~</span> <span class="st">"Coordination"</span>,</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>      Measure <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"CN_per_C"</span>, <span class="st">"CN_per_S"</span>) <span class="sc">~</span> <span class="st">"Phrasal Complexity"</span></span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(syntax_long, <span class="fu">aes</span>(<span class="at">x =</span> Measure, <span class="at">y =</span> Value, <span class="at">fill =</span> document)) <span class="sc">+</span></span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>, <span class="at">width =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>Category, <span class="at">scales =</span> <span class="st">"free"</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Set2"</span>) <span class="sc">+</span></span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Syntactic Complexity: Complete Profile"</span>,</span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Comparing multiple dimensions of syntactic complexity"</span>,</span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Value"</span>,</span>
+<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Document"</span></span>
+<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"top"</span></span>
+<span id="cb40-34"><a href="#cb40-34" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-05-representation_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 </section>
