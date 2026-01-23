@@ -234,7 +234,7 @@ y = NULL
 
 We now see that "natiue commodities" and "forraine commodities" are almost as important as "free trade" in *The Circle of Commerce*, and "merchants adventurers" is even more prominent.
 
-**Warning:** while my lexicon tracks the alternate spelling for "traffic" (= "traffick"), it doesn't account for other possible spelling variations (such as "native" = "natiue"). In addition, it treats the variations as distinct words, so that "naval traffic" is being counted as a different bigram from "naval traffick." This is fine (in my opinion) at this exploratory stage, but it's something that will need addressing in our analysis down the line.
+**Warning:** while my lexicon tracks the alternate spelling for "traffic" (= "traffick"), it doesn't account for other possible spelling variations (such as "native" = "natiue"). In addition, it treats the variations as distinct words, so that "native plant" is being counted as a different bigram from "natiue plant." This is fine (in my opinion) at this exploratory stage, but it's something that will need addressing in our analysis down the line.
 
 -   [For your own entertainment]{.underline}: test your understanding of regex by standardizing "traffick" to "traffic" in the text upstream of the bigram analysis.
 

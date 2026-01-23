@@ -660,3 +660,7 @@ ggplot(syntax_long, aes(x = Measure, y = Value, fill = document)) +
     legend.position = "top"
   )
 ```
+
+OK, we have numbers and pretty pictures, but what does this all mean? Looking at these numbers, my take away is that the two texts are fairly similar in syntactic complexity. The mystery text has marginally longer sentences with more clauses, while Misselden's text shows slightly more elaborate noun phrases. But nothing remarkable. Both texts employ comparable levels of subordination and coordination, suggesting similar levels of structural sophistication in their writing.
+
+Given that the results for both texts are nearly identical (differences of 0.1-0.2 across most measures), I (and most researchers) would conclude these texts show **no meaningful difference** in syntactic complexity. Of course, this is a rather limited example, where I am comparing just two texts. If I had a large corpus, then I would want to take a more rigorous approach. We will come back to this over the next couple of weeks.
