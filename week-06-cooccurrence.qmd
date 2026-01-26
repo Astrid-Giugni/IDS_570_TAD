@@ -1,5 +1,5 @@
 ---
-title: "Week 06: Co-occurrence and moving towards Word2Vec"
+title: "Week 06: Co-occurrence, PMI, and moving towards Word2Vec"
 format: html
 execute:
   echo: true
@@ -292,3 +292,5 @@ install.packages("patchwork") #do this once
 library(patchwork)
 p_cooc + p_pmi
 ```
+
+**Looking ahead:** Word2Vec will keep the same core intuition (meaning from context), but it will learn dense vectors by **predicting** words from windows rather than just counting them.
