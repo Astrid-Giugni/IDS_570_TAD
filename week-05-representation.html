@@ -250,6 +250,12 @@ window.Quarto = {
  <span class="menu-text">Week 05: Text Representation (2)</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./week-06-cooccurrence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 06: Co-occurrence &amp; PMI</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -821,7 +827,7 @@ $ dep_rel       &lt;chr&gt; "det", "root", "case", "nmod", "punct", "det", "root
 <span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>A quick note about punctuation: we filter out punctuation because punctuation itself doesn’t add to a sentence complexity. While someone typing: [I “like” lemon tea] changes the meaning from [I like lemon tea], it doesn’t add to syntactic complexity.</p>
+<p>A quick note about punctuation: we filter out punctuation because punctuation itself doesn’t add to a sentence complexity. While someone typing ‘I “like” lemon tea’ changes the meaning from ‘I like lemon tea,’ it doesn’t add to syntactic complexity.</p>
 <p>If you want to know a bit more about clauses, you can find the <a href="https://universaldependencies.org/u/dep/all.html">full list here</a>. But a quick summary for our needs is below:</p>
 <div class="cell">
 <div id="tbl-clause-types" class="cell quarto-float quarto-figure quarto-figure-center anchored">
@@ -1186,6 +1192,8 @@ Table&nbsp;1
 </div>
 </div>
 </div>
+<p>OK, we have numbers and pretty pictures, but what does this all mean? Looking at these numbers, my take away is that the two texts are fairly similar in syntactic complexity. The mystery text has marginally longer sentences with more clauses, while Misselden’s text shows slightly more elaborate noun phrases. But nothing remarkable. Both texts employ comparable levels of subordination and coordination, suggesting similar levels of structural sophistication in their writing.</p>
+<p>Given that the results for both texts are nearly identical (differences of 0.1-0.2 across most measures), I (and most researchers) would conclude these texts show <strong>no meaningful difference</strong> in syntactic complexity. Of course, this is a rather limited example, where I am comparing just two texts. If I had a large corpus, then I would want to take a more rigorous approach. We will come back to this over the next couple of weeks.</p>
 
 
 </section>
