@@ -31,7 +31,7 @@ We are going to do this with one of the foundational texts of modern economics, 
 
 You will find the `wealth.txt` file under files on Canvas.
 
-### I. Windows and Co-occcurrence
+### I. Windows and Co-occurrence
 
 Starting with out intuition that a word's meaning is constrained by its neighbors, we have to define what we mean by "neighbors." We are going to work with "windows" as the unit of analysis. The idea is that we place a window of fixed size across tokens and we record which words appear together.
 
@@ -169,7 +169,7 @@ You may want to stop me and complain: well, why didn't you remove stopwords? Wou
 
 ### I. PMI
 
-With the raw co-occurrence count we are tracking the words that appear near the anchor most often. What we are going to compute using PMI is the words that appear near the anchor *more often than we would expect* givenhow *frequently those words occur in the text overall*. This makes PMI a better measure of **association strength**, rather than simple proximity.
+With the raw co-occurrence count we are tracking the words that appear near the anchor most often. What we are going to compute using PMI is the words that appear near the anchor *more often than we would expect* given how *frequently those words occur in the text overall*. This makes PMI a better measure of **association strength**, rather than simple proximity.
 
 Pointwise Mutual Information (PMI) is defined as:
 
@@ -258,7 +258,7 @@ Take a minute to compare the first words in `pmi_tbl_filtered` with `pmi_tbl`. W
 Finally, we can visually compare raw co-occurrence:
 
 ```{r}
-p_cooc <- cooc %>%
+cooc %>%
   slice_max(cooc_n, n = 15) %>%
   mutate(word = reorder(word, cooc_n)) %>%
   ggplot(aes(x = cooc_n, y = word)) +
@@ -273,7 +273,7 @@ p_cooc <- cooc %>%
 and top PMI (filtered by by co-occurrence threshold):
 
 ```{r}
-p_cooc <- pmi_tbl_filtered %>%
+pmi_tbl_filtered %>%
   slice_max(pmi, n = 15) %>%
   mutate(word = reorder(word, pmi)) %>%
   ggplot(aes(x = pmi, y = word)) +
