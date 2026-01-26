@@ -1,0 +1,294 @@
+---
+title: "Week 06: Co-occurrence and moving towards Word2Vec"
+format: html
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+## Windows, Co-occurrence, and PMI
+
+So far, we have been focusing on counting words and other features as a way to represent texts and to compare them to each other. What about modeling meaning? The basic intuition that we are going to work with is that we can learn a lot about the meaning of words by looking at their **relational properties**. That is:
+
+-   a word's meaning is constrained by its neighbors ("*bank* account" vs. "river *bank*")
+
+-   meaning emerges from patterns of use
+
+Later on in the semester, we will discuss the limitations of this approach (which some of you have already touched on in class by asking about sarcasm and irony, but there are objections derived from ordinary language philosophy that we need to address), but first we need to learn how to implement this intuition about meaning and to extract as much as we can from it!
+
+Today's tutorial is preparing you for the next core concepts in the class:
+
+-   Embeddings
+
+-   Semantics
+
+-   Word2Vec
+
+-   BERT-style models
+
+We are going to do this with one of the foundational texts of modern economics, Adam Smith's *Wealth of Nations* (1776). By the standards of this course, this is a positively modern text!
+
+You will find the `wealth.txt` file under files on Canvas.
+
+### I. Windows and Co-occcurrence
+
+Starting with out intuition that a word's meaning is constrained by its neighbors, we have to define what we mean by "neighbors." We are going to work with "windows" as the unit of analysis. The idea is that we place a window of fixed size across tokens and we record which words appear together.
+
+Let's get started:
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(tidytext)
+library(tibble)
+library(readr) 
+library(tidyr) 
+library(tidyverse)
+library(ggplot2)
+
+```
+
+and let's keep the same naming pattern we have developed in the previous tutorials:
+
+```{r}
+
+raw_text <- read_file("texts/wealth.txt")
+
+texts <- tibble(
+  doc_title = "wealth.txt",
+  text = raw_text
+)
+
+texts
+
+## Bonus tip: another way to read a text that makes it easier to change later in the code:
+# file_path <- "wealth.txt"
+# raw_text <- read_file(file_path)
+
+```
+
+Great. Now we need to tokenize the text. Because we want to build windows that move through the text in order, we need to preserve token order (so we do **not** disregard word/token order the way we did in bag of words approaches).
+
+```{r}
+tokens <- texts %>%
+  unnest_tokens(word, text) %>%
+  group_by(doc_title) %>%
+  mutate(token_id = row_number()) %>%
+  ungroup()
+
+#Let's take a quick look 
+tokens %>% slice(1:20)
+
+```
+
+For this tutorial, we are going to try to get a sense for how Adam Smith discusses the term "labor" (side note: for the sake of simplicity, I normalized "labour" to "labor" before providing the file to you). This means that we are going to consider the token "labor" to be our **anchor** term and we will create windows around it. **Important:** a window size of 5 means that we are trying to capture 5 tokens on **each side** of our anchor.
+
+Selecting an anchor:
+
+```{r}
+
+anchor <- "labor" #this allows you to change this as needed
+window_size <- 5
+
+#check how many anchor words are in the text
+tokens %>% filter(word == anchor) %>% count()
+```
+
+OK, now we know that there are plenty of our anchor tokens, but we also need to know *where* they are so that we can find the windows around them.
+
+```{r}
+anchor_hits <- tokens %>%
+  filter(word == anchor) %>%
+  select(doc_title, anchor_id = token_id) # organize by location of anchor position
+
+#Let's take a look at the tibble
+anchor_hits
+```
+
+The next step is the key to our analysis: we begin by pairing each anchor occurrence with every token in the document so that we can calculate distances between them. Once those distances are known, we filter down to the tokens that lie within a fix window around the anchor. So, let's build the window table!
+
+Please make sure that you understand the **concepts** behind the following block of code:
+
+```{r}
+
+# Each row in `windows` will be ONE token that appears near ONE anchor occurrence.
+
+windows <- anchor_hits %>%
+  # Join each anchor occurrence to ALL tokens in the same document.
+  # This is intentionally a "many-to-many" join because one anchor hit matches many tokens [remember we had a similar set up last week].
+  left_join(tokens, by = "doc_title", relationship = "many-to-many") %>%
+  
+  # Compute how far each token is from the anchor.
+  # Negative distance = to the LEFT of the anchor; positive = to the RIGHT.
+  mutate(distance = token_id - anchor_id) %>%
+  
+  # Keep only tokens within the window size (±5 tokens).
+  filter(abs(distance) <= window_size) %>%
+  
+  # Remove the anchor word itself (distance 0) so we only keep context words, which is what we are interested in.
+  filter(distance != 0) %>%
+  
+  # Add two helpful identifiers:
+  # a unique window_id for each anchor occurrence
+  # a column that repeats the anchor word (so it's visible in the output)
+  mutate(
+    window_id = paste0(doc_title, "_", anchor_id),
+    anchor_word = anchor
+  ) %>%
+  
+  # Keep only the columns we need for the next steps.
+  select(
+    doc_title,
+    window_id,
+    anchor_word,
+    anchor_id,
+    token_id,
+    distance,
+    word
+  )
+
+windows %>%
+  arrange(anchor_id, distance) %>%
+  slice(1:20)
+```
+
+Now, each row in `windows` represents one word that appeared near one specific occurrence of the anchor. Next, we can collapse all the context window rows into a single ranked list by adding them up. This will measure how many times any given word appears within ±5 window_size tokens of the anchor across the whole document.
+
+```{r}
+cooc <- windows %>%
+  count(word, sort = TRUE, name = "cooc_n")
+
+cooc
+```
+
+So you can view `cooc_n` as a tally of contextual proximity. Note: `cooc_n` does *not* tell you whether a word is important! It just tells you that it appears frequently (or not) near the anchor. At this point of the analysis, you can see that very common words (such as "is," "the," and "which") rise to the top of the list. This is a problem as common words end up dominating even when they tell us little about the anchor–this is expected since we are using raw counts.
+
+You may want to stop me and complain: well, why didn't you remove stopwords? Wouldn't that fix this? This is a reasonable complaint and removing stopwords would *help* but not *solve* the issue. Removing stopwords can make the co-occurrence list look more meaningful, but you will still have words that are very common in the document itself appear near any anchor word. We have a better way to solve the common word problem for this particular task...
+
+### I. PMI
+
+With the raw co-occurrence count we are tracking the words that appear near the anchor most often. What we are going to compute using PMI is the words that appear near the anchor *more often than we would expect* givenhow *frequently those words occur in the text overall*. This makes PMI a better measure of **association strength**, rather than simple proximity.
+
+Pointwise Mutual Information (PMI) is defined as:
+
+$$
+\mathrm{PMI}(w, a) = \log_2 \left( \frac{P(w, a)}{P(w)\,P(a)} \right)
+$$
+
+where:
+
+-   $P(w,a)$ is the probability that the word $w$ appears in the anchor's context window
+
+-   $P(w)$ is the overall probability of the word $w$ in the document
+
+-   $P(a)$ is the overall probability of the anchor word $a$ in the document
+
+If PMI is high, the word $w$ appears near the anchor more often than we would expect by chance, given how frequent each word is overall. Reference if you want a deeper dive into PMI, see [Appendix J in Jurafsky and Martin](https://web.stanford.edu/~jurafsky/slp3/J.pdf).
+
+First, we compute the overall word frequencies in the document, $P(w)$ and $P(a)$:
+
+```{r}
+total_tokens <- nrow(tokens)
+
+word_freq <- tokens %>%
+  count(word, name = "word_n") %>%
+  mutate(p_word = word_n / total_tokens)
+
+word_freq
+
+```
+
+We now get anchor frequency and probability:
+
+```{r}
+anchor_stats <- word_freq %>%
+  filter(word == anchor) %>%
+  transmute(anchor_n = word_n, p_anchor = p_word)
+
+anchor_stats
+
+```
+
+**Gut check:** you might (or not) think that these tibbles look weird! At this stage, we are seeing the documents exactly as the computer sees it: a long sequence of tokens. Numbers appear here because Adam Smith uses **a lot** of numbers (which shouldn't surprise us!). This gives us a baseline picture of overall frequency, which PMI will later use to decide whether a word's appearance near the anchor is genuinely informative or merely a byproduct of being common everywhere.
+
+Now we will define the "window token universe" and compute $P(w,a)$. If we let the "sample space" be all token occurrences that fall inside any anchor window (excluding the anchor tokens themselves), the $P(w,a)$ is the probability that a randomly selected token from this window-universe is $w$.
+
+```{r}
+total_window_tokens <- nrow(windows)
+
+p_w_given_windows <- windows %>%
+  count(word, name = "cooc_n") %>%
+  mutate(p_word_in_windows = cooc_n / total_window_tokens)
+
+p_w_given_windows
+
+```
+
+This is effectively P(w\| in anchor windows), which is proportional to $P(w,a)$ for our purposes.
+
+Next, we join baseline frequencies and compute PMI
+
+```{r}
+pmi_tbl <- p_w_given_windows %>%
+  left_join(word_freq, by = "word") %>%
+  mutate(
+    pmi = log2(p_word_in_windows / (p_word * anchor_stats$p_anchor))
+  ) %>%
+  arrange(desc(pmi))
+
+pmi_tbl
+
+```
+
+This should start to give us a clearer picture! However, we do have to worry about rare words. PMI can become misleadingly large when `cooc_n` is very small (e.g., a word appears once in a window). A standard practice is to filter by minimum co-occurrence count.
+
+```{r}
+pmi_tbl_filtered <- pmi_tbl %>%
+  filter(cooc_n >= 3) %>%        # adjust threshold as needed
+  arrange(desc(pmi))
+
+pmi_tbl_filtered
+
+```
+
+Take a minute to compare the first words in `pmi_tbl_filtered` with `pmi_tbl`. Which words rise to the top under PMI that did not dominate raw co-occurrence? What kinds of words does PMI "reward" and what kinds does it "punish"?
+
+Finally, we can visually compare raw co-occurrence:
+
+```{r}
+p_cooc <- cooc %>%
+  slice_max(cooc_n, n = 15) %>%
+  mutate(word = reorder(word, cooc_n)) %>%
+  ggplot(aes(x = cooc_n, y = word)) +
+  geom_col() +
+  labs(
+    title = str_glue("Top co-occurring words within ±{window_size} of '{anchor}'"),
+    x = "Co-occurrence count",
+    y = NULL
+  )
+```
+
+and top PMI (filtered by by co-occurrence threshold):
+
+```{r}
+p_cooc <- pmi_tbl_filtered %>%
+  slice_max(pmi, n = 15) %>%
+  mutate(word = reorder(word, pmi)) %>%
+  ggplot(aes(x = pmi, y = word)) +
+  geom_col() +
+  labs(
+    title = str_glue("Top PMI-associated words near '{anchor}' (cooc_n ≥ 3)"),
+    x = "PMI (log2 scale)",
+    y = NULL
+  )
+```
+
+We can put them side by side by using a new library `patchwork`:
+
+```{r}
+install.packages("patchwork") #do this once
+library(patchwork)
+p_cooc + p_pmi
+```

@@ -421,7 +421,7 @@ is_complex_nominal = dep_rel %in% c(
 )
 ```
 
-A quick note about punctuation: we filter out punctuation because punctuation itself doesn't add to a sentence complexity. While someone typing: \[I "like" lemon tea\] changes the meaning from \[I like lemon tea\], it doesn't add to syntactic complexity.
+A quick note about punctuation: we filter out punctuation because punctuation itself doesn't add to a sentence complexity. While someone typing 'I "like" lemon tea' changes the meaning from 'I like lemon tea,' it doesn't add to syntactic complexity.
 
 If you want to know a bit more about clauses, you can find the [full list here](https://universaldependencies.org/u/dep/all.html). But a quick summary for our needs is below:
 
