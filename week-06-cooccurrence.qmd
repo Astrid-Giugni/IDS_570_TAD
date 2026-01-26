@@ -285,12 +285,4 @@ p_cooc <- pmi_tbl_filtered %>%
   )
 ```
 
-We can put them side by side by using a new library `patchwork`:
-
-```{r}
-install.packages("patchwork") #do this once
-library(patchwork)
-p_cooc + p_pmi
-```
-
 **Looking ahead:** Word2Vec will keep the same core intuition (meaning from context), but it will learn dense vectors by **predicting** words from windows rather than just counting them.
