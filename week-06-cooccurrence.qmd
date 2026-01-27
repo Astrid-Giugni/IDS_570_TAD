@@ -285,9 +285,23 @@ pmi_tbl_filtered %>%
   )
 ```
 
-**Looking ahead:** Word2Vec will keep the same core intuition (meaning from context), but it will learn dense vectors by **predicting** words from windows rather than just counting them. While PMI gives us valuable insights into which words are strongly associated with our anchor term, it still relies on explicitly counting co-occurrences within fixed windows. Word2Vec takes this same fundamental intuition, but approaches it from a predictive rather than counting framework. Instead of tallying how often words appear together, Word2Vec trains a neural network to predict context words from anchor words (or *vice versa*), learning dense vector representations in the process. These vectors capture semantic relationships in a continuous space where similar words cluster together, allowing for operations like analogy reasoning (e.g., "king" - "man" + "woman" ≈ "queen"). This approach compresses the kind of distributional information we've been exploring with PMI into compact, efficient representations that can capture nuanced semantic relationships across your entire corpus.
+#### What does this all mean?
 
-The table below summarizes how co-occurrence and PMI connect conceptually to Word2Vec, highlighting what stays the same and what changes.
+The PMI analysis begins to reveal some interesting aspects how Adam Smith talks about labor. By comparing the raw co-occurrence counts with the PMI scores, we can distinguish between words that merely appear frequently throughout the text and words that have a genuinely strong association with the concept of labor.
+
+**Division and organization** ("division" - PMI: 13.5, "divisions" - PMI: 13.1, "subdivisions" - PMI: 13.1): The extremely high PMI for "division" confirms something that you *might* already know about Smith: the concept of "division of labor" is central to his discussion. For Smith, this is a way to understand human cooperation. This fits in nicely with the results for skilled labor ("skilled" - PMI: 13.1): the appearance of "skilled" and phrases related to men's labor suggests Smith distinguishes between different types of labor and their respective values or capabilities.
+
+**Productivity and capacity** ("productive" - PMI: 12.9, "powers" - PMI: 13.0): Smith consistently discusses labor in terms of its productive capacity and the powers or capabilities it possesses.
+
+**Compensation** ("rewarded" - PMI: 13.1, "wages" - appears in raw counts): not a surprising result by any means, but Smith does discuss rewards and wages alongside labor.
+
+If you have read Smith's *Wealth of Nations,* this isn't particularly surprising... but that's the point of this exercise. PMI is doing quite well at picking up features of interest in a complex, 18th century economic text.
+
+### Looking ahead: 
+
+Word2Vec will keep the same core intuition (meaning from context), but it will learn dense vectors by **predicting** words from windows rather than just counting them. While PMI gives us valuable insights into which words are strongly associated with our anchor term, it still relies on explicitly counting co-occurrences within fixed windows. Word2Vec takes this same fundamental intuition, but approaches it from a predictive rather than counting framework. Instead of tallying how often words appear together, Word2Vec trains a neural network to predict context words from anchor words (or *vice versa*), learning dense vector representations in the process. These vectors capture semantic relationships in a continuous space where similar words cluster together, allowing for operations like analogy reasoning (e.g., "king" - "man" + "woman" ≈ "queen"). This approach compresses the kind of distributional information we've been exploring with PMI into compact, efficient representations that can capture nuanced semantic relationships across your entire corpus.
+
+The table below summarizes how co-occurrence and PMI connect conceptually to Word2Vec. Keep this in mind for Week 7.
 
 | Aspect | Co-occurrence / PMI | Word2Vec |
 |-----------------|--------------------------------------|------------------|
