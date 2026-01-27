@@ -117,7 +117,7 @@ Please make sure that you understand the **concepts** behind the following block
 
 windows <- anchor_hits %>%
   # Join each anchor occurrence to ALL tokens in the same document.
-  # This is intentionally a "many-to-many" join because one anchor hit matches many tokens [remember we had a similar set up last week].
+  # This is a "many-to-many" join because one anchor hit matches many tokens [remember we had a similar set up last week].
   left_join(tokens, by = "doc_title", relationship = "many-to-many") %>%
   
   # Compute how far each token is from the anchor.
@@ -130,9 +130,7 @@ windows <- anchor_hits %>%
   # Remove the anchor word itself (distance 0) so we only keep context words, which is what we are interested in.
   filter(distance != 0) %>%
   
-  # Add two helpful identifiers:
-  # a unique window_id for each anchor occurrence
-  # a column that repeats the anchor word (so it's visible in the output)
+  
   mutate(
     window_id = paste0(doc_title, "_", anchor_id),
     anchor_word = anchor
