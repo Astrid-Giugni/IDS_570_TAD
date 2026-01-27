@@ -303,8 +303,8 @@ window.Quarto = {
 </ul>
 <p>We are going to do this with one of the foundational texts of modern economics, Adam Smith’s <em>Wealth of Nations</em> (1776). By the standards of this course, this is a positively modern text!</p>
 <p>You will find the <code>wealth.txt</code> file under files on Canvas.</p>
-<section id="i.-windows-and-co-occcurrence" class="level3">
-<h3 class="anchored" data-anchor-id="i.-windows-and-co-occcurrence">I. Windows and Co-occcurrence</h3>
+<section id="i.-windows-and-co-occurrence" class="level3">
+<h3 class="anchored" data-anchor-id="i.-windows-and-co-occurrence">I. Windows and Co-occurrence</h3>
 <p>Starting with out intuition that a word’s meaning is constrained by its neighbors, we have to define what we mean by “neighbors.” We are going to work with “windows” as the unit of analysis. The idea is that we place a window of fixed size across tokens and we record which words appear together.</p>
 <p>Let’s get started:</p>
 <div class="cell">
@@ -510,7 +510,7 @@ window.Quarto = {
 </section>
 <section id="i.-pmi" class="level3">
 <h3 class="anchored" data-anchor-id="i.-pmi">I. PMI</h3>
-<p>With the raw co-occurrence count we are tracking the words that appear near the anchor most often. What we are going to compute using PMI is the words that appear near the anchor <em>more often than we would expect</em> givenhow <em>frequently those words occur in the text overall</em>. This makes PMI a better measure of <strong>association strength</strong>, rather than simple proximity.</p>
+<p>With the raw co-occurrence count we are tracking the words that appear near the anchor most often. What we are going to compute using PMI is the words that appear near the anchor <em>more often than we would expect</em> given how <em>frequently those words occur in the text overall</em>. This makes PMI a better measure of <strong>association strength</strong>, rather than simple proximity.</p>
 <p>Pointwise Mutual Information (PMI) is defined as:</p>
 <p><span class="math display">\[
 \mathrm{PMI}(w, a) = \log_2 \left( \frac{P(w, a)}{P(w)\,P(a)} \right)
@@ -644,7 +644,7 @@ window.Quarto = {
 <p>Take a minute to compare the first words in <code>pmi_tbl_filtered</code> with <code>pmi_tbl</code>. Which words rise to the top under PMI that did not dominate raw co-occurrence? What kinds of words does PMI “reward” and what kinds does it “punish”?</p>
 <p>Finally, we can visually compare raw co-occurrence:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>p_cooc <span class="ot">&lt;-</span> cooc <span class="sc">%&gt;%</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>cooc <span class="sc">%&gt;%</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(cooc_n, <span class="at">n =</span> <span class="dv">15</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">word =</span> <span class="fu">reorder</span>(word, cooc_n)) <span class="sc">%&gt;%</span></span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> cooc_n, <span class="at">y =</span> word)) <span class="sc">+</span></span>
@@ -654,10 +654,17 @@ window.Quarto = {
 <span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Co-occurrence count"</span>,</span>
 <span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
 <span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-06-cooccurrence_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
 </div>
 <p>and top PMI (filtered by by co-occurrence threshold):</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>p_cooc <span class="ot">&lt;-</span> pmi_tbl_filtered <span class="sc">%&gt;%</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>pmi_tbl_filtered <span class="sc">%&gt;%</span></span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(pmi, <span class="at">n =</span> <span class="dv">15</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">word =</span> <span class="fu">reorder</span>(word, pmi)) <span class="sc">%&gt;%</span></span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> pmi, <span class="at">y =</span> word)) <span class="sc">+</span></span>
@@ -667,8 +674,73 @@ window.Quarto = {
 <span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"PMI (log2 scale)"</span>,</span>
 <span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
 <span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-06-cooccurrence_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
-<p><strong>Looking ahead:</strong> Word2Vec will keep the same core intuition (meaning from context), but it will learn dense vectors by <strong>predicting</strong> words from windows rather than just counting them.</p>
+</div>
+</div>
+<section id="what-does-this-all-mean" class="level4">
+<h4 class="anchored" data-anchor-id="what-does-this-all-mean">What does this all mean?</h4>
+<p>The PMI analysis begins to reveal some interesting aspects how Adam Smith talks about labor. By comparing the raw co-occurrence counts with the PMI scores, we can distinguish between words that merely appear frequently throughout the text and words that have a genuinely strong association with the concept of labor.</p>
+<p><strong>Division and organization</strong> (“division” - PMI: 13.5, “divisions” - PMI: 13.1, “subdivisions” - PMI: 13.1): The extremely high PMI for “division” confirms something that you <em>might</em> already know about Smith: the concept of “division of labor” is central to his discussion. For Smith, this is a way to understand human cooperation. This fits in nicely with the results for skilled labor (“skilled” - PMI: 13.1): the appearance of “skilled” and phrases related to men’s labor suggests Smith distinguishes between different types of labor and their respective values or capabilities.</p>
+<p><strong>Productivity and capacity</strong> (“productive” - PMI: 12.9, “powers” - PMI: 13.0): Smith consistently discusses labor in terms of its productive capacity and the powers or capabilities it possesses.</p>
+<p><strong>Compensation</strong> (“rewarded” - PMI: 13.1, “wages” - appears in raw counts): not a surprising result by any means, but Smith does discuss rewards and wages alongside labor.</p>
+<p>If you have read Smith’s <em>Wealth of Nations,</em> this isn’t particularly surprising… but that’s the point of this exercise. PMI is doing quite well at picking up features of interest in a complex, 18th century economic text.</p>
+</section>
+</section>
+<section id="looking-ahead" class="level3">
+<h3 class="anchored" data-anchor-id="looking-ahead">Looking ahead:</h3>
+<p>Word2Vec will keep the same core intuition (meaning from context), but it will learn dense vectors by <strong>predicting</strong> words from windows rather than just counting them. While PMI gives us valuable insights into which words are strongly associated with our anchor term, it still relies on explicitly counting co-occurrences within fixed windows. Word2Vec takes this same fundamental intuition, but approaches it from a predictive rather than counting framework. Instead of tallying how often words appear together, Word2Vec trains a neural network to predict context words from anchor words (or <em>vice versa</em>), learning dense vector representations in the process. These vectors capture semantic relationships in a continuous space where similar words cluster together, allowing for operations like analogy reasoning (e.g., “king” - “man” + “woman” ≈ “queen”). This approach compresses the kind of distributional information we’ve been exploring with PMI into compact, efficient representations that can capture nuanced semantic relationships across your entire corpus.</p>
+<p>The table below summarizes how co-occurrence and PMI connect conceptually to Word2Vec. Keep this in mind for Week 7.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 23%">
+<col style="width: 52%">
+<col style="width: 24%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Aspect</th>
+<th>Co-occurrence / PMI</th>
+<th>Word2Vec</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Unit of analysis</td>
+<td>Words within fixed context windows</td>
+<td>Words within fixed context windows</td>
+</tr>
+<tr class="even">
+<td>Core operation</td>
+<td>Counting occurrences and associations</td>
+<td>Predicting words from context (or context from words)</td>
+</tr>
+<tr class="odd">
+<td>Representation</td>
+<td>Sparse, count-based tables</td>
+<td>Dense, learned vectors</td>
+</tr>
+<tr class="even">
+<td>Role of frequency</td>
+<td>Explicitly corrected (via PMI)</td>
+<td>Implicitly downweighted during training</td>
+</tr>
+<tr class="odd">
+<td>What is learned</td>
+<td>Association strength between words</td>
+<td>Vector representations encoding semantic similarity</td>
+</tr>
+<tr class="even">
+<td>Semantic intuition</td>
+<td>Words are meaningful if they co-occur unexpectedly</td>
+<td>Words are meaningful if they help predict similar contexts</td>
+</tr>
+</tbody>
+</table>
 
 
 </section>
