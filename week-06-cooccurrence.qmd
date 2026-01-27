@@ -213,7 +213,17 @@ anchor_stats
 
 **Gut check:** you might (or not) think that these tibbles look weird! At this stage, we are seeing the documents exactly as the computer sees it: a long sequence of tokens. Numbers appear here because Adam Smith uses **a lot** of numbers (which shouldn't surprise us!). This gives us a baseline picture of overall frequency, which PMI will later use to decide whether a word's appearance near the anchor is genuinely informative or merely a byproduct of being common everywhere.
 
-Now we will define the "window token universe" and compute $P(w,a)$. If we let the "sample space" be all token occurrences that fall inside any anchor window (excluding the anchor tokens themselves), the $P(w,a)$ is the probability that a randomly selected token from this window-universe is $w$.
+Now we need to compute $P(w,a)$. We define the sample space as all tokens that appear inside any widow around the anchor word, excluding the anchor tokens themselves. You can think of this as the complete collection of *all context words* around the anchor in *The Wealth of Nations*. Then $P(w,a)$ is the probability that, if we randomly select one token from all the tokens that occur inside anchor windows, that token is the word $w$.
+
+In practice, this means that we do the following:
+
+-   We count how many times 𝑤 appears inside anchor windows.
+
+-   We divide by the total number of tokens across all anchor windows.
+
+-   The result is $P(w,a)$.
+
+This definition allows us to treat co-occurrence as a probabilistic event rather than just a raw count.
 
 ```{r}
 total_window_tokens <- nrow(windows)
