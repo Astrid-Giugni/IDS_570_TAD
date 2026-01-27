@@ -285,4 +285,15 @@ pmi_tbl_filtered %>%
   )
 ```
 
-**Looking ahead:** Word2Vec will keep the same core intuition (meaning from context), but it will learn dense vectors by **predicting** words from windows rather than just counting them.
+**Looking ahead:** Word2Vec will keep the same core intuition (meaning from context), but it will learn dense vectors by **predicting** words from windows rather than just counting them. While PMI gives us valuable insights into which words are strongly associated with our anchor term, it still relies on explicitly counting co-occurrences within fixed windows. Word2Vec takes this same fundamental intuition, but approaches it from a predictive rather than counting framework. Instead of tallying how often words appear together, Word2Vec trains a neural network to predict context words from anchor words (or *vice versa*), learning dense vector representations in the process. These vectors capture semantic relationships in a continuous space where similar words cluster together, allowing for operations like analogy reasoning (e.g., "king" - "man" + "woman" ≈ "queen"). This approach compresses the kind of distributional information we've been exploring with PMI into compact, efficient representations that can capture nuanced semantic relationships across your entire corpus.
+
+The table below summarizes how co-occurrence and PMI connect conceptually to Word2Vec, highlighting what stays the same and what changes.
+
+| Aspect | Co-occurrence / PMI | Word2Vec |
+|-----------------|--------------------------------------|------------------|
+| Unit of analysis | Words within fixed context windows | Words within fixed context windows |
+| Core operation | Counting occurrences and associations | Predicting words from context (or context from words) |
+| Representation | Sparse, count-based tables | Dense, learned vectors |
+| Role of frequency | Explicitly corrected (via PMI) | Implicitly downweighted during training |
+| What is learned | Association strength between words | Vector representations encoding semantic similarity |
+| Semantic intuition | Words are meaningful if they co-occur unexpectedly | Words are meaningful if they help predict similar contexts |
