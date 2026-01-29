@@ -256,6 +256,12 @@ window.Quarto = {
  <span class="menu-text">Week 06: Co-occurrence &amp; PMI</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./week-07-word2vs.qmd" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 07: Word2Vec and LDA introduction</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -434,7 +440,7 @@ Third_Text_A06785               0.533      0.471             1.000</code></pre>
 <li>Note: <code>quanteda</code> gives you the option to use either natural or base 10 log. The default is base 10. See the full documentation <a href="https://quanteda.io/reference/dfm_tfidf.html">here</a>. In some other applications, you will see a preference for natural logarithm. The difference between the two is really irrelevant (it’s easy to apply a change of base) and what matters is the compression. What the log does: it keeps the monotonic property of IDF (rarer words get higher IDF values), but it won’t let something like a typo in one document dominate.</li>
 </ul></li>
 </ul>
-<p>TF-IDF is just the product of TF with IDF. <code>Quanteda</code> will do all the work for us.</p>
+<p>TF-IDF is just the product of TF with IDF. [Note: we should really say <code>TF-IDF(t,d)</code>, that is, for term <code>t</code> in document <code>d</code>, but the short-hand skips that parenthetical.] <code>Quanteda</code> will do all the work for us.</p>
 <p>Let’s go ahead and see how TF-IDF changes our DFM matrix:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dfm_tfidf <span class="ot">&lt;-</span> <span class="fu">dfm_tfidf</span>(dfm_mat)</span>
