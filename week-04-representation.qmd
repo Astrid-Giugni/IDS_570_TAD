@@ -131,7 +131,7 @@ There are two components to TF-IDF:
 
     -   Note: `quanteda` gives you the option to use either natural or base 10 log. The default is base 10. See the full documentation [here](https://quanteda.io/reference/dfm_tfidf.html). In some other applications, you will see a preference for natural logarithm. The difference between the two is really irrelevant (it's easy to apply a change of base) and what matters is the compression. What the log does: it keeps the monotonic property of IDF (rarer words get higher IDF values), but it won't let something like a typo in one document dominate.
 
-TF-IDF is just the product of TF with IDF. `Quanteda` will do all the work for us.
+TF-IDF is just the product of TF with IDF. \[Note: we should really say `TF-IDF(t,d)`, that is, for term `t` in document `d`, but the short-hand skips that parenthetical.\] `Quanteda` will do all the work for us.
 
 Let's go ahead and see how TF-IDF changes our DFM matrix:
 
