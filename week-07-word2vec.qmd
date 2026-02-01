@@ -23,7 +23,8 @@ If you have worked with Python before, you can use whichever environment you wan
 -   As we go along this tutorial: I am re-introducing the training wheels. I am including links to some of the major Python concepts as they come up in the code!
 
 ```{r}
-################## Ignore this (it allows me to run Python in quarto for website)
+#/ echo: false
+
 library(reticulate)
 
 use_python("C:/Users/astri/miniconda3/envs/tad/python.exe", required = TRUE)
@@ -67,7 +68,7 @@ print(text[mid:mid+800])
 
 The `print()` function is something that will come up over and over again. If you get lost by how I am using it, do click on this [**explanation**](https://realpython.com/python-print/).
 
-The next step is to tokenize the text. This is the Python version of `unnest_tokens()` in tidytext. But in Python, we have to do this using a regex: so, hopefully, you feel comfortable with the regex unit from Week 2. We are also going to lowercase.
+The next step is to tokenize the text. This is the Python version of `unnest_tokens()` in tidytext. But in Python, we have to do this using a regex: so, hopefully, you feel comfortable with the regex unit from Week 2. We are also going to lowercase. This tokenizer keeps alphabetic words (and contractions), so it ignores numbers and hyphenated compounds; that’s a simplification for today, not a general rule.
 
 Since we also want to run some checks on our process (as we did in R), we are going to inspect the most frequent tokens using [`Counter`](https://realpython.com/python-counter/), the Python parallel to tidytext's `count(word, sort =TRUE)`.
 
@@ -96,7 +97,7 @@ for w, c in counts.most_common(25):
 
 The library [**Scikit-learn**](https://scikit-learn.org/stable/) is going to allow us to import a standard list of stopwords. More importantly, `Scikit-learn` is a machine learning library for Python and we will use it more than once!
 
-We are going to covert the list of pre-defined stopwords into a [**set**](https://realpython.com/python-sets/) because it will make filtering tokens more efficient. We can then use the **in-place OR operator** `|=` to add all the elements of our custom stopwords to the standard stopwords (the link at "sets" will also explain `|=`).
+We are going to convert the list of pre-defined stopwords into a [**set**](https://realpython.com/python-sets/) because it will make filtering tokens more efficient. We can then use the **in-place OR operator** `|=` to add all the elements of our custom stopwords to the standard stopwords (the link at "sets" will also explain `|=`).
 
 **Aside:** if you go to the tutorial, you might see that there is another **OR operator** `|` . This operator creates a new set. I am just modifying the preexisting one by adding the custom stopwords.
 
@@ -106,8 +107,8 @@ from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
 stopwords = set(ENGLISH_STOP_WORDS) #turn it into a set
 
-# This is option and right now, I am only using this as an example of syntax
-custom_stopwords = {"upon", "shall", "hath"}
+# This is optional and I am only using this as an example of syntax (hence the choice of silly terms)
+custom_stopwords = {"barnacle", "putine"}
 
 stopwords |= custom_stopwords
 
@@ -116,7 +117,7 @@ print("Stopwords loaded:", len(stopwords))
 print("Sample:", sorted(list(stopwords))[:25])
 ```
 
-Now that we have our stopwords as we want them, we can apply it to our tokens. We are also going to remove really short tokens (fewer than 3 tokens). Something that sometimes throws people off: I am stating the length requirement as a strict inequality. Now look at the code below: do you understand why have `len(t) >= 3` ?
+Now that we have our stopwords as we want them, we can apply it to our tokens. We are also going to remove really short tokens (fewer than 3 characters). Something that sometimes throws people off: I am stating the length requirement as a strict inequality. Now look at the code below: do you understand why have `len(t) >= 3` ?
 
 ```{python}
 
@@ -165,7 +166,7 @@ print("First segment length:", len(segments[0]))
 print("Last segment length:", len(segments[-1]))
 ```
 
-Each segment is now a document for LDA: we have 186 segments, which is a good document count for LDA, and segment sizes are consistent (800; last shorter, which makes sense). Let's see what word counts in a segment look like:
+Each segment is now a document for LDA: we have 186 segments, which is a good document count for LDA, and segment sizes are consistent (800; last shorter, which is what we expect). Note: I picked 800 somewhat arbitrarily, but it is meant to capture approximately 2-3 paragraphs per segment given what I know of Smith's writing. Let's see what word counts in a segment look like:
 
 ```{python}
 
@@ -202,7 +203,7 @@ w2v = Word2Vec(
     sentences=segments,     # each segment is a list of tokens
     vector_size=100,        # dimensionality
     window=5,               # context window (parallel to your co-occurrence window)
-    min_count=20,           # ignore very rare words
+    min_count=10,           # ignore very rare words
     workers=4,              # number of CPU cores for parallel processing
     sg=1                    # 1=skip-gram, 0=CBOW
 )
@@ -216,7 +217,7 @@ We have to make some choices when we train Word2Vec:
 
 -   `window=5` matches what we did in our co-occurrence calculation.
 
--   `min_count=20` keeps the vocab manageable and stable for teaching.
+-   `min_count=10` keeps the vocab manageable (and its good for a class exercise). Note: the exact choice of 10 (instead of, say, 15 or 20) is based on trail and error. Given that we have 1,395 words in the vocabulary after filtering, I don't want to be too agressive. For a larger and more varied corpus, I might go for 20.
 
 -   **Important:** if you have an older machine and it's freezing; `change workers = 4` to 2 or even 1.
 
@@ -243,7 +244,7 @@ for target in ["trade", "labor", "price", "capital", "market"]:
 
 For **trade**: the terms that we are getting indicate that Smith is using structural and institutional language in conjunction with this term. We have verbs like carrying, carried, and shipping (possibly used as a noun...), as well as structural qualifiers such as branches, returns, and direct. Some words are perhaps more surprising and would require more investigation (such as round).
 
-For **labor:** there is a strong sign the model has learned trade as an activity embedded in the language of key economic activities, such as productive, distributed, enables, and, more obviously, but very reassuring, laborer and tools.
+For **labor:** there is a strong sign the model has learned labor as an activity embedded in the language of key economic activities, such as productive, distributed, enables, and, more obviously, but very reassuring, laborer and tools.
 
 -   As an exercise for the students: what do you think of the neighbors for price, capital, and markets? Any surprises?
 
@@ -262,7 +263,7 @@ for seg in segments:
         start = max(0, i - WINDOW)
         end = min(len(seg), i + WINDOW + 1)
         for j in range(start, end):
-            if i != j:
+            if i != j and seg[j] != token: # otherwise "trade" will be the closest to "trade" etc.
                 cooc[token][seg[j]] += 1
 
 def show_cooc_neighbors(word, topn=10):
@@ -324,7 +325,7 @@ In the filtering step we are mirroring what we did in R when we removed very rar
 
 At this point, we have the same kind of data structure we relied on in R for bag-of-words models: **documents represented by word counts**. The next step will simply convert these counts into the specific input format required by the LDA implementation we are using.
 
-We are finally done with preprocessing and we can actually fit the LDA model (yay!). [To reiterate]{.underline}: these "topics" are computational constructs; they are estimates of latent word distributions that, taken together, explain the observed word counts reasonable well.
+We are finally done with preprocessing and we can actually fit the LDA model (yay!). [To reiterate]{.underline}: these "topics" are computational constructs; they are estimates of latent word distributions that, taken together, explain the observed word counts reasonably well.
 
 ```{python}
 # Train LDA model
@@ -378,6 +379,11 @@ for topic_id in range(lda.num_topics):
     for word, weight in lda.show_topic(topic_id, topn=12):
         print(f"{word:>12}  {weight:.3f}")
 
+```
+
+```{python}
+# After training, inspect learned alpha values
+print("Learned alpha values:", lda.alpha)
 ```
 
 And let's visualize them with a bar plot that gives us a representation of the topic prevalence across segments:
@@ -444,3 +450,9 @@ plt.legend()
 plt.show()
 
 ```
+
+### Final considerations and bringing things together:
+
+The eight topics our model identified capture distinct but overlapping themes in *The Wealth of Nations*. Topic 2 (foreign trade and manufactures) and Topic 6 (precious metals and banking) emerge as the most prevalent, together accounting for over a third of the book's content. This makes sense given Smith's focus on international commerce and monetary systems. Topic 1 clearly represents taxation and fiscal policy (tax, taxes, duties, Britain), while Topic 3 captures discussions of war, military spending, and colonial companies—particularly the East India Company. Topics 0 and 4 both relate to labor and wages, but Topic 0 emphasizes the relationship between landlords, rent, and maintenance, while Topic 4 focuses more directly on wage rates, employment, and labor markets. Topic 5 centers on agricultural commodities and their prices over time (corn, wheat, cattle, century, improvement), likely reflecting Smith's extended discussions of agricultural economics and historical price movements. The distribution of topic prevalence tells us something important (and reassuring given what is known about Smith's work): Smith doesn't devote equal attention to all themes—international trade and monetary systems clearly dominate his analysis.
+
+As we look at the visualization, we can perhaps get a better sense of some of the structural distribution of these topics. The topic prevalence plot across segments reveals the book's structure and confirms that LDA has captured meaningful thematic shifts as Smith moves through his argument. Notice how Topic 2 (foreign trade) shows strong presence in the middle and later portions of the book, which aligns with Smith's extended treatment of commercial policy in Books IV and V. Topic 6 (metals and banking) appears in concentrated bursts rather than being evenly distributed, suggesting Smith returns to monetary questions at specific points in his argument. Topic 3 (war and colonies) is relatively rare overall but spikes sharply in specific segments—these likely correspond to his discussions of colonial administration and military expenditure. The uneven distribution of topics across segments is exactly what we should expect from a structured argument: Smith isn't randomly mixing concepts and arguments, he's developing them systematically. If all topics appeared uniformly across all segments, it would suggest either that our segmentation strategy failed to capture the book's organization, or that LDA wasn't identifying meaningful thematic distinctions. Instead, the clear peaks and valleys should give us some reassurance that both our preprocessing choices and the model's topic assignments are capturing real patterns in how Smith structured his economic treatise
