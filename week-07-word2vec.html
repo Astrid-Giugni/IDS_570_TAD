@@ -303,11 +303,12 @@ window.Quarto = {
 <li>As we go along this tutorial: I am re-introducing the training wheels. I am including links to some of the major Python concepts as they come up in the code!</li>
 </ul>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">################## Ignore this (it allows me to run Python in quarto for website)</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(reticulate)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">use_python</span>(<span class="st">"C:/Users/astri/miniconda3/envs/tad/python.exe"</span>, <span class="at">required =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">py_config</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#/ echo: false</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(reticulate)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">use_python</span>(<span class="st">"C:/Users/astri/miniconda3/envs/tad/python.exe"</span>, <span class="at">required =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">py_config</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>python:         C:/Users/astri/miniconda3/envs/tad/python.exe
 libpython:      C:/Users/astri/miniconda3/envs/tad/python311.dll
@@ -405,7 +406,7 @@ COMMODITIES, OR OF THEIR PRICE IN labor, AND THEIR PRICE IN MONEY.
 </div>
 </div>
 <p>The <code>print()</code> function is something that will come up over and over again. If you get lost by how I am using it, do click on this <a href="https://realpython.com/python-print/"><strong>explanation</strong></a>.</p>
-<p>The next step is to tokenize the text. This is the Python version of <code>unnest_tokens()</code> in tidytext. But in Python, we have to do this using a regex: so, hopefully, you feel comfortable with the regex unit from Week 2. We are also going to lowercase.</p>
+<p>The next step is to tokenize the text. This is the Python version of <code>unnest_tokens()</code> in tidytext. But in Python, we have to do this using a regex: so, hopefully, you feel comfortable with the regex unit from Week 2. We are also going to lowercase. This tokenizer keeps alphabetic words (and contractions), so it ignores numbers and hyphenated compounds; that’s a simplification for today, not a general rule.</p>
 <p>Since we also want to run some checks on our process (as we did in R), we are going to inspect the most frequent tokens using <a href="https://realpython.com/python-counter/"><code>Counter</code></a>, the Python parallel to tidytext’s <code>count(word, sort =TRUE)</code>.</p>
 <p><strong>Making things look nicer:</strong> You can skip this explanation, if you are new to Python. This is equivalent to: <code>print(w, c)</code>. I am just trying to make the display more readable for the class!</p>
 <p>In the next block below, I am going to use an <code>f-string</code> inside <code>print()</code>. An <code>f-string</code> is a way to format text, so <code>f"{w:&gt;12} {c}"</code> means (working inside out):</p>
@@ -463,15 +464,15 @@ Top 25 tokens:</code></pre>
 </div>
 </div>
 <p>The library <a href="https://scikit-learn.org/stable/"><strong>Scikit-learn</strong></a> is going to allow us to import a standard list of stopwords. More importantly, <code>Scikit-learn</code> is a machine learning library for Python and we will use it more than once!</p>
-<p>We are going to covert the list of pre-defined stopwords into a <a href="https://realpython.com/python-sets/"><strong>set</strong></a> because it will make filtering tokens more efficient. We can then use the <strong>in-place OR operator</strong> <code>|=</code> to add all the elements of our custom stopwords to the standard stopwords (the link at “sets” will also explain <code>|=</code>).</p>
+<p>We are going to convert the list of pre-defined stopwords into a <a href="https://realpython.com/python-sets/"><strong>set</strong></a> because it will make filtering tokens more efficient. We can then use the <strong>in-place OR operator</strong> <code>|=</code> to add all the elements of our custom stopwords to the standard stopwords (the link at “sets” will also explain <code>|=</code>).</p>
 <p><strong>Aside:</strong> if you go to the tutorial, you might see that there is another <strong>OR operator</strong> <code>|</code> . This operator creates a new set. I am just modifying the preexisting one by adding the custom stopwords.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.feature_extraction.text <span class="im">import</span> ENGLISH_STOP_WORDS</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>stopwords <span class="op">=</span> <span class="bu">set</span>(ENGLISH_STOP_WORDS) <span class="co">#turn it into a set</span></span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="co"># This is option and right now, I am only using this as an example of syntax</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>custom_stopwords <span class="op">=</span> {<span class="st">"upon"</span>, <span class="st">"shall"</span>, <span class="st">"hath"</span>}</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="co"># This is optional and I am only using this as an example of syntax (hence the choice of silly terms)</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>custom_stopwords <span class="op">=</span> {<span class="st">"barnacle"</span>, <span class="st">"putine"</span>}</span>
 <span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>stopwords <span class="op">|=</span> custom_stopwords</span>
 <span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
@@ -485,7 +486,7 @@ Top 25 tokens:</code></pre>
 <pre><code>Sample: ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again', 'against', 'all', 'almost', 'alone', 'along', 'already', 'also', 'although', 'always', 'am', 'among', 'amongst', 'amoungst', 'amount', 'an', 'and', 'another', 'any']</code></pre>
 </div>
 </div>
-<p>Now that we have our stopwords as we want them, we can apply it to our tokens. We are also going to remove really short tokens (fewer than 3 tokens). Something that sometimes throws people off: I am stating the length requirement as a strict inequality. Now look at the code below: do you understand why have <code>len(t) &gt;= 3</code> ?</p>
+<p>Now that we have our stopwords as we want them, we can apply it to our tokens. We are also going to remove really short tokens (fewer than 3 characters). Something that sometimes throws people off: I am stating the length requirement as a strict inequality. Now look at the code below: do you understand why have <code>len(t) &gt;= 3</code> ?</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -497,11 +498,11 @@ Top 25 tokens:</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Tokens (clean):"</span>, <span class="bu">len</span>(clean_tokens))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Tokens (clean): 148789</code></pre>
+<pre><code>Tokens (clean): 148917</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Unique tokens (clean):"</span>, <span class="bu">len</span>(<span class="bu">set</span>(clean_tokens)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Unique tokens (clean): 9154</code></pre>
+<pre><code>Unique tokens (clean): 9156</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>clean_counts <span class="op">=</span> Counter(clean_tokens)</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -564,7 +565,7 @@ Top 25 tokens after cleaning:</code></pre>
 <span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a><span class="co">#inspect the segmentation</span></span>
 <span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of segments:"</span>, <span class="bu">len</span>(segments))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Number of segments: 186</code></pre>
+<pre><code>Number of segments: 187</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"First segment length:"</span>, <span class="bu">len</span>(segments[<span class="dv">0</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -572,10 +573,10 @@ Top 25 tokens after cleaning:</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Last segment length:"</span>, <span class="bu">len</span>(segments[<span class="op">-</span><span class="dv">1</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Last segment length: 789</code></pre>
+<pre><code>Last segment length: 117</code></pre>
 </div>
 </div>
-<p>Each segment is now a document for LDA: we have 186 segments, which is a good document count for LDA, and segment sizes are consistent (800; last shorter, which makes sense). Let’s see what word counts in a segment look like:</p>
+<p>Each segment is now a document for LDA: we have 186 segments, which is a good document count for LDA, and segment sizes are consistent (800; last shorter, which is what we expect). Note: I picked 800 somewhat arbitrarily, but it is meant to capture approximately 2-3 paragraphs per segment given what I know of Smith’s writing. Let’s see what word counts in a segment look like:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -624,21 +625,23 @@ Top 25 tokens after cleaning:</code></pre>
 <span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    sentences<span class="op">=</span>segments,     <span class="co"># each segment is a list of tokens</span></span>
 <span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>    vector_size<span class="op">=</span><span class="dv">100</span>,        <span class="co"># dimensionality</span></span>
 <span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>    window<span class="op">=</span><span class="dv">5</span>,               <span class="co"># context window (parallel to your co-occurrence window)</span></span>
-<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>    min_count<span class="op">=</span><span class="dv">20</span>,           <span class="co"># ignore very rare words</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>    min_count<span class="op">=</span><span class="dv">10</span>,           <span class="co"># ignore very rare words</span></span>
 <span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>    workers<span class="op">=</span><span class="dv">4</span>,              <span class="co"># number of CPU cores for parallel processing</span></span>
 <span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>    sg<span class="op">=</span><span class="dv">1</span>                    <span class="co"># 1=skip-gram, 0=CBOW</span></span>
-<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Vocabulary size:"</span>, <span class="bu">len</span>(w2v.wv.key_to_index))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Vocabulary size: 1395</code></pre>
+<pre><code>Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Vocabulary size:"</span>, <span class="bu">len</span>(w2v.wv.key_to_index))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Vocabulary size: 2317</code></pre>
 </div>
 </div>
 <p>We have to make some choices when we train Word2Vec:</p>
 <ul>
 <li><p><code>vector_size=100</code>: each word is represented as a 100-dimensional vector (if we choose higher dimension, we capture more information about each word, but it’s slower and requires more text data). Common values in practice: 100-300. 100 is often the default.</p></li>
 <li><p><code>window=5</code> matches what we did in our co-occurrence calculation.</p></li>
-<li><p><code>min_count=20</code> keeps the vocab manageable and stable for teaching.</p></li>
+<li><p><code>min_count=10</code> keeps the vocab manageable (and its good for a class exercise). Note: the exact choice of 10 (instead of, say, 15 or 20) is based on trail and error. Given that we have 1,395 words in the vocabulary after filtering, I don’t want to be too agressive. For a larger and more varied corpus, I might go for 20.</p></li>
 <li><p><strong>Important:</strong> if you have an older machine and it’s freezing; <code>change workers = 4</code> to 2 or even 1.</p></li>
 <li><p><code>sg=1</code> (skip-gram) is usually better for capturing rarer, more specific relations.</p></li>
 </ul>
@@ -647,149 +650,149 @@ Top 25 tokens after cleaning:</code></pre>
 <li>quick aside if you haven’t worked in Python before: this is the first time we are defining a function using the <a href="https://realpython.com/defining-your-own-python-function/#getting-to-know-functions-in-python"><strong>def</strong> keyword</a>.</li>
 </ul>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Nearest neighbors (cosine similarity)</span></span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> show_neighbors(word, topn<span class="op">=</span><span class="dv">10</span>):</span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> word <span class="kw">not</span> <span class="kw">in</span> w2v.wv:</span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"'</span><span class="sc">{</span>word<span class="sc">}</span><span class="ss">' not in vocabulary."</span>)</span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Nearest neighbors for '</span><span class="sc">{</span>word<span class="sc">}</span><span class="ss">':"</span>)</span>
-<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> w, sim <span class="kw">in</span> w2v.wv.most_similar(word, topn<span class="op">=</span>topn):</span>
-<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>w<span class="sc">:&gt;12}</span><span class="ss">  </span><span class="sc">{</span>sim<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> target <span class="kw">in</span> [<span class="st">"trade"</span>, <span class="st">"labor"</span>, <span class="st">"price"</span>, <span class="st">"capital"</span>, <span class="st">"market"</span>]:</span>
-<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>    show_neighbors(target, topn<span class="op">=</span><span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Nearest neighbors (cosine similarity)</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> show_neighbors(word, topn<span class="op">=</span><span class="dv">10</span>):</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> word <span class="kw">not</span> <span class="kw">in</span> w2v.wv:</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"'</span><span class="sc">{</span>word<span class="sc">}</span><span class="ss">' not in vocabulary."</span>)</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Nearest neighbors for '</span><span class="sc">{</span>word<span class="sc">}</span><span class="ss">':"</span>)</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> w, sim <span class="kw">in</span> w2v.wv.most_similar(word, topn<span class="op">=</span>topn):</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>w<span class="sc">:&gt;12}</span><span class="ss">  </span><span class="sc">{</span>sim<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> target <span class="kw">in</span> [<span class="st">"trade"</span>, <span class="st">"labor"</span>, <span class="st">"price"</span>, <span class="st">"capital"</span>, <span class="st">"market"</span>]:</span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>    show_neighbors(target, topn<span class="op">=</span><span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Nearest neighbors for 'trade':
     carrying  0.880
-    branches  0.853
-advantageous  0.852
-       round  0.851
-    shipping  0.828
-      branch  0.827
-      forced  0.821
-       carry  0.801
-      direct  0.801
-     carried  0.790
+     carried  0.853
+       round  0.845
+      branch  0.830
+    branches  0.828
+       carry  0.811
+      trades  0.811
+      direct  0.809
+advantageous  0.807
+     returns  0.803
 
 Nearest neighbors for 'labor':
-     laborer  0.865
-        puts  0.858
-      motion  0.849
-        adds  0.843
- distributed  0.799
-   increases  0.797
-  recompence  0.791
-conveniences  0.787
-       tools  0.787
-   regulates  0.785
+     laborer  0.848
+        puts  0.847
+        adds  0.840
+      motion  0.818
+ constitutes  0.811
+        vary  0.808
+    laborers  0.804
+ distributed  0.803
+  recompence  0.803
+      barren  0.803
 
 Nearest neighbors for 'price':
-       rises  0.847
-        sink  0.844
-         low  0.810
-       lower  0.806
-      barley  0.803
-      prices  0.800
-       bread  0.795
-       raise  0.791
-   regulates  0.790
-        meat  0.784
+       rises  0.851
+         low  0.850
+        sink  0.846
+       bread  0.839
+     butcher  0.829
+      barley  0.827
+       lower  0.815
+        meat  0.814
+       raise  0.813
+    somewhat  0.811
 
 Nearest neighbors for 'capital':
-    capitals  0.871
-    replaces  0.833
-   regularly  0.833
-        bear  0.832
-       stock  0.832
-      unless  0.823
-     replace  0.822
-     employs  0.812
-    employed  0.809
-       yield  0.807
+    capitals  0.890
+    replaces  0.859
+   withdrawn  0.852
+        bear  0.843
+     employs  0.835
+      owners  0.830
+       fixed  0.830
+   regularly  0.828
+    reserved  0.826
+      unless  0.825
 
 Nearest neighbors for 'market':
-    supplied  0.815
-     thither  0.802
-        come  0.789
-     brought  0.786
-   supplying  0.777
-     markets  0.774
-   effectual  0.770
-      demand  0.761
-    bringing  0.758
-      export  0.746</code></pre>
+     brought  0.775
+    supplied  0.770
+       bring  0.770
+     thither  0.765
+   effectual  0.756
+    bringing  0.750
+      nearer  0.746
+     cheaper  0.744
+        come  0.740
+   plentiful  0.736</code></pre>
 </div>
 </div>
 <p>For <strong>trade</strong>: the terms that we are getting indicate that Smith is using structural and institutional language in conjunction with this term. We have verbs like carrying, carried, and shipping (possibly used as a noun…), as well as structural qualifiers such as branches, returns, and direct. Some words are perhaps more surprising and would require more investigation (such as round).</p>
-<p>For <strong>labor:</strong> there is a strong sign the model has learned trade as an activity embedded in the language of key economic activities, such as productive, distributed, enables, and, more obviously, but very reassuring, laborer and tools.</p>
+<p>For <strong>labor:</strong> there is a strong sign the model has learned labor as an activity embedded in the language of key economic activities, such as productive, distributed, enables, and, more obviously, but very reassuring, laborer and tools.</p>
 <ul>
 <li>As an exercise for the students: what do you think of the neighbors for price, capital, and markets? Any surprises?</li>
 </ul>
 <p>I think that at this point, it will be helpful to compare with the co-occurrence analysis we did last week. Let’s compute simple co-occurrence neighbors using the same as in week 6 (<code>window = 5</code>) and compare.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Co-occurrence neighbors (window = 5)</span></span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter, defaultdict</span>
-<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>WINDOW <span class="op">=</span> <span class="dv">5</span></span>
-<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>cooc <span class="op">=</span> defaultdict(Counter)</span>
-<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> seg <span class="kw">in</span> segments:</span>
-<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, token <span class="kw">in</span> <span class="bu">enumerate</span>(seg):</span>
-<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>        start <span class="op">=</span> <span class="bu">max</span>(<span class="dv">0</span>, i <span class="op">-</span> WINDOW)</span>
-<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>        end <span class="op">=</span> <span class="bu">min</span>(<span class="bu">len</span>(seg), i <span class="op">+</span> WINDOW <span class="op">+</span> <span class="dv">1</span>)</span>
-<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(start, end):</span>
-<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> i <span class="op">!=</span> j:</span>
-<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>                cooc[token][seg[j]] <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> show_cooc_neighbors(word, topn<span class="op">=</span><span class="dv">10</span>):</span>
-<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Co-occurrence neighbors for '</span><span class="sc">{</span>word<span class="sc">}</span><span class="ss">':"</span>)</span>
-<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> w, c <span class="kw">in</span> cooc[word].most_common(topn):</span>
-<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>w<span class="sc">:&gt;12}</span><span class="ss">  </span><span class="sc">{</span>c<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Co-occurrence neighbors (window = 5)</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter, defaultdict</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>WINDOW <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>cooc <span class="op">=</span> defaultdict(Counter)</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> seg <span class="kw">in</span> segments:</span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, token <span class="kw">in</span> <span class="bu">enumerate</span>(seg):</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>        start <span class="op">=</span> <span class="bu">max</span>(<span class="dv">0</span>, i <span class="op">-</span> WINDOW)</span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>        end <span class="op">=</span> <span class="bu">min</span>(<span class="bu">len</span>(seg), i <span class="op">+</span> WINDOW <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(start, end):</span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> i <span class="op">!=</span> j <span class="kw">and</span> seg[j] <span class="op">!=</span> token: <span class="co"># otherwise "trade" will be the closest to "trade" etc.</span></span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>                cooc[token][seg[j]] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> show_cooc_neighbors(word, topn<span class="op">=</span><span class="dv">10</span>):</span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Co-occurrence neighbors for '</span><span class="sc">{</span>word<span class="sc">}</span><span class="ss">':"</span>)</span>
+<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> w, c <span class="kw">in</span> cooc[word].most_common(topn):</span>
+<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>w<span class="sc">:&gt;12}</span><span class="ss">  </span><span class="sc">{</span>c<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now we can look at them and compare with Word2Vec neighbors defined by cosine similarity:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> target <span class="kw">in</span> [<span class="st">"trade"</span>, <span class="st">"labor"</span>, <span class="st">"price"</span>]:</span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>    show_cooc_neighbors(target, topn<span class="op">=</span><span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> target <span class="kw">in</span> [<span class="st">"trade"</span>, <span class="st">"labor"</span>, <span class="st">"price"</span>]:</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>    show_cooc_neighbors(target, topn<span class="op">=</span><span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Co-occurrence neighbors for 'trade':
-       trade  248
      foreign  192
        great  164
-     capital  125
-     country  120
+     capital  127
+     country  119
  consumption  92
-    employed  83
+    employed  82
      greater  80
      carried  70
     monopoly  68
+    branches  67
 
 Co-occurrence neighbors for 'labor':
-     produce  226
-    quantity  217
-       wages  201
-       price  191
-       labor  180
-        land  160
+     produce  227
+    quantity  216
+       wages  202
+       price  193
+        land  161
      greater  139
        stock  122
        value  122
   productive  120
+     country  119
 
 Co-occurrence neighbors for 'price':
-       price  384
-      market  201
-       labor  191
+      market  200
+       labor  193
        money  158
         corn  142
         real  116
         rise  106
  commodities  104
         high  101
-    quantity  95</code></pre>
+    quantity  94
+     produce  90</code></pre>
 </div>
 </div>
 <ul>
@@ -810,53 +813,53 @@ Co-occurrence neighbors for 'price':
 <p>With that behind us, the next step that we are going to do is the parallel to creating a DFM, but we have to organize our text into the data structure required by LDA. We already have <code>segments</code> and <code>segment_counts</code>, we need a <a href="https://docs.python.org/3/tutorial/datastructures.html"><strong>dictionary</strong></a> (this is a key data structure in Python, follow the link if you are unfamiliar with it) and a document-<strong>term</strong> matrix (D<strong>T</strong>M). LDA works with a “bag-of-words” representation, so we need to get word counts for each segment. This should be very familiar for our work in R.</p>
 <p>In the code below, <code>Dictionary</code> builds a vocabulary from our corpus and creates a mapping between each unique word (like “trade”) and a unique integer ID (assigned sequentially, in the order that new words are first encountered when gensim scans the corpus).</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gensim.corpora <span class="im">import</span> Dictionary</span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Build a dictionary from the segments</span></span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>dictionary <span class="op">=</span> Dictionary(segments)</span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a><span class="co"># do some cleaning</span></span>
-<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>dictionary.filter_extremes(</span>
-<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>    no_below<span class="op">=</span><span class="dv">10</span>,    <span class="co"># must appear in at least 10 segments</span></span>
-<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>    no_above<span class="op">=</span><span class="fl">0.5</span>   <span class="co"># must appear in no more than 50% of segments</span></span>
-<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Vocabulary size after filtering:"</span>, <span class="bu">len</span>(dictionary))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gensim.corpora <span class="im">import</span> Dictionary</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Build a dictionary from the segments</span></span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>dictionary <span class="op">=</span> Dictionary(segments)</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a><span class="co"># do some cleaning</span></span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>dictionary.filter_extremes(</span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>    no_below<span class="op">=</span><span class="dv">10</span>,    <span class="co"># must appear in at least 10 segments</span></span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a>    no_above<span class="op">=</span><span class="fl">0.5</span>   <span class="co"># must appear in no more than 50% of segments</span></span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Vocabulary size after filtering:"</span>, <span class="bu">len</span>(dictionary))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Vocabulary size after filtering: 1709</code></pre>
+<pre><code>Vocabulary size after filtering: 1711</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert segments to bag-of-words format</span></span>
-<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>corpus <span class="op">=</span> [dictionary.doc2bow(seg) <span class="cf">for</span> seg <span class="kw">in</span> segments]</span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Take a look</span></span>
-<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"First document (bow format):"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert segments to bag-of-words format</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>corpus <span class="op">=</span> [dictionary.doc2bow(seg) <span class="cf">for</span> seg <span class="kw">in</span> segments]</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Take a look</span></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"First document (bow format):"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>First document (bow format):</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(corpus[<span class="dv">0</span>][:<span class="dv">10</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(corpus[<span class="dv">0</span>][:<span class="dv">10</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[(0, 1), (1, 3), (2, 1), (3, 1), (4, 2), (5, 1), (6, 1), (7, 1), (8, 1), (9, 1)]</code></pre>
 </div>
 </div>
 <p>In the filtering step we are mirroring what we did in R when we removed very rare words and stopwords, but with a slightly different logic. Remember, we are trying to create topics and rare words in the corpus won’t really define a what the text is “about,” so we filter out words that appear in fewer than 10 segments by using <code>no_below=10</code> (out of 186 segments). Conversely, really frequent words tend to be too general to distinguish topics, so we filter for words that appear in more than half of the segments using <code>no_above=0.5</code>. <u>Note</u>: both these values are heuristics that tend to work well for a first run of the model. But you might decide that, based on your question, you want to try different filters!</p>
 <p>At this point, we have the same kind of data structure we relied on in R for bag-of-words models: <strong>documents represented by word counts</strong>. The next step will simply convert these counts into the specific input format required by the LDA implementation we are using.</p>
-<p>We are finally done with preprocessing and we can actually fit the LDA model (yay!). <u>To reiterate</u>: these “topics” are computational constructs; they are estimates of latent word distributions that, taken together, explain the observed word counts reasonable well.</p>
+<p>We are finally done with preprocessing and we can actually fit the LDA model (yay!). <u>To reiterate</u>: these “topics” are computational constructs; they are estimates of latent word distributions that, taken together, explain the observed word counts reasonably well.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Train LDA model</span></span>
-<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gensim.models <span class="im">import</span> LdaModel</span>
-<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>lda <span class="op">=</span> LdaModel(</span>
-<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>    corpus<span class="op">=</span>corpus,</span>
-<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>    id2word<span class="op">=</span>dictionary,</span>
-<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>    num_topics<span class="op">=</span><span class="dv">8</span>,</span>
-<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">42</span>,</span>
-<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>    passes<span class="op">=</span><span class="dv">10</span>,</span>
-<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="st">"auto"</span>,</span>
-<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>    eta<span class="op">=</span><span class="st">"auto"</span></span>
-<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"LDA model trained."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Train LDA model</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gensim.models <span class="im">import</span> LdaModel</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>lda <span class="op">=</span> LdaModel(</span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>    corpus<span class="op">=</span>corpus,</span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>    id2word<span class="op">=</span>dictionary,</span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>    num_topics<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">42</span>,</span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>    passes<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="st">"auto"</span>,</span>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a>    eta<span class="op">=</span><span class="st">"auto"</span></span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb62-14"><a href="#cb62-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-15"><a href="#cb62-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"LDA model trained."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>LDA model trained.</code></pre>
 </div>
@@ -884,210 +887,223 @@ Co-occurrence neighbors for 'price':
 <p>At the end of the day: LDA results depend on modeling choices and random initialization. Different runs can produce different, but equally reasonable, topic structures.</p>
 <p>OK, we can finally enjoy the fruits of our labor. Let’s inspect the topics:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> topic_id <span class="kw">in</span> <span class="bu">range</span>(lda.num_topics):</span>
-<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Topic </span><span class="sc">{</span>topic_id<span class="sc">}</span><span class="ss">:"</span>)</span>
-<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> word, weight <span class="kw">in</span> lda.show_topic(topic_id, topn<span class="op">=</span><span class="dv">12</span>):</span>
-<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>word<span class="sc">:&gt;12}</span><span class="ss">  </span><span class="sc">{</span>weight<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> topic_id <span class="kw">in</span> <span class="bu">range</span>(lda.num_topics):</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Topic </span><span class="sc">{</span>topic_id<span class="sc">}</span><span class="ss">:"</span>)</span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> word, weight <span class="kw">in</span> lda.show_topic(topic_id, topn<span class="op">=</span><span class="dv">12</span>):</span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>word<span class="sc">:&gt;12}</span><span class="ss">  </span><span class="sc">{</span>weight<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Topic 0:
-        rent  0.023
-       wages  0.012
-     society  0.012
-        work  0.010
-    landlord  0.008
- maintenance  0.007
-      afford  0.007
-   materials  0.007
+        corn  0.020
+       wages  0.016
+        rent  0.010
+      demand  0.008
      profits  0.007
-      demand  0.006
+        work  0.007
+        rate  0.006
+        rise  0.006
  improvement  0.006
-     workmen  0.006
+        high  0.006
+      cattle  0.005
+     average  0.005
 
 Topic 1:
-         tax  0.037
-       taxes  0.024
-        rent  0.017
-      duties  0.013
-     britain  0.007
-       taxed  0.007
-        fall  0.007
-     imposed  0.007
-     payment  0.006
-        cent  0.006
-   shillings  0.006
-      houses  0.006
+        bank  0.043
+       paper  0.019
+        cent  0.017
+        gold  0.015
+      silver  0.013
+ circulation  0.012
+         sum  0.012
+       bills  0.010
+       notes  0.009
+      credit  0.009
+      pounds  0.008
+       banks  0.008
 
 Topic 2:
-     foreign  0.018
-        home  0.012
-manufactures  0.011
- exportation  0.011
- importation  0.009
-      bounty  0.007
-     britain  0.007
- consumption  0.007
-manufacturers  0.006
-  employment  0.006
-  productive  0.006
-     society  0.006
+     company  0.010
+  government  0.009
+    colonies  0.008
+ established  0.006
+   sovereign  0.006
+    commerce  0.006
+   authority  0.006
+      clergy  0.005
+         law  0.005
+      church  0.005
+      empire  0.005
+     society  0.005
 
 Topic 3:
-         war  0.029
-        army  0.014
-       peace  0.013
-    standing  0.011
-     company  0.011
-        debt  0.010
-         new  0.010
-    military  0.008
-       india  0.008
-     nations  0.008
-      nation  0.007
-       field  0.007
+      silver  0.043
+        gold  0.034
+        coin  0.014
+      metals  0.012
+       mines  0.011
+     foreign  0.009
+    exchange  0.009
+ commodities  0.008
+        east  0.008
+    purchase  0.007
+      annual  0.007
+    standard  0.006
 
 Topic 4:
-       wages  0.027
-        rate  0.012
-     profits  0.011
-  employment  0.010
- employments  0.008
-      trades  0.007
-      demand  0.007
-    laborers  0.007
-        poor  0.006
-        cent  0.006
-      london  0.006
-      places  0.006
+        debt  0.017
+         war  0.013
+     britain  0.011
+         new  0.009
+  government  0.009
+        fund  0.008
+       taxes  0.008
+       debts  0.008
+    millions  0.007
+     chapter  0.007
+     private  0.006
+       peace  0.006
 
 Topic 5:
-        corn  0.025
-      silver  0.019
-   shillings  0.019
-       wheat  0.010
-      cattle  0.009
-     quarter  0.009
-     century  0.008
- improvement  0.008
-        coin  0.008
-        rise  0.007
-      prices  0.007
-     average  0.007
+         tax  0.034
+        rent  0.026
+       taxes  0.015
+      annual  0.008
+  productive  0.007
+    landlord  0.007
+     society  0.007
+      houses  0.006
+ consumption  0.006
+        fall  0.006
+     profits  0.006
+       lands  0.006
 
 Topic 6:
-      silver  0.028
-        gold  0.026
-        bank  0.015
-        coin  0.010
-        corn  0.008
-    colonies  0.008
-      metals  0.008
-        cent  0.007
-         new  0.006
-       mines  0.006
-       paper  0.006
-     foreign  0.006
+     ancient  0.011
+   education  0.011
+         men  0.009
+     society  0.009
+        life  0.007
+        army  0.006
+   authority  0.006
+         war  0.006
+    standing  0.006
+        body  0.006
+   exercises  0.006
+    military  0.006
 
 Topic 7:
-     company  0.012
-    colonies  0.008
-   authority  0.008
- established  0.007
-      church  0.007
-         law  0.006
-   sovereign  0.006
-         men  0.006
-     ancient  0.006
-     private  0.005
-     society  0.005
-   education  0.005</code></pre>
+     foreign  0.019
+      duties  0.014
+     britain  0.013
+        home  0.013
+ exportation  0.012
+ importation  0.010
+ consumption  0.009
+    colonies  0.009
+      bounty  0.009
+    monopoly  0.007
+        duty  0.007
+manufactures  0.007</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="co"># After training, inspect learned alpha values</span></span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Learned alpha values:"</span>, lda.alpha)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Learned alpha values: [0.08285706 0.04526103 0.07984485 0.06372422 0.04359768 0.05820734
+ 0.04462427 0.07341722]</code></pre>
 </div>
 </div>
 <p>And let’s visualize them with a bar plot that gives us a representation of the topic prevalence across segments:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>K <span class="op">=</span> lda.num_topics</span>
-<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>topic_mass <span class="op">=</span> np.zeros(K)</span>
-<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Sum topic probabilities over all segments</span></span>
-<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> bow <span class="kw">in</span> corpus:</span>
-<span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a>    doc_topics <span class="op">=</span> lda.get_document_topics(bow, minimum_probability<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k, p <span class="kw">in</span> doc_topics:</span>
-<span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>        topic_mass[k] <span class="op">+=</span> p</span>
-<span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize to proportions (so bars sum to 1)</span></span>
-<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a>topic_share <span class="op">=</span> topic_mass <span class="op">/</span> topic_mass.<span class="bu">sum</span>()</span>
-<span id="cb64-15"><a href="#cb64-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-16"><a href="#cb64-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
-<span id="cb64-17"><a href="#cb64-17" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
-<span id="cb64-18"><a href="#cb64-18" aria-hidden="true" tabindex="-1"></a>plt.bar(<span class="bu">range</span>(K), topic_share)</span>
-<span id="cb64-19"><a href="#cb64-19" aria-hidden="true" tabindex="-1"></a>plt.xticks(<span class="bu">range</span>(K), [<span class="ss">f"T</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>K <span class="op">=</span> lda.num_topics</span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a>topic_mass <span class="op">=</span> np.zeros(K)</span>
+<span id="cb68-6"><a href="#cb68-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-7"><a href="#cb68-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Sum topic probabilities over all segments</span></span>
+<span id="cb68-8"><a href="#cb68-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> bow <span class="kw">in</span> corpus:</span>
+<span id="cb68-9"><a href="#cb68-9" aria-hidden="true" tabindex="-1"></a>    doc_topics <span class="op">=</span> lda.get_document_topics(bow, minimum_probability<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb68-10"><a href="#cb68-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k, p <span class="kw">in</span> doc_topics:</span>
+<span id="cb68-11"><a href="#cb68-11" aria-hidden="true" tabindex="-1"></a>        topic_mass[k] <span class="op">+=</span> p</span>
+<span id="cb68-12"><a href="#cb68-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-13"><a href="#cb68-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize to proportions (so bars sum to 1)</span></span>
+<span id="cb68-14"><a href="#cb68-14" aria-hidden="true" tabindex="-1"></a>topic_share <span class="op">=</span> topic_mass <span class="op">/</span> topic_mass.<span class="bu">sum</span>()</span>
+<span id="cb68-15"><a href="#cb68-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-16"><a href="#cb68-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb68-17"><a href="#cb68-17" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb68-18"><a href="#cb68-18" aria-hidden="true" tabindex="-1"></a>plt.bar(<span class="bu">range</span>(K), topic_share)</span>
+<span id="cb68-19"><a href="#cb68-19" aria-hidden="true" tabindex="-1"></a>plt.xticks(<span class="bu">range</span>(K), [<span class="ss">f"T</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>([&lt;matplotlib.axis.XTick object at 0x0000019C7D45E5D0&gt;, &lt;matplotlib.axis.XTick object at 0x0000019C7D43DC50&gt;, &lt;matplotlib.axis.XTick object at 0x0000019C7D4A4890&gt;, &lt;matplotlib.axis.XTick object at 0x0000019C7D4A6CD0&gt;, &lt;matplotlib.axis.XTick object at 0x0000019C7D4B06D0&gt;, &lt;matplotlib.axis.XTick object at 0x0000019C7D4B2690&gt;, &lt;matplotlib.axis.XTick object at 0x0000019C7D4B4B50&gt;, &lt;matplotlib.axis.XTick object at 0x0000019C7D4B6D50&gt;], [Text(0, 0, 'T0'), Text(1, 0, 'T1'), Text(2, 0, 'T2'), Text(3, 0, 'T3'), Text(4, 0, 'T4'), Text(5, 0, 'T5'), Text(6, 0, 'T6'), Text(7, 0, 'T7')])</code></pre>
+<pre><code>([&lt;matplotlib.axis.XTick object at 0x00000289139438D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000289138E8CD0&gt;, &lt;matplotlib.axis.XTick object at 0x00000289136BF1D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000289139BA110&gt;, &lt;matplotlib.axis.XTick object at 0x00000289139BBB10&gt;, &lt;matplotlib.axis.XTick object at 0x00000289139A9B90&gt;, &lt;matplotlib.axis.XTick object at 0x00000289139C0110&gt;, &lt;matplotlib.axis.XTick object at 0x00000289139C25D0&gt;], [Text(0, 0, 'T0'), Text(1, 0, 'T1'), Text(2, 0, 'T2'), Text(3, 0, 'T3'), Text(4, 0, 'T4'), Text(5, 0, 'T5'), Text(6, 0, 'T6'), Text(7, 0, 'T7')])</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Share of topic mass (across segments)"</span>)</span>
-<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Topic"</span>)</span>
-<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"LDA topic prevalence in Wealth of Nations (by segment)"</span>)</span>
-<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Share of topic mass (across segments)"</span>)</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Topic"</span>)</span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"LDA topic prevalence in Wealth of Nations (by segment)"</span>)</span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="week-07-word2vec_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="week-07-word2vec_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the numeric values too (useful for interpretation)</span></span>
-<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, s <span class="kw">in</span> <span class="bu">enumerate</span>(topic_share):</span>
-<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Topic </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>s<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb71"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the numeric values too (useful for interpretation)</span></span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, s <span class="kw">in</span> <span class="bu">enumerate</span>(topic_share):</span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Topic </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>s<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Topic 0: 0.116
-Topic 1: 0.129
-Topic 2: 0.204
-Topic 3: 0.048
-Topic 4: 0.077
-Topic 5: 0.095
-Topic 6: 0.173
-Topic 7: 0.159</code></pre>
+<pre><code>Topic 0: 0.204
+Topic 1: 0.062
+Topic 2: 0.189
+Topic 3: 0.119
+Topic 4: 0.058
+Topic 5: 0.124
+Topic 6: 0.071
+Topic 7: 0.173</code></pre>
 </div>
 </div>
 <p>Each bar shows the average proportion of that topic across all your 186 segments—i.e., which themes are most prevalent in the book under your segmentation choice.</p>
 <p>One more visualization: topic prevalence by segment. This makes the structure of <em>The Wealth of Nations</em> visible.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Get per-segment topic distributions</span></span>
-<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>doc_topic_matrix <span class="op">=</span> np.array([</span>
-<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a>    [p <span class="cf">for</span> _, p <span class="kw">in</span> lda.get_document_topics(bow, minimum_probability<span class="op">=</span><span class="dv">0</span>)]</span>
-<span id="cb69-7"><a href="#cb69-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> bow <span class="kw">in</span> corpus</span>
-<span id="cb69-8"><a href="#cb69-8" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb69-9"><a href="#cb69-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-10"><a href="#cb69-10" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
-<span id="cb69-11"><a href="#cb69-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-12"><a href="#cb69-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot only the top 4 topics by overall prevalence (less clutter)</span></span>
-<span id="cb69-13"><a href="#cb69-13" aria-hidden="true" tabindex="-1"></a>top_topics <span class="op">=</span> np.argsort(topic_share)[<span class="op">-</span><span class="dv">4</span>:]</span>
-<span id="cb69-14"><a href="#cb69-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-15"><a href="#cb69-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> top_topics:</span>
-<span id="cb69-16"><a href="#cb69-16" aria-hidden="true" tabindex="-1"></a>    plt.plot(doc_topic_matrix[:, k], label<span class="op">=</span><span class="ss">f"Topic </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb69-17"><a href="#cb69-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-18"><a href="#cb69-18" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Segment index (approx. book progression)"</span>)</span>
-<span id="cb69-19"><a href="#cb69-19" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Topic proportion"</span>)</span>
-<span id="cb69-20"><a href="#cb69-20" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Topic prevalence across Wealth of Nations"</span>)</span>
-<span id="cb69-21"><a href="#cb69-21" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
-<span id="cb69-22"><a href="#cb69-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb73"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Get per-segment topic distributions</span></span>
+<span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a>doc_topic_matrix <span class="op">=</span> np.array([</span>
+<span id="cb73-6"><a href="#cb73-6" aria-hidden="true" tabindex="-1"></a>    [p <span class="cf">for</span> _, p <span class="kw">in</span> lda.get_document_topics(bow, minimum_probability<span class="op">=</span><span class="dv">0</span>)]</span>
+<span id="cb73-7"><a href="#cb73-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> bow <span class="kw">in</span> corpus</span>
+<span id="cb73-8"><a href="#cb73-8" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb73-9"><a href="#cb73-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-10"><a href="#cb73-10" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb73-11"><a href="#cb73-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-12"><a href="#cb73-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot only the top 4 topics by overall prevalence (less clutter)</span></span>
+<span id="cb73-13"><a href="#cb73-13" aria-hidden="true" tabindex="-1"></a>top_topics <span class="op">=</span> np.argsort(topic_share)[<span class="op">-</span><span class="dv">4</span>:]</span>
+<span id="cb73-14"><a href="#cb73-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-15"><a href="#cb73-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> top_topics:</span>
+<span id="cb73-16"><a href="#cb73-16" aria-hidden="true" tabindex="-1"></a>    plt.plot(doc_topic_matrix[:, k], label<span class="op">=</span><span class="ss">f"Topic </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb73-17"><a href="#cb73-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-18"><a href="#cb73-18" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Segment index (approx. book progression)"</span>)</span>
+<span id="cb73-19"><a href="#cb73-19" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Topic proportion"</span>)</span>
+<span id="cb73-20"><a href="#cb73-20" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Topic prevalence across Wealth of Nations"</span>)</span>
+<span id="cb73-21"><a href="#cb73-21" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb73-22"><a href="#cb73-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="week-07-word2vec_files/figure-html/unnamed-chunk-16-3.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="week-07-word2vec_files/figure-html/unnamed-chunk-17-3.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-
-
 </section>
+</section>
+<section id="final-considerations-and-bringing-things-together" class="level3">
+<h3 class="anchored" data-anchor-id="final-considerations-and-bringing-things-together">Final considerations and bringing things together:</h3>
+<p>The eight topics our model identified capture distinct but overlapping themes in <em>The Wealth of Nations</em>. Topic 2 (foreign trade and manufactures) and Topic 6 (precious metals and banking) emerge as the most prevalent, together accounting for over a third of the book’s content. This makes sense given Smith’s focus on international commerce and monetary systems. Topic 1 clearly represents taxation and fiscal policy (tax, taxes, duties, Britain), while Topic 3 captures discussions of war, military spending, and colonial companies—particularly the East India Company. Topics 0 and 4 both relate to labor and wages, but Topic 0 emphasizes the relationship between landlords, rent, and maintenance, while Topic 4 focuses more directly on wage rates, employment, and labor markets. Topic 5 centers on agricultural commodities and their prices over time (corn, wheat, cattle, century, improvement), likely reflecting Smith’s extended discussions of agricultural economics and historical price movements. The distribution of topic prevalence tells us something important (and reassuring given what is known about Smith’s work): Smith doesn’t devote equal attention to all themes—international trade and monetary systems clearly dominate his analysis.</p>
+<p>As we look at the visualization, we can perhaps get a better sense of some of the structural distribution of these topics. The topic prevalence plot across segments reveals the book’s structure and confirms that LDA has captured meaningful thematic shifts as Smith moves through his argument. Notice how Topic 2 (foreign trade) shows strong presence in the middle and later portions of the book, which aligns with Smith’s extended treatment of commercial policy in Books IV and V. Topic 6 (metals and banking) appears in concentrated bursts rather than being evenly distributed, suggesting Smith returns to monetary questions at specific points in his argument. Topic 3 (war and colonies) is relatively rare overall but spikes sharply in specific segments—these likely correspond to his discussions of colonial administration and military expenditure. The uneven distribution of topics across segments is exactly what we should expect from a structured argument: Smith isn’t randomly mixing concepts and arguments, he’s developing them systematically. If all topics appeared uniformly across all segments, it would suggest either that our segmentation strategy failed to capture the book’s organization, or that LDA wasn’t identifying meaningful thematic distinctions. Instead, the clear peaks and valleys should give us some reassurance that both our preprocessing choices and the model’s topic assignments are capturing real patterns in how Smith structured his economic treatise</p>
+
+
 </section>
 </section>
 
