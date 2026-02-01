@@ -34,3 +34,7 @@ website:
             text: "Week 04: Text Representation (1)"
           - href: week-05-representation.qmd
             text: "Week 05: Text Representation (2)"
+          - href: week-06-cooccurrence.qmd
+            text: "Week 06: Co-occurrence & PMI"
+          - href: week-07-word2vec.qmd
+            text: "Week 07: Word2Vec and LDA introduction"
