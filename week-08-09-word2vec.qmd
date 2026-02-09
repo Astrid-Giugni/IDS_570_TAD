@@ -1,0 +1,286 @@
+---
+title: "Weeks 08 & 9: Weak Supervision & Supervised Text Classification in Python"
+editor: visual
+format: html
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| include: false
+
+library(reticulate)
+
+use_python("C:/Users/astri/miniconda3/envs/tad/python.exe", required = TRUE)
+py_config()
+```
+
+## Why this week?
+
+So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). This week, we make a key transition:
+
+-   We will **train a supervised classifier** that learns to recognize a category of texts.
+
+In political science, economics, and NLP, supervised learning is often the workhorse method for answering questions like:
+
+-   Is this text pro-trade or protectionist?
+-   Does this paragraph contain “merchant discourse”?
+-   Which documents are about X, versus not-X?
+
+But supervised learning raises a methodological question immediately: Where do labels come from?
+
+In humanities contexts, we often do **not** begin with a fully human-labeled dataset. So we will begin with **weak supervision**: we will generate *imperfect* labels using rules, then train a model, and validate it carefully.
+
+------------------------------------------------------------------------
+
+## Learning goals
+
+By the end of this tutorial, you should be able to:
+
+1.  **Define a category** you want to detect in texts (a binary label). For us, it will be about the concept "merchant" (this will be our "seed" concept).
+2.  **Segment texts** into a usable unit of analysis (chunks).
+3.  Create a **weakly supervised training dataset** using a seed term and related terms.
+4.  Train a **baseline text classifier** in Python using:
+    -   TF–IDF features
+    -   Logistic regression
+5.  Evaluate the classifier using:
+    -   a train/test split
+    -   a confusion matrix
+    -   precision, recall, and F1 score
+6.  Reflect on what “accuracy” means when labels come from weak supervision.
+
+------------------------------------------------------------------------
+
+## Big picture workflow
+
+Here is the full pipeline we will build:
+
+1.  Load texts from a folder (`texts/`): [you will **need** to get the 500+ files that I uploaded on Canvas under "Train_Text_Documents."]{.underline}
+2.  Segment each text into sentence-based chunks (our “documents” for classification)
+3.  Use Word2Vec (trained on our corpus) to expand a seed concept (seed: `merchant`)
+4.  Build a search-word list (Tier A/B/C: more details below)
+5.  Use the search-word list to create weak labels
+6.  Create a CORE vs NEG dataset (and optionally a MAYBE set)
+7.  Split into train and test
+8.  Train a classifier (TF–IDF + logistic regression)
+9.  Evaluate and interpret
+
+We will move slowly and validate outputs at each stage. Again, I am keeping the training wheels on, but
+
+------------------------------------------------------------------------
+
+## What you need before starting
+
+-   VSCode installed
+-   A project folder like: `IDS_570_TAD/`
+-   A subfolder: `texts/` containing your `.txt` files
+-   A Python virtual environment (`.venv`) activated in VSCode
+-   Packages we will use:
+    -   `nltk`
+    -   `gensim`
+    -   `scikit-learn`
+    -   `tqdm`
+
+(We will install these together in the steps below.)
+
+## Step 0: Project setup & environment
+
+Before we do any modeling, we need to make sure our project is set up correctly. This step is mainly for those of you **new to Python**, but it also will help everyone learn good project organization skills: many errors in text analysis come from working in the wrong folder or environment. Using my conventions for labelling files and directories, your project folder (which for me is "IDS_570_TAD") will look like:
+
+IDS_570_TAD/ ├── texts/ │ ├── A00419.txt │ ├── A00430.txt │ ├── ... ├── data/ ├── models/ ├── step1_load_texts.py ├── step2_segment_texts.py ├── ... └── .venv/
+
+Where:
+
+-   `texts/` contains the raw `.txt` files you want to analyze.
+-   `data/` will store intermediate outputs (JSON files, inspection samples).
+-   `models/` will store trained models (e.g., Word2Vec, classifiers).
+-   Each `stepX_*.py` file does one conceptual task.
+
+We intentionally separate steps into different scripts so that: - each step is easy to test and debug - you can rerun part of the pipeline without rerunning everything - you can clearly see how the pipeline is constructed.
+
+------------------------------------------------------------------------
+
+### Opening the terminal in VSCode; Virtual environment set up
+
+Make sure you open VSCode [in the project folder]{.underline} (`IDS_570_TAD`).
+
+Then open the [**terminal**](https://code.visualstudio.com/docs/terminal/getting-started): there are a ton of videos online, if you have never done it before. If you are using something other than VSCode, you can also find guides online.
+
+You should see something like:
+
+\`\`\`bash PS D:\Users...\IDS\_570_TAD\>
+
+If you see a different folder, you are in the wrong place. This is important because we are going to set up a Python virtual environment to keep project-specific packages isolated.
+
+Next, create the environment and activate it:
+
+`python -m venv .venv`
+
+then, in Windows:
+
+`.venv\Scripts\Activate.ps1`
+
+And in Mac/Linux
+
+`source .venv/bin/activate`
+
+For full instructions, see [**here**](https://docs.python.org/3/library/venv.html). Your terminal prompt should now include `.venv`.
+
+### Installing required packages
+
+Install the libraries we will use:
+
+`pip install nltk gensim scikit-learn tqdm`
+
+We will download one additional resource (NLTK sentence tokenizer) later.
+
+Before moving on, check:
+
+-   Can you see your `.txt` files from Python?
+
+-   Does `python step1_load_texts.py` run without errors?
+
+-   Is your terminal in the correct folder?
+
+If something is off here, it is worth fixing **before** you continue: go back through the steps above and see if something is missing. There are also a lot of videos online that help you go through this process.
+
+## Step 1: Loading, Inspecting, and Segmenting Texts
+
+Before we segment, vectorize, or classify anything, we need to confirm that Python can see and read our texts correctly.
+
+### Reading text files from a folder
+
+We will assume all `.txt` files are stored in a folder called `texts/`. Now, create a new file and name it: `step1_load_texts.py` and then run it:
+
+``` Python
+from pathlib import Path
+
+TEXT_DIR = Path("texts")
+
+# Collect all .txt files
+files = sorted(TEXT_DIR.glob("*.txt"))
+
+print(f"Found {len(files)} .txt files.")
+
+# Print the first few filenames
+print("First 10 files:")
+for f in files[:10]:
+    print(" ", f)
+```
+
+You should see a list of filenames printed to the terminal. Now we want to inspect one file to make sure that we have set things up correctly (**note**: in the future, I will [**assume**]{.underline} that you will do this on your own!). To the same file as above, add the following and run the script again:
+
+``` Python
+# Read one example file
+example_file = files[0]
+
+with open(example_file, "r", encoding="utf-8", errors="ignore") as f:
+    text = f.read()
+
+print("\nReading file:")
+print(example_file)
+print("-" * 40)
+print("Number of characters:", len(text))
+print("\nFirst 1,000 characters:\n")
+print(text[:1000])
+```
+
+We are just making sure that we can load the data and that things look correct (that is, we have funky looking Early Modern texts).
+
+### Segmenting Texts into Chunks
+
+Our `.txt` files are far too large to classify as single units. A supervised classifier expects many medium-sized examples and some of the texts I gave you are *very* long (I check one of them at randome and it had 2,888,252 characters!). So we need to decide what counts as a “document” for classification.
+
+-   For this week, we will treat chunks of sentences as our unit of analysis. We're using sentence chunks because we want to capture enough context for semantic meaning (a single sentence might be ambiguous), but not so much that we get incorrect labels (a 50-page chapter likely discusses many topics and might lead to mislabelling: such a large "chunk" may not be about "merchants" in any meaningful sense, but, for example, it could be a biblical passage mentioning a merchants *metaphorically*–we would need a more careful approach for these kinds of texts).
+
+**Note:** There is no universally correct choice here; segmentation is a modeling decision and I am basing the "chunk" size on experience.
+
+We will begin by splitting each text into sentences using NLTK. I have two pieces of documentation for NLTK that I recommend, if you want to delve into it: [**here**](https://www.nltk.org/) and [[**here**]{.underline}](https://guides.library.upenn.edu/penntdm/python/nltk).
+
+Create a new file: `step2_segment_and_chunk.py` . We will chunk the texts and check some basic diagnostics to make sure that the code is actually running properly.
+
+``` Python
+from pathlib import Path
+import nltk
+
+# Download required tokenizers (run once)
+nltk.download("punkt", quiet=True)
+nltk.download("punkt_tab", quiet=True)
+
+TEXT_DIR = Path("texts")
+txt_paths = sorted(TEXT_DIR.glob("*.txt"))
+
+sample_path = txt_paths[0]
+
+with open(sample_path, "r", encoding="utf-8", errors="ignore") as f:
+    text = f.read()
+
+# 1) Split text into sentences
+sentences = nltk.sent_tokenize(text)
+
+print("File:", sample_path)
+print("Number of sentences:", len(sentences))
+print()
+
+# 2) Group sentences into chunks of ~120 words
+TARGET_WORDS = 120
+
+chunks = []
+current = []
+current_len = 0
+
+for sent in sentences:
+    words = sent.split()
+    if not words:
+        continue
+
+    # If adding this sentence would exceed the target, finalize the chunk
+    if current_len + len(words) > TARGET_WORDS and current:
+        chunks.append(" ".join(current))
+        current = []
+        current_len = 0
+
+    current.append(sent)
+    current_len += len(words)
+
+# Add any leftover sentences
+if current:
+    chunks.append(" ".join(current))
+
+print("Number of chunks:", len(chunks))
+
+# 3) Diagnostics on chunk length (rough word counts)
+lengths = [len(c.split()) for c in chunks]
+lengths_sorted = sorted(lengths)
+
+print()
+print("Approx word counts per chunk:")
+print("  min:", min(lengths))
+print("  median:", lengths_sorted[len(lengths_sorted)//2])
+print("  max:", max(lengths))
+
+lo, hi = 5, 200
+in_range = sum(lo <= n <= hi for n in lengths)
+print(f"Chunks with {lo}–{hi} words:", in_range)
+print("Share in range:", round(in_range / len(lengths), 3))
+
+print()
+print("--- Chunk 1 preview (first 400 chars) ---")
+print(chunks[0][:400])
+```
+
+And run the script.
+
+[You should see]{.underline}:
+
+-   Thousands of chunks for a large text
+
+-   A median chunk length around 100–120 words
+
+-   Most chunks falling in the 5–200 word range
+
+-   Chunks that are readable and context-rich
+
+This tells us that our segmentation choice is reasonable for classification.
