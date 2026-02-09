@@ -21,9 +21,9 @@ py_config()
 
 So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). This week, we make a key transition:
 
--   We will **train a supervised classifier** that learns to recognize a category of texts.
+We will **train a supervised classifier** that learns to recognize a category of texts. In particular, we are going to figure out how to distinguish which texts engage in merchant-related discourse versus those that do not.
 
-In political science, economics, and NLP, supervised learning is often the workhorse method for answering questions like:
+In humanities (and social sciences), supervised learning is often the workhorse method for answering questions like:
 
 -   Is this text pro-trade or protectionist?
 -   Does this paragraph contain “merchant discourse”?
@@ -33,11 +33,9 @@ But supervised learning raises a methodological question immediately: Where do l
 
 In humanities contexts, we often do **not** begin with a fully human-labeled dataset. So we will begin with **weak supervision**: we will generate *imperfect* labels using rules, then train a model, and validate it carefully.
 
-------------------------------------------------------------------------
+## What we are going to do:
 
-## Learning goals
-
-By the end of this tutorial, you should be able to:
+With this week's tutorial, I want you to learn how to do the following:
 
 1.  **Define a category** you want to detect in texts (a binary label). For us, it will be about the concept "merchant" (this will be our "seed" concept).
 2.  **Segment texts** into a usable unit of analysis (chunks).
@@ -50,8 +48,6 @@ By the end of this tutorial, you should be able to:
     -   a confusion matrix
     -   precision, recall, and F1 score
 6.  Reflect on what “accuracy” means when labels come from weak supervision.
-
-------------------------------------------------------------------------
 
 ## Big picture workflow
 
@@ -87,9 +83,7 @@ We will move slowly and validate outputs at each stage. Again, I am keeping the 
 
 ## Step 0: Project setup & environment
 
-Before we do any modeling, we need to make sure our project is set up correctly. This step is mainly for those of you **new to Python**, but it also will help everyone learn good project organization skills: many errors in text analysis come from working in the wrong folder or environment. Using my conventions for labelling files and directories, your project folder (which for me is "IDS_570_TAD") will look like:
-
-IDS_570_TAD/ ├── texts/ │ ├── A00419.txt │ ├── A00430.txt │ ├── ... ├── data/ ├── models/ ├── step1_load_texts.py ├── step2_segment_texts.py ├── ... └── .venv/
+Before we do any modeling, we need to make sure our project is set up correctly. This step is mainly for those of you **new to Python**, but it also will help everyone learn good project organization skills: many errors in text analysis come from working in the wrong folder or environment.
 
 Where:
 
@@ -99,8 +93,6 @@ Where:
 -   Each `stepX_*.py` file does one conceptual task.
 
 We intentionally separate steps into different scripts so that: - each step is easy to test and debug - you can rerun part of the pipeline without rerunning everything - you can clearly see how the pipeline is constructed.
-
-------------------------------------------------------------------------
 
 ### Opening the terminal in VSCode; Virtual environment set up
 
@@ -154,7 +146,7 @@ Before we segment, vectorize, or classify anything, we need to confirm that Pyth
 
 We will assume all `.txt` files are stored in a folder called `texts/`. Now, create a new file and name it: `step1_load_texts.py` and then run it:
 
-``` Python
+``` python
 from pathlib import Path
 
 TEXT_DIR = Path("texts")
@@ -172,7 +164,7 @@ for f in files[:10]:
 
 You should see a list of filenames printed to the terminal. Now we want to inspect one file to make sure that we have set things up correctly (**note**: in the future, I will [**assume**]{.underline} that you will do this on your own!). To the same file as above, add the following and run the script again:
 
-``` Python
+``` python
 # Read one example file
 example_file = files[0]
 
@@ -189,7 +181,7 @@ print(text[:1000])
 
 We are just making sure that we can load the data and that things look correct (that is, we have funky looking Early Modern texts).
 
-### Segmenting Texts into Chunks
+## Step 2: Segmenting Texts into Chunks
 
 Our `.txt` files are far too large to classify as single units. A supervised classifier expects many medium-sized examples and some of the texts I gave you are *very* long (I check one of them at randome and it had 2,888,252 characters!). So we need to decide what counts as a “document” for classification.
 
@@ -201,7 +193,7 @@ We will begin by splitting each text into sentences using NLTK. I have two piece
 
 Create a new file: `step2_segment_and_chunk.py` . We will chunk the texts and check some basic diagnostics to make sure that the code is actually running properly.
 
-``` Python
+``` python
 from pathlib import Path
 import nltk
 
@@ -217,14 +209,14 @@ sample_path = txt_paths[0]
 with open(sample_path, "r", encoding="utf-8", errors="ignore") as f:
     text = f.read()
 
-# 1) Split text into sentences
+# Split text into sentences
 sentences = nltk.sent_tokenize(text)
 
 print("File:", sample_path)
 print("Number of sentences:", len(sentences))
 print()
 
-# 2) Group sentences into chunks of ~120 words
+# Group sentences into chunks of ~120 words
 TARGET_WORDS = 120
 
 chunks = []
@@ -251,7 +243,7 @@ if current:
 
 print("Number of chunks:", len(chunks))
 
-# 3) Diagnostics on chunk length (rough word counts)
+# Diagnostics on chunk length (rough word counts)
 lengths = [len(c.split()) for c in chunks]
 lengths_sorted = sorted(lengths)
 
@@ -284,3 +276,83 @@ And run the script.
 -   Chunks that are readable and context-rich
 
 This tells us that our segmentation choice is reasonable for classification.
+
+## Step 3: Tokenize Chunks for Modelling
+
+This step will be conceptually familiar from when we used `unnest_tokens()` in tidytext.\
+we transform a text column into word tokens.
+
+We will do this using [`gensim.utils.simple_preprocess()`](https://tedboy.github.io/nlps/generated/generated/gensim.utils.simple_preprocess.html).
+
+Create a new file: `step3_tokenize_chunks.py`. This new script is going to **build on** what we did in the "step2" script, s you will find the same logic repeated at the beginning.
+
+``` python
+from pathlib import Path
+import nltk
+from gensim.utils import simple_preprocess
+
+nltk.download("punkt", quiet=True)
+nltk.download("punkt_tab", quiet=True)
+
+TEXT_DIR = Path("texts")
+txt_paths = sorted(TEXT_DIR.glob("*.txt"))
+sample_path = txt_paths[0]
+
+with open(sample_path, "r", encoding="utf-8", errors="ignore") as f:
+    text = f.read()
+
+# Step 2 logic: sentences -> chunks (~120 words)
+sentences = nltk.sent_tokenize(text)
+
+TARGET_WORDS = 120
+chunks = []
+current = []
+current_len = 0
+
+for sent in sentences:
+    words = sent.split()
+    if not words:
+        continue
+
+    if current_len + len(words) > TARGET_WORDS and current:
+        chunks.append(" ".join(current))
+        current = []
+        current_len = 0
+
+    current.append(sent)
+    current_len += len(words)
+
+if current:
+    chunks.append(" ".join(current))
+
+# Step 3: now we tokenize each chunk
+token_lists = [simple_preprocess(c, deacc=True) for c in chunks]
+
+print("File:", sample_path)
+print("Chunks (strings):", len(chunks))
+print("Chunks (token lists):", len(token_lists))
+
+print("\n--- Token preview (first 60 tokens of first chunk) ---")
+print(token_lists[0][:60])
+
+print("\n--- Token count of first chunk ---")
+print(len(token_lists[0]))
+```
+
+Now run it. What we are doing:
+
+-   `simple_preprocess()` returns a **list of tokens**.
+
+-   Tokens are lowercased and cleaned.
+
+-   This is now in the format required by Word2Vec:
+
+    -   Word2Vec expects `sentences=[["token","token",...], ...]`
+
+With `genism`, tokenization creates a "list-of list" representation of tokens.
+
+⚠️ **Note of warning:** gensim may look “stuck” the first time. When you import `gensim` (especially on Windows), Python may appear to freeze for 10–60 seconds. This is normal and does **not** mean your code is broken.
+
+-   `gensim` loads compiled components used for Word2Vec
+-   on Windows, this initial load can be slow
+-   Python does not print progress messages during this step If the terminal is not showing an error message, wait patiently before interrupting the process. Only stop the program if it has been unresponsive for several minutes.

@@ -23,7 +23,7 @@ If you have worked with Python before, you can use whichever environment you wan
 -   As we go along this tutorial: I am re-introducing the training wheels. I am including links to some of the major Python concepts as they come up in the code!
 
 ```{r}
-#/ echo: false
+#| include: false
 
 library(reticulate)
 
