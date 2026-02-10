@@ -141,7 +141,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-08-09-word2vec.html">Week 07: Weeks 08 &amp; 9: Weak Supervision &amp; Supervised Text Classification in Python</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-08-09-word2vec.html">Week 08: Weeks 08 &amp; 9: Weak Supervision &amp; Supervised Text Classification in Python</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -236,7 +236,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./week-08-09-word2vec.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Week 07: Weeks 08 &amp; 9: Weak Supervision &amp; Supervised Text Classification in Python</span></a>
+ <span class="menu-text">Week 08: Weeks 08 &amp; 9: Weak Supervision &amp; Supervised Text Classification in Python</span></a>
   </div>
 </li>
       </ul>
@@ -250,7 +250,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-08-09-word2vec.html">Week 07: Weeks 08 &amp; 9: Weak Supervision &amp; Supervised Text Classification in Python</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-08-09-word2vec.html">Week 08: Weeks 08 &amp; 9: Weak Supervision &amp; Supervised Text Classification in Python</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Weeks 08 &amp; 9: Weak Supervision &amp; Supervised Text Classification in Python</h1>
 </div>
@@ -269,10 +269,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="why-this-week" class="level2">
-<h2 class="anchored" data-anchor-id="why-this-week">Why this week?</h2>
-<p>So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). This week, we make a key transition:</p>
-<p>We will <strong>train a supervised classifier</strong> that learns to recognize a category of texts. In particular, we are going to figure out how to distinguish which texts engage in merchant-related discourse versus those that do not.</p>
+<section id="weeks-8-and-9-goals" class="level1">
+<h1>Weeks 8 and 9 goals:</h1>
+<p>So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). During these two weeks we are going to make a key transition to supervised methods. I am grouping the two</p>
+<p><u><strong>For Week 8</strong></u>:</p>
+<p>First, we will <strong>train a supervised classifier</strong> that learns to recognize a category of texts. In particular, we are going to figure out how to distinguish which texts engage in merchant-related discourse versus those that do not.</p>
 <p>In humanities (and social sciences), supervised learning is often the workhorse method for answering questions like:</p>
 <ul>
 <li>Is this text pro-trade or protectionist?</li>
@@ -281,9 +282,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>But supervised learning raises a methodological question immediately: Where do labels come from?</p>
 <p>In humanities contexts, we often do <strong>not</strong> begin with a fully human-labeled dataset. So we will begin with <strong>weak supervision</strong>: we will generate <em>imperfect</em> labels using rules, then train a model, and validate it carefully.</p>
-</section>
-<section id="what-we-are-going-to-do" class="level2">
-<h2 class="anchored" data-anchor-id="what-we-are-going-to-do">What we are going to do:</h2>
+<p><u><strong>For Week 9</strong></u><strong>:</strong></p>
+<p>kdfjalsd</p>
+<section id="week-8-what-we-are-going-to-do" class="level2">
+<h2 class="anchored" data-anchor-id="week-8-what-we-are-going-to-do">Week 8: what we are going to do</h2>
 <p>With this week’s tutorial, I want you to learn how to do the following:</p>
 <ol type="1">
 <li><strong>Define a category</strong> you want to detect in texts (a binary label). For us, it will be about the concept “merchant” (this will be our “seed” concept).</li>
@@ -318,7 +320,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Evaluate and interpret</li>
 </ol>
 <p>We will move slowly and validate outputs at each stage. Again, I am keeping the training wheels on, but</p>
-<hr>
 </section>
 <section id="what-you-need-before-starting" class="level2">
 <h2 class="anchored" data-anchor-id="what-you-need-before-starting">What you need before starting</h2>
@@ -396,6 +397,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"First 10 files:"</span>)</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> files[:<span class="dv">10</span>]:</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">" "</span>, f)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This should tell you that you found <u>about</u> 516 .txt files. <strong>Note</strong>: you have a <u>very</u> slightly different training set; you are <strong>responsible</strong> for keeping track of how this affects things down the line (though the first few steps should match). It’s my way of keeping you on your toes!</p>
 <p>You should see a list of filenames printed to the terminal. Now we want to inspect one file to make sure that we have set things up correctly (<strong>note</strong>: in the future, I will <u><strong>assume</strong></u> that you will do this on your own!). To the same file as above, add the following and run the script again:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read one example file</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>example_file <span class="op">=</span> files[<span class="dv">0</span>]</span>
@@ -409,12 +411,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of characters:"</span>, <span class="bu">len</span>(text))</span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">First 1,000 characters:</span><span class="ch">\n</span><span class="st">"</span>)</span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(text[:<span class="dv">1000</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>We are just making sure that we can load the data and that things look correct (that is, we have funky looking Early Modern texts).</p>
+<p>We are just making sure that we can load the data and that things look correct (that is, we have funky looking Early Modern texts). In my case (and it should be in your too), the file read was: <code>texts\A00419.txt</code>; number of characters: 2888252l and then you should get the first few lines of the text.</p>
 </section>
 </section>
 <section id="step-2-segmenting-texts-into-chunks" class="level2">
 <h2 class="anchored" data-anchor-id="step-2-segmenting-texts-into-chunks">Step 2: Segmenting Texts into Chunks</h2>
-<p>Our <code>.txt</code> files are far too large to classify as single units. A supervised classifier expects many medium-sized examples and some of the texts I gave you are <em>very</em> long (I check one of them at randome and it had 2,888,252 characters!). So we need to decide what counts as a “document” for classification.</p>
+<p>Our <code>.txt</code> files are far too large to classify as single units. A supervised classifier expects many medium-sized examples and some of the texts I gave you are <em>very</em> long (the one above had 2,888,252 characters!). So we need to decide what counts as a “document” for classification.</p>
 <ul>
 <li>For this week, we will treat chunks of sentences as our unit of analysis. We’re using sentence chunks because we want to capture enough context for semantic meaning (a single sentence might be ambiguous), but not so much that we get incorrect labels (a 50-page chapter likely discusses many topics and might lead to mislabelling: such a large “chunk” may not be about “merchants” in any meaningful sense, but, for example, it could be a biblical passage mentioning a merchants <em>metaphorically</em>–we would need a more careful approach for these kinds of texts).</li>
 </ul>
@@ -491,10 +493,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>And run the script.</p>
 <p><u>You should see</u>:</p>
 <ul>
-<li><p>Thousands of chunks for a large text</p></li>
-<li><p>A median chunk length around 100–120 words</p></li>
-<li><p>Most chunks falling in the 5–200 word range</p></li>
-<li><p>Chunks that are readable and context-rich</p></li>
+<li><p>Thousands of chunks (<code>5172</code>)</p></li>
+<li><p>A median chunk length around 100–120 words (<code>median: 101</code>)</p></li>
+<li><p>Most chunks falling in the 5–200 word range (<code>5009</code>; with the share in range: <code>0.968</code>)</p></li>
+<li><p>And a preview of the first chunk.</p></li>
 </ul>
 <p>This tells us that our segmentation choice is reasonable for classification.</p>
 </section>
@@ -563,13 +565,20 @@ we transform a text column into word tokens.</p>
 <li>Word2Vec expects <code>sentences=[["token","token",...], ...]</code></li>
 </ul></li>
 </ul>
-<p>With <code>genism</code>, tokenization creates a “list-of list” representation of tokens.</p>
-<p>⚠️ <strong>Note of warning:</strong> gensim may look “stuck” the first time you import it. When you import <code>gensim</code> (especially on Windows), Python may appear to freeze for 10–60 seconds. This is normal and does <strong>not</strong> mean your code is broken.</p>
+<p>The output should look like:</p>
+<p><code>Chunks (strings): 5172</code></p>
+<p><code>Chunks (token lists): 5172</code></p>
+<p><code>--- Token preview (first 60 tokens of first chunk) --- ['the', 'first', 'booke', 'of', 'the', 'covntrie', 'farme', 'chap', 'what', 'manner', 'of', 'husbandrie', 'is', 'entreated', 'of', 'in', 'the', 'discourse', 'following', 'even', 'as', 'the', 'manner', 'of', 'building', 'vsed', 'at', 'this', 'day', 'the', 'varietie', 'of', 'countries', 'causeth', 'diuers', 'manner', 'of', 'labouring', 'of', 'the', 'earth']</code></p>
+<p><code>--- Token count of first chunk --- 41</code></p>
+<section id="note-of-warning" class="level3">
+<h3 class="anchored" data-anchor-id="note-of-warning">⚠️ <strong>Note of warning:</strong></h3>
+<p>gensim may look “stuck” the first time you import it. When you import <code>gensim</code> (especially on Windows), Python may appear to freeze for 10–60 seconds. This is normal and does <strong>not</strong> mean your code is broken.</p>
 <ul>
 <li><code>gensim</code> loads compiled components used for Word2Vec</li>
 <li>on Windows, this initial load can be slow</li>
 <li>Python does not print progress messages during this step If the terminal is not showing an error message, wait patiently before interrupting the process. Only stop the program if it has been unresponsive for several minutes.</li>
 </ul>
+</section>
 </section>
 <section id="step-4-process-all-files-and-filter-chunks" class="level2">
 <h2 class="anchored" data-anchor-id="step-4-process-all-files-and-filter-chunks">Step 4: Process all Files and Filter Chunks</h2>
@@ -643,11 +652,462 @@ we transform a text column into word tokens.</p>
 <span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Total chunks kept (after filtering):"</span>, <span class="bu">len</span>(all_chunks))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>And run it. At this point, you can see:</p>
 <ul>
-<li><p>total number of .txt files processed</p></li>
-<li><p>total number of chunks retained</p></li>
+<li><p>total number of .txt files processed: <code>516</code></p></li>
+<li><p>total chunks kept (after filtering): <code>539057</code></p></li>
 </ul>
+</section>
+<section id="step-5-train-word2-vec-on-our-corpus" class="level2">
+<h2 class="anchored" data-anchor-id="step-5-train-word2-vec-on-our-corpus">Step 5: Train Word2 Vec on our Corpus</h2>
+<p>In Week 07, we used Word2Vec as a way to represent meaning geometrically: words that occur in similar contexts end up close together in vector space.</p>
+<p>This week, we will use Word2Vec for a very practical purpose: expand a seed term into a list of conceptually related terms (so we can build a weakly supervised training set).</p>
+<p>Our seed term will be:</p>
+<ul>
+<li><code>merchant</code></li>
+</ul>
+<p>We will then have Word2Vec look for terms that are in the same (geometric) neighborhood as <u>merchant</u>.</p>
+<p>OK, create a new file <code>step5_train_word2vec.py</code> and run it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> nltk</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gensim.utils <span class="im">import</span> simple_preprocess</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gensim.models <span class="im">import</span> Word2Vec</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>nltk.download(<span class="st">"punkt"</span>, quiet<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>nltk.download(<span class="st">"punkt_tab"</span>, quiet<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Load and preprocess all texts (same logic as Step 4)</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>TEXT_DIR <span class="op">=</span> Path(<span class="st">"texts"</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>txt_paths <span class="op">=</span> <span class="bu">sorted</span>(TEXT_DIR.glob(<span class="st">"*.txt"</span>))</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>TARGET_WORDS <span class="op">=</span> <span class="dv">120</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>MIN_WORDS <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>MAX_WORDS <span class="op">=</span> <span class="dv">200</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> chunk_text(text, target_words<span class="op">=</span><span class="dv">120</span>):</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    sentences <span class="op">=</span> nltk.sent_tokenize(text)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    chunks <span class="op">=</span> []</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    current <span class="op">=</span> []</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    current_len <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> sent <span class="kw">in</span> sentences:</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        words <span class="op">=</span> sent.split()</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> words:</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> current_len <span class="op">+</span> <span class="bu">len</span>(words) <span class="op">&gt;</span> target_words <span class="kw">and</span> current:</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>            chunks.append(<span class="st">" "</span>.join(current))</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>            current <span class="op">=</span> []</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>            current_len <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>        current.append(sent)</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>        current_len <span class="op">+=</span> <span class="bu">len</span>(words)</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> current:</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>        chunks.append(<span class="st">" "</span>.join(current))</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> chunks</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>token_lists <span class="op">=</span> []</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Found </span><span class="sc">{</span><span class="bu">len</span>(txt_paths)<span class="sc">}</span><span class="ss"> text files."</span>)</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Building token lists..."</span>)</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> path <span class="kw">in</span> txt_paths:</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(path, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>, errors<span class="op">=</span><span class="st">"ignore"</span>) <span class="im">as</span> f:</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>        text <span class="op">=</span> f.read()</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    chunks <span class="op">=</span> chunk_text(text, TARGET_WORDS)</span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> c <span class="kw">in</span> chunks:</span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>        tokens <span class="op">=</span> simple_preprocess(c, deacc<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> MIN_WORDS <span class="op">&lt;=</span> <span class="bu">len</span>(tokens) <span class="op">&lt;=</span> MAX_WORDS:</span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>            token_lists.append(tokens)</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Total tokenized chunks kept:"</span>, <span class="bu">len</span>(token_lists))</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a><span class="co">################</span></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a><span class="co"># Train Word2Vec (same logic as what we did in week 07)</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a><span class="co">################</span></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Training Word2Vec..."</span>)</span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Word2Vec(</span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>    sentences<span class="op">=</span>token_lists,</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>    vector_size<span class="op">=</span><span class="dv">200</span>,   <span class="co"># dimensionality of word vectors</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>    window<span class="op">=</span><span class="dv">5</span>,          <span class="co"># context window size</span></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>    min_count<span class="op">=</span><span class="dv">5</span>,       <span class="co"># ignore very rare words</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>    workers<span class="op">=</span><span class="dv">4</span>,         <span class="co"># adjust depending on your machine (see Week 07)</span></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>    sg<span class="op">=</span><span class="dv">1</span>               <span class="co"># 1 = skip-gram; 0 = CBOW</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="co"># Save model</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>Path(<span class="st">"models"</span>).mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>model_path <span class="op">=</span> Path(<span class="st">"models"</span>) <span class="op">/</span> <span class="st">"w2v_full.bin"</span></span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>model.save(<span class="bu">str</span>(model_path))</span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Model saved to:"</span>, model_path)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This will take a little while (or more than a little while, depending on your machine). Once it’s done, it will tell you: <code>Model saved to: models\w2v_full.bin</code>.</p>
+<section id="checking-the-semantic-neighborhood" class="level3">
+<h3 class="anchored" data-anchor-id="checking-the-semantic-neighborhood">Checking the semantic neighborhood</h3>
+<p>Now, we are going to load the model and ask for neighbors of our seed concept (that is, what words are near “merchant” in the vector space?).</p>
+<p>So, create another file, <code>step5b_query_word2vec.py</code>, and run it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gensim.models <span class="im">import</span> Word2Vec</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>model_path <span class="op">=</span> Path(<span class="st">"models"</span>) <span class="op">/</span> <span class="st">"w2v_full.bin"</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Word2Vec.load(<span class="bu">str</span>(model_path))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>seed <span class="op">=</span> <span class="st">"merchant"</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> seed <span class="kw">not</span> <span class="kw">in</span> model.wv:</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"'</span><span class="sc">{</span>seed<span class="sc">}</span><span class="ss">' not found in the model vocabulary."</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"This usually means min_count is too high or the corpus is too small."</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Top 30 words similar to '</span><span class="sc">{</span>seed<span class="sc">}</span><span class="ss">':"</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> word, score <span class="kw">in</span> model.wv.similar_by_word(seed, topn<span class="op">=</span><span class="dv">30</span>):</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>word<span class="sc">:20s}</span><span class="ss"> </span><span class="sc">{</span>score<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>My output is:</p>
+<p><code>Top 30 words similar to 'merchant':</code></p>
+<p><code>marchant 0.736</code></p>
+<p><code>factor 0.702</code></p>
+<p><code>merchants 0.689</code></p>
+<p><code>jeweller 0.667</code></p>
+<p><code>customer 0.665</code></p>
+<p><code>purser 0.648</code></p>
+<p><code>tailor 0.639</code></p>
+<p><code>wholesale 0.637</code></p>
+<p><code>clothier 0.635</code></p>
+<p><code>worshipful 0.632</code></p>
+<p><code>vintner 0.629</code></p>
+<p><code>clothyer 0.620</code></p>
+<p><code>adventurer 0.620</code></p>
+<p><code>trade 0.620</code></p>
+<p><code>brewer 0.619</code></p>
+<p><code>venturer 0.617</code></p>
+<p><code>chapman 0.616</code></p>
+<p><code>factory 0.610</code></p>
+<p><code>seller 0.610</code></p>
+<p><code>staple 0.606</code></p>
+<p><code>tradesman 0.606</code></p>
+<p><code>adventurers 0.606</code></p>
+<p><code>sailor 0.604</code></p>
+<p><code>horner 0.603</code></p>
+<p><code>staplers 0.599</code></p>
+<p><code>easterling 0.599</code></p>
+<p><code>banker 0.598</code></p>
+<p><code>marchants 0.595</code></p>
+<p><code>goldsmith 0.594</code></p>
+<p><code>apprentice 0.592</code></p>
+<p>What did you get? Anything surprising or simply unclear? The list here makes a lot of sense to me. A historical note: “Easterling merchants” would have been merchants from the Baltic regions, so that works in this list. What we have created is a <u>corpus-specific semantic map</u> for the concept of “merchant.”</p>
+<p>We will now use this list as a resource for weak supervision in the next steps in our classification task.</p>
+</section>
+</section>
+<section id="step-6-build-a-tiered-keyword-list-abc" class="level2">
+<h2 class="anchored" data-anchor-id="step-6-build-a-tiered-keyword-list-abc">Step 6: Build a tiered keyword list (A/B/C)</h2>
+<p>Word2Vec gives us a list of words “near” our seed term (<code>merchant</code>). But we do not want to blindly treat Word2Vec neighbors as truth. Instead, we use them as a <em>suggestions</em> and then impose an interpretive structure.</p>
+<p>A useful strategy is to split candidate terms into tiers:</p>
+<ul>
+<li>Tier A (high confidence): direct hits and spelling variants<br>
+e.g., <code>merchant</code>, <code>marchant</code>, <code>merchants</code>, <code>marchants</code></li>
+<li>Tier B (strongly related roles): terms that usually indicate commercial activity<br>
+e.g., <code>factor</code>, <code>chapman</code>, <code>adventurer</code>, <code>venturer</code>, <code>staple</code></li>
+<li>Tier C (maybe / adjacent): occupational neighborhood terms that might appear in commercial contexts but are often broader<br>
+e.g., <code>tailor</code>, <code>clothier</code>, <code>haberdasher</code></li>
+</ul>
+<p>This tiering is a modeling decision:</p>
+<ul>
+<li><p>Tier A+B will become our <strong>CORE triggers</strong> (high precision).</p></li>
+<li><p>Tier C will become a <strong>MAYBE set</strong> (to inspect separately).</p></li>
+</ul>
+<p>Create a new file step6_define_tiers.py and run it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tier A: direct spellings / variants of the seed concept</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>TIER_A <span class="op">=</span> {</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"merchant"</span>, <span class="st">"merchants"</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"marchant"</span>, <span class="st">"marchants"</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Tier B: closely related commercial roles / terms</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>TIER_B <span class="op">=</span> {</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"factor"</span>, <span class="st">"chapman"</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"adventurer"</span>, <span class="st">"adventurers"</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"venturer"</span>, <span class="st">"venturers"</span>,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"staple"</span>, <span class="st">"staplers"</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"trade"</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"purser"</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Tier C: "maybe" occupational neighborhood (often adjacent, not always merchant-specific)</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>TIER_C <span class="op">=</span> {</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"clothier"</span>, <span class="st">"clothyer"</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tailor"</span>, <span class="st">"tayler"</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"haberdasher"</span>,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"goldsmith"</span>,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"vintner"</span>,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"brewer"</span>,</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">"banker"</span>,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">"grazier"</span>,</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"jeweller"</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Tier A size:"</span>, <span class="bu">len</span>(TIER_A))</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Tier B size:"</span>, <span class="bu">len</span>(TIER_B))</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Tier C size:"</span>, <span class="bu">len</span>(TIER_C))</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Tier A:"</span>, <span class="bu">sorted</span>(TIER_A))</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Tier B:"</span>, <span class="bu">sorted</span>(TIER_B))</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Tier C:"</span>, <span class="bu">sorted</span>(TIER_C))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Let’s walk through what each tier represents and why I set them up this way:</p>
+<ul>
+<li><p>Tier A: terms are direct references to the concept we care about (spelling variants common in early modern texts);</p></li>
+<li><p>Tier B: these terms describe occupations and roles that often involve trade; institutional or economic positions adjacent to merchants; vocabulary that appears frequently in commercial contexts. But they are not perfect synonyms for “merchant.”</p></li>
+<li><p>Tier C: these terms are occupational nouns that are often related to production, craft, or commerce, and they frequently appear near merchant discourse. But they are much more ambiguous.</p></li>
+</ul>
+<p>This is where interpretive judgment enters the pipeline:</p>
+<ul>
+<li><p>We decide what our category means.</p></li>
+<li><p>We decide which words count as strong evidence vs.&nbsp;weak evidence.</p></li>
+<li><p>We acknowledge that “merchant discourse” is fuzzy at the edges.</p></li>
+</ul>
+</section>
+<section id="step-7-label-chunks-using-tiered-keywords-weak-supervision" class="level2">
+<h2 class="anchored" data-anchor-id="step-7-label-chunks-using-tiered-keywords-weak-supervision">Step 7: Label chunks using tiered keywords (weak supervision)</h2>
+<p>We now have:</p>
+<ul>
+<li>a large set of sentence-based chunks,</li>
+<li>tokenized into word lists,</li>
+<li>and a tiered list of keywords (A / B / C).</li>
+</ul>
+<p>The next step is to assign labels to chunks. This is where we can translate our decision making about tiers into rule-based labeling of the chunks. This is called <strong>weak supervision</strong>.</p>
+<section id="our-labeling-rules" class="level3">
+<h3 class="anchored" data-anchor-id="our-labeling-rules">Our labeling rules</h3>
+<p>For each chunk:</p>
+<ul>
+<li><p>CORE (label = 1) → contains <em>any</em> Tier A or Tier B word<br>
+(high confidence merchant discourse)</p></li>
+<li><p>MAYBE (label = 2) → contains Tier C words <em>only</em><br>
+(ambiguous / adjacent cases)</p></li>
+<li><p>NEG (label = 0) → contains none of the above</p></li>
+</ul>
+<p>These rules encode our interpretive decisions from Step 6. OK, now we can get started with the actual labelling.</p>
+</section>
+<section id="labeling-the-full-corpus" class="level3">
+<h3 class="anchored" data-anchor-id="labeling-the-full-corpus">Labeling the full corpus</h3>
+<p>Create a new file: <code>step7_label_chunks.py</code> and run it.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> nltk</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gensim.utils <span class="im">import</span> simple_preprocess</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>nltk.download(<span class="st">"punkt"</span>, quiet<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>nltk.download(<span class="st">"punkt_tab"</span>, quiet<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Tier definitions (from Step 6)</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>TIER_A <span class="op">=</span> {</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"merchant"</span>, <span class="st">"merchants"</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"marchant"</span>, <span class="st">"marchants"</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>TIER_B <span class="op">=</span> {</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"factor"</span>, <span class="st">"chapman"</span>,</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"adventurer"</span>, <span class="st">"adventurers"</span>,</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"venturer"</span>, <span class="st">"venturers"</span>,</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"staple"</span>, <span class="st">"staplers"</span>,</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"trade"</span>, <span class="st">"purser"</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>TIER_C <span class="op">=</span> {</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"clothier"</span>, <span class="st">"clothyer"</span>,</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tailor"</span>, <span class="st">"tayler"</span>,</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">"haberdasher"</span>,</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">"goldsmith"</span>,</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">"vintner"</span>,</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">"brewer"</span>,</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">"banker"</span>,</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">"grazier"</span>,</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">"jeweller"</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Load and process texts</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>TEXT_DIR <span class="op">=</span> Path(<span class="st">"texts"</span>)</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>txt_paths <span class="op">=</span> <span class="bu">sorted</span>(TEXT_DIR.glob(<span class="st">"*.txt"</span>))</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>TARGET_WORDS <span class="op">=</span> <span class="dv">120</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>MIN_WORDS <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>MAX_WORDS <span class="op">=</span> <span class="dv">200</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> chunk_text(text, target_words<span class="op">=</span><span class="dv">120</span>):</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>    sentences <span class="op">=</span> nltk.sent_tokenize(text)</span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>    chunks <span class="op">=</span> []</span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>    current <span class="op">=</span> []</span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>    current_len <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> sent <span class="kw">in</span> sentences:</span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>        words <span class="op">=</span> sent.split()</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> words:</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> current_len <span class="op">+</span> <span class="bu">len</span>(words) <span class="op">&gt;</span> target_words <span class="kw">and</span> current:</span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>            chunks.append(<span class="st">" "</span>.join(current))</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>            current <span class="op">=</span> []</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>            current_len <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>        current.append(sent)</span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>        current_len <span class="op">+=</span> <span class="bu">len</span>(words)</span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> current:</span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>        chunks.append(<span class="st">" "</span>.join(current))</span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> chunks</span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>labeled <span class="op">=</span> []</span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Processing </span><span class="sc">{</span><span class="bu">len</span>(txt_paths)<span class="sc">}</span><span class="ss"> files..."</span>)</span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> path <span class="kw">in</span> txt_paths:</span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(path, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>, errors<span class="op">=</span><span class="st">"ignore"</span>) <span class="im">as</span> f:</span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a>        text <span class="op">=</span> f.read()</span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a>    chunks <span class="op">=</span> chunk_text(text, TARGET_WORDS)</span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> c <span class="kw">in</span> chunks:</span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a>        tokens <span class="op">=</span> simple_preprocess(c, deacc<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a>        n_tokens <span class="op">=</span> <span class="bu">len</span>(tokens)</span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> (MIN_WORDS <span class="op">&lt;=</span> n_tokens <span class="op">&lt;=</span> MAX_WORDS):</span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a>        token_set <span class="op">=</span> <span class="bu">set</span>(tokens)</span>
+<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> token_set <span class="op">&amp;</span> (TIER_A <span class="op">|</span> TIER_B):</span>
+<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a>            label <span class="op">=</span> <span class="dv">1</span>   <span class="co"># CORE</span></span>
+<span id="cb9-95"><a href="#cb9-95" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> token_set <span class="op">&amp;</span> TIER_C:</span>
+<span id="cb9-96"><a href="#cb9-96" aria-hidden="true" tabindex="-1"></a>            label <span class="op">=</span> <span class="dv">2</span>   <span class="co"># MAYBE</span></span>
+<span id="cb9-97"><a href="#cb9-97" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb9-98"><a href="#cb9-98" aria-hidden="true" tabindex="-1"></a>            label <span class="op">=</span> <span class="dv">0</span>   <span class="co"># NEG</span></span>
+<span id="cb9-99"><a href="#cb9-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-100"><a href="#cb9-100" aria-hidden="true" tabindex="-1"></a>        labeled.append((c, label))</span>
+<span id="cb9-101"><a href="#cb9-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-102"><a href="#cb9-102" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Total chunks labeled:"</span>, <span class="bu">len</span>(labeled))</span>
+<span id="cb9-103"><a href="#cb9-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-104"><a href="#cb9-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-105"><a href="#cb9-105" aria-hidden="true" tabindex="-1"></a><span class="co"># Save labeled data</span></span>
+<span id="cb9-106"><a href="#cb9-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-107"><a href="#cb9-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-108"><a href="#cb9-108" aria-hidden="true" tabindex="-1"></a>Path(<span class="st">"data"</span>).mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-109"><a href="#cb9-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-110"><a href="#cb9-110" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(Path(<span class="st">"data"</span>) <span class="op">/</span> <span class="st">"merchant_labeled_chunks.json"</span>, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb9-111"><a href="#cb9-111" aria-hidden="true" tabindex="-1"></a>    json.dump(labeled, f, ensure_ascii<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb9-112"><a href="#cb9-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-113"><a href="#cb9-113" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Saved labeled chunks to data/merchant_labeled_chunks.json"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>What we did so far: we applied rules we designed, using the lexical triggers we chose, to create a labeled dataset. Obviously, these labels are imperfect and corpus-specific, but they are good enough to train a first classifier.</p>
+<p>At this point, we have turned unstructured text into a supervised learning dataset. All the steps that we are doing next (train/test splits, classifiers, confusion matrices) depend on the choices made up to here. We can’t quite train a classifier, yet. First, we need to separate CORE, MAYBE, and NEG examples, inspect them, and think carefully about evaluation.</p>
+<p>This is where questions of <a href="https://en.wikipedia.org/wiki/Precision_and_recall"><strong>precision</strong> and <strong>recall</strong></a> enter the picture.</p>
+</section>
+</section>
+<section id="step-9-decide-what-to-train-on" class="level2">
+<h2 class="anchored" data-anchor-id="step-9-decide-what-to-train-on">Step 9: Decide what to train on</h2>
+<p>Now we have three kinds of labeled chunks of text:</p>
+<ul>
+<li>CORE (label = 1): High-confidence merchant discourse<br>
+</li>
+<li>MAYBE (label = 2): Ambiguous, adjacent, or borderline cases<br>
+</li>
+<li>NEG (label = 0): Clearly not merchant discourse</li>
+</ul>
+<p>Before we actually train a classifier, we must decide which of these labels should the model actually learn from. For this week, we will:</p>
+<ul>
+<li>Train the classifier only on CORE vs.&nbsp;NEG</li>
+<li>Exclude MAYBE from training</li>
+<li>Save MAYBE for later inspection and interpretation</li>
+</ul>
+<p>Why? The honest answer is: I tried a couple of options and compared with my own readings of the texts, this gave the best results at this stage. But I also want to note the MAYBE category contains texts that are close to commerce but not clearly merchant discourse and so require a lot of contextual interpretation. They are also texts where other scholars may disagree with my reading. This means that including them for this training, would reduce interpretability and make evaluation harder to explain.</p>
+<p>Instead, we treat the MAYBE texts as a set of texts to which we apply the trained classifier later. This mirrors how supervised models are often used in practice: - trained on clear cases, - applied to ambiguous ones.</p>
+<section id="separate-datasets" class="level3">
+<h3 class="anchored" data-anchor-id="separate-datasets">Separate datasets</h3>
+<p>Create a new file <code>step9_prepare_datasets.py</code> . <strong>Before</strong> you run it, read the explanation about the NEG step after the code sample. <em>Then</em> run it.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>random.seed(<span class="dv">42</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>DATA_PATH <span class="op">=</span> Path(<span class="st">"data"</span>) <span class="op">/</span> <span class="st">"merchant_labeled_chunks.json"</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DATA_PATH, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    labeled <span class="op">=</span> json.load(f)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>core <span class="op">=</span> [(t, <span class="dv">1</span>) <span class="cf">for</span> (t, y) <span class="kw">in</span> labeled <span class="cf">if</span> y <span class="op">==</span> <span class="dv">1</span>]</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>neg  <span class="op">=</span> [(t, <span class="dv">0</span>) <span class="cf">for</span> (t, y) <span class="kw">in</span> labeled <span class="cf">if</span> y <span class="op">==</span> <span class="dv">0</span>]</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>maybe <span class="op">=</span> [t <span class="cf">for</span> (t, y) <span class="kw">in</span> labeled <span class="cf">if</span> y <span class="op">==</span> <span class="dv">2</span>]</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Loaded:"</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"  CORE:"</span>, <span class="bu">len</span>(core))</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"  NEG :"</span>, <span class="bu">len</span>(neg))</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"  MAYBE:"</span>, <span class="bu">len</span>(maybe))</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="co">###### =&gt; NEG step [see explanation below]</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>neg_sample <span class="op">=</span> random.sample(neg, <span class="bu">len</span>(core))</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>training_data <span class="op">=</span> core <span class="op">+</span> neg_sample</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>random.shuffle(training_data)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Training set size (CORE + NEG):"</span>, <span class="bu">len</span>(training_data))</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="co">### Split the data into train and test sets:</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>split <span class="op">=</span> <span class="bu">int</span>(<span class="fl">0.8</span> <span class="op">*</span> <span class="bu">len</span>(training_data))</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>train_data <span class="op">=</span> training_data[:split]</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>test_data  <span class="op">=</span> training_data[split:]</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Train size:"</span>, <span class="bu">len</span>(train_data))</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Test size :"</span>, <span class="bu">len</span>(test_data))</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"MAYBE size:"</span>, <span class="bu">len</span>(maybe))</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Save the datasets:</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>Path(<span class="st">"data"</span>).mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(Path(<span class="st">"data"</span>) <span class="op">/</span> <span class="st">"train_core_vs_neg.json"</span>, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>    json.dump(train_data, f, ensure_ascii<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(Path(<span class="st">"data"</span>) <span class="op">/</span> <span class="st">"test_core_vs_neg.json"</span>, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    json.dump(test_data, f, ensure_ascii<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(Path(<span class="st">"data"</span>) <span class="op">/</span> <span class="st">"maybe_texts.json"</span>, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>    json.dump(maybe, f, ensure_ascii<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Saved training, test, and MAYBE datasets."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>With this step in the code we are <u>downsampling</u> NEG to match the size of the CORE set. Why? [Think for a second about what most of the texts might look like…] Well, in most corpora, NEG examples vastly outnumber CORE examples: <em>most</em> of the text is <em>not</em> likely to be talking about the concept/topic you are targeting. Now, the texts that we have for class <em>are</em> a little skewed towards “merchant” and, as you will see after you run the code, we would still have an overwhelming number of NEG chunks, but I want you to learn best practices <em>in general</em>!</p>
+<p>Training directly on all NEG data can cause the model to:</p>
+<ul>
+<li><p>always predict “not merchant”</p></li>
+<li><p>achieve high accuracy but low usefulness</p></li>
+</ul>
+<p>OK, this is what I got back from this step:</p>
+<p><code>Loaded:</code></p>
+<p><code>CORE: 11373</code></p>
+<p><code>NEG : 527174</code> [<strong>!!!</strong>]</p>
+<p><code>MAYBE: 510</code></p>
+<p><code>Training set size (CORE + NEG): 22746</code> [<strong>Important:</strong> can you see where this is coming from based on the above explanation? And, can you see why we needed to downsample?]</p>
+<p><code>Train size: 18196</code></p>
+<p><code>Test size : 4550</code></p>
+<p><code>MAYBE size: 510</code></p>
+<p>Now, add the following to step9 code to save the datasets:</p>
 
 
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
