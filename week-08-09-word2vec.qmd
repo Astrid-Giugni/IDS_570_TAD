@@ -17,11 +17,13 @@ use_python("C:/Users/astri/miniconda3/envs/tad/python.exe", required = TRUE)
 py_config()
 ```
 
-## This week's goals:
+# Weeks 8 and 9 goals:
 
-So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). This week, we make a key transition:
+So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). During these two weeks we are going to make a key transition to supervised methods. I am grouping the two
 
-We will **train a supervised classifier** that learns to recognize a category of texts. In particular, we are going to figure out how to distinguish which texts engage in merchant-related discourse versus those that do not.
+[**For Week 8**]{.underline}:
+
+First, we will **train a supervised classifier** that learns to recognize a category of texts. In particular, we are going to figure out how to distinguish which texts engage in merchant-related discourse versus those that do not.
 
 In humanities (and social sciences), supervised learning is often the workhorse method for answering questions like:
 
@@ -33,7 +35,11 @@ But supervised learning raises a methodological question immediately: Where do l
 
 In humanities contexts, we often do **not** begin with a fully human-labeled dataset. So we will begin with **weak supervision**: we will generate *imperfect* labels using rules, then train a model, and validate it carefully.
 
-## What we are going to do:
+[**For Week 9**]{.underline}**:**
+
+kdfjalsd
+
+## Week 8: what we are going to do
 
 With this week's tutorial, I want you to learn how to do the following:
 
@@ -734,16 +740,13 @@ The next step is to assign labels to chunks. This is where we can translate our 
 
 For each chunk:
 
--   CORE (label = 1)\
-    → contains *any* Tier A or Tier B word\
+-   CORE (label = 1) → contains *any* Tier A or Tier B word\
     (high confidence merchant discourse)
 
--   MAYBE (label = 2)\
-    → contains Tier C words *only*\
+-   MAYBE (label = 2) → contains Tier C words *only*\
     (ambiguous / adjacent cases)
 
--   NEG (label = 0)\
-    → contains none of the above
+-   NEG (label = 0) → contains none of the above
 
 These rules encode our interpretive decisions from Step 6. OK, now we can get started with the actual labelling.
 
@@ -867,8 +870,113 @@ with open(Path("data") / "merchant_labeled_chunks.json", "w", encoding="utf-8") 
 print("Saved labeled chunks to data/merchant_labeled_chunks.json")
 ```
 
-What we did so far: we applied rules we designed, using the lexical triggers we chose, to create a labeled dataset. Obviously, these labels are imperfect and corpus-specific, but they are good enough to train a first classifier (that is, weak labels).
+What we did so far: we applied rules we designed, using the lexical triggers we chose, to create a labeled dataset. Obviously, these labels are imperfect and corpus-specific, but they are good enough to train a first classifier.
 
 At this point, we have turned unstructured text into a supervised learning dataset. All the steps that we are doing next (train/test splits, classifiers, confusion matrices) depend on the choices made up to here. We can't quite train a classifier, yet. First, we need to separate CORE, MAYBE, and NEG examples, inspect them, and think carefully about evaluation.
 
 This is where questions of [**precision** and **recall**](https://en.wikipedia.org/wiki/Precision_and_recall) enter the picture.
+
+## Step 9: Decide what to train on
+
+Now we have three kinds of labeled chunks of text:
+
+-   CORE (label = 1): High-confidence merchant discourse\
+-   MAYBE (label = 2): Ambiguous, adjacent, or borderline cases\
+-   NEG (label = 0): Clearly not merchant discourse
+
+Before we actually train a classifier, we must decide which of these labels should the model actually learn from. For this week, we will:
+
+-   Train the classifier only on CORE vs. NEG
+-   Exclude MAYBE from training
+-   Save MAYBE for later inspection and interpretation
+
+Why? The honest answer is: I tried a couple of options and compared with my own readings of the texts, this gave the best results at this stage. But I also want to note the MAYBE category contains texts that are close to commerce but not clearly merchant discourse and so require a lot of contextual interpretation. They are also texts where other scholars may disagree with my reading. This means that including them for this training, would reduce interpretability and make evaluation harder to explain.
+
+Instead, we treat the MAYBE texts as a set of texts to which we apply the trained classifier later. This mirrors how supervised models are often used in practice: - trained on clear cases, - applied to ambiguous ones.
+
+### Separate datasets
+
+Create a new file `step9_prepare_datasets.py` . **Before** you run it, read the explanation about the NEG step after the code sample. *Then* run it.
+
+``` Python
+import json
+from pathlib import Path
+import random
+
+random.seed(42)
+
+DATA_PATH = Path("data") / "merchant_labeled_chunks.json"
+
+with open(DATA_PATH, "r", encoding="utf-8") as f:
+    labeled = json.load(f)
+
+core = [(t, 1) for (t, y) in labeled if y == 1]
+neg  = [(t, 0) for (t, y) in labeled if y == 0]
+maybe = [t for (t, y) in labeled if y == 2]
+
+print("Loaded:")
+print("  CORE:", len(core))
+print("  NEG :", len(neg))
+print("  MAYBE:", len(maybe))
+
+###### => NEG step [see explanation below]
+neg_sample = random.sample(neg, len(core))
+
+training_data = core + neg_sample
+random.shuffle(training_data)
+
+print("Training set size (CORE + NEG):", len(training_data))
+
+### Split the data into train and test sets:
+
+split = int(0.8 * len(training_data))
+train_data = training_data[:split]
+test_data  = training_data[split:]
+
+print("Train size:", len(train_data))
+print("Test size :", len(test_data))
+print("MAYBE size:", len(maybe))
+
+# Save the datasets:
+
+Path("data").mkdir(exist_ok=True)
+
+with open(Path("data") / "train_core_vs_neg.json", "w", encoding="utf-8") as f:
+    json.dump(train_data, f, ensure_ascii=False)
+
+with open(Path("data") / "test_core_vs_neg.json", "w", encoding="utf-8") as f:
+    json.dump(test_data, f, ensure_ascii=False)
+
+with open(Path("data") / "maybe_texts.json", "w", encoding="utf-8") as f:
+    json.dump(maybe, f, ensure_ascii=False)
+
+print("Saved training, test, and MAYBE datasets.")
+```
+
+With this step in the code we are [downsampling]{.underline} NEG to match the size of the CORE set. Why? \[Think for a second about what most of the texts might look like...\] Well, in most corpora, NEG examples vastly outnumber CORE examples: *most* of the text is *not* likely to be talking about the concept/topic you are targeting. Now, the texts that we have for class *are* a little skewed towards "merchant" and, as you will see after you run the code, we would still have an overwhelming number of NEG chunks, but I want you to learn best practices *in general*!
+
+Training directly on all NEG data can cause the model to:
+
+-   always predict “not merchant”
+
+-   achieve high accuracy but low usefulness
+
+OK, this is what I got back from this step:
+
+`Loaded:`
+
+`CORE: 11373`
+
+`NEG : 527174` \[**!!!**\]
+
+`MAYBE: 510`
+
+`Training set size (CORE + NEG): 22746` \[**Important:** can you see where this is coming from based on the above explanation? And, can you see why we needed to downsample?\]
+
+`Train size: 18196`
+
+`Test size : 4550`
+
+`MAYBE size: 510`
+
+Now, add the following to step9 code to save the datasets:
