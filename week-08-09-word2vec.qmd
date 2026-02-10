@@ -19,11 +19,13 @@ py_config()
 
 # Weeks 8 and 9 goals:
 
-So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). During these two weeks we are going to make a key transition to supervised methods. I am grouping the two
+So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). During these two weeks we are going to make a key transition to supervised methods. I am grouping the two together because we need to take some time to think about how to *thoughtfully* set up the classification task–language is flexible and conceptual boundaries are porous!
+
+You can move across the code and steps for these two weeks at your own pace as you get familiar with the process. [In class]{.underline}: I will move through the lectures *assuming* that everyone will finish working through this entire tutorial by March 6th (the end of week 9).
 
 [**For Week 8**]{.underline}:
 
-First, we will **train a supervised classifier** that learns to recognize a category of texts. In particular, we are going to figure out how to distinguish which texts engage in merchant-related discourse versus those that do not.
+The goal is to **train a supervised classifier** that learns to recognize a category of texts. In particular, we are going to figure out how to distinguish which texts engage in merchant-related discourse versus those that do not.
 
 In humanities (and social sciences), supervised learning is often the workhorse method for answering questions like:
 
@@ -33,27 +35,26 @@ In humanities (and social sciences), supervised learning is often the workhorse 
 
 But supervised learning raises a methodological question immediately: Where do labels come from?
 
-In humanities contexts, we often do **not** begin with a fully human-labeled dataset. So we will begin with **weak supervision**: we will generate *imperfect* labels using rules, then train a model, and validate it carefully.
+In humanities contexts, we often do **not** begin with a fully human-labeled dataset. So we will begin with **weak supervision**: we will generate *imperfect* labels using rules, then train a model, and validate it carefully. So, for week 8, you will:
+
+1.  Define a category you want to detect in texts (a binary label). For us, it will be about the concept "merchant" (this will be our "seed" concept).
+2.  Segment texts into a usable unit of analysis (chunks).
+3.  Create a weakly supervised training dataset using a seed term and related terms.
 
 [**For Week 9**]{.underline}**:**
 
-kdfjalsd
+1.  Train a **baseline text classifier** in Python using:
 
-## Week 8: what we are going to do
-
-With this week's tutorial, I want you to learn how to do the following:
-
-1.  **Define a category** you want to detect in texts (a binary label). For us, it will be about the concept "merchant" (this will be our "seed" concept).
-2.  **Segment texts** into a usable unit of analysis (chunks).
-3.  Create a **weakly supervised training dataset** using a seed term and related terms.
-4.  Train a **baseline text classifier** in Python using:
     -   TF–IDF features
     -   Logistic regression
-5.  Evaluate the classifier using:
+
+2.  Evaluate the classifier using:
+
     -   a train/test split
     -   a confusion matrix
     -   precision, recall, and F1 score
-6.  Reflect on what “accuracy” means when labels come from weak supervision.
+
+3.  Reflect on what “accuracy” means when labels come from weak supervision.
 
 ## Big picture workflow
 
@@ -84,6 +85,8 @@ We will move slowly and validate outputs at each stage. Again, I am keeping the 
     -   `tqdm`
 
 (We will install these together in the steps below.)
+
+## Week 8 (Part I--Week Supervision)
 
 ## Step 0: Project setup & environment
 
@@ -979,4 +982,106 @@ OK, this is what I got back from this step:
 
 `MAYBE size: 510`
 
-Now, add the following to step9 code to save the datasets:
+## Week 9 (Part II--The Classification Task)
+
+Now we are ready to create an actual classifier. So far, our training data looks like this:
+
+-   a chunk of text (a string),
+
+-   paired with a label (CORE = 1 or NEG = 0).
+
+We can read these strings directly (and have done so to check things along the way), but obviously computers cannot. A classifier cannot operate on words, sentences, or meanings. It can only operate on numbers. So before we train a model, we must transform text into a numerical representation as we have been doing in previous weeks. In particular, we will revisit our old friend **TF-IDF** (remember our work in [week 4](https://astrid-giugni.github.io/IDS_570_TAD/week-04-representation.html)).
+
+Our next steps:
+
+1.  Convert text chunks into TF-IDF vectors. This helps emphasize *distinctive* vocabulary rather than common function words.
+
+2.  Train a simple binary classifier
+
+3.  Evaluate its performance on held-out data
+
+4.  Apply it to the MAYBE set (review above if needed)
+
+5.  Evaluate on what the model learned and what it did not, and see if it is useful for historical interpretation.
+
+As with week 8, we are going to build everything step by step. Create a new file, `step10_tfidf_representation.py`. Don't run it yet, I will give explanations below and I want you to **read** and understand them before running the code.
+
+``` Python
+import json
+from pathlib import Path
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+DATA_DIR = Path("data")
+
+#We now load the datasets we prepared at the end of last week (step 9)
+with open(DATA_DIR / "train_core_vs_neg.json", "r", encoding="utf-8") as f:
+    train_data = json.load(f)
+
+with open(DATA_DIR / "test_core_vs_neg.json", "r", encoding="utf-8") as f:
+    test_data = json.load(f)
+
+# Separate texts and labels
+X_train_texts = [t for (t, y) in train_data]
+y_train = [y for (t, y) in train_data]
+
+X_test_texts = [t for (t, y) in test_data]
+y_test = [y for (t, y) in test_data]
+
+print("Train size:", len(X_train_texts))
+print("Test size :", len(X_test_texts))
+
+##### ==> See explanation [A] below
+
+vectorizer = TfidfVectorizer(
+    lowercase=True,
+    min_df=5,        # ignore very rare words
+    max_df=0.9       # ignore extremely common words; Explanation [B]
+)
+X_train = vectorizer.fit_transform(X_train_texts)
+X_test = vectorizer.transform(X_test_texts)
+
+print("TF-IDF matrix shapes:")
+print("  Train:", X_train.shape)
+print("  Test :", X_test.shape)
+
+#####  ==> See explanation [C] below
+```
+
+-   Explanation \[A\]: after the lines above, we still have raw text, so we have to define a TF-IDF vectorizer.
+
+-   Explanation \[B\]: we set the parameters as `min_df=5` so that we remove words that appear [in fewer than]{.underline} 5 documents; and `max_df=0.9` so that we remove words that appear in more than 90% of the documents.
+
+Explanation \[C\]: we fit the vectorizer on the training data **only**, then apply it to the test data. Each text chunk is now a numeric vector.
+
+We have:
+
+| Object    | What it contains | What it’s used for                |
+|-----------|------------------|-----------------------------------|
+| `X_train` | TF-IDF vectors   | Model learns patterns             |
+| `y_train` | Labels           | Supervision signal                |
+| `X_test`  | TF-IDF vectors   | Model makes predictions           |
+| `y_test`  | Labels           | We check how good predictions are |
+
+I am going to belabor this more so that it's fully clear, you can think of the X, Y part of this as:
+
+X = the input to the model → the text, represented numerically (TF-IDF vectors)
+
+y = the output we want the model to predict → the labels (CORE = 1, NEG = 0)
+
+So:
+
+X_train = text chunks (as numbers)
+
+y_train = labels for those chunks
+
+Where **train** = data the model is allowed to learn from; **test** = data the model has *never seen* before.
+
+#### Looking ahead to the next step (confusion matrix):
+
+Later, when we compute a confusion matrix:
+
+-    predictions come from `X_test`
+
+-   “true labels” come from `y_test`
+
+The confusion matrix will help us understand how often the model’s predictions on unseen data match the labels produced by our weak supervision rules. I will remind you below, but you want to start keeping in mind that the confusion matrix does *not* measure truth, it just measures agreement with a labeling scheme.
