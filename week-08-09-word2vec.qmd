@@ -17,7 +17,7 @@ use_python("C:/Users/astri/miniconda3/envs/tad/python.exe", required = TRUE)
 py_config()
 ```
 
-## Why this week?
+## This week's goals:
 
 So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). This week, we make a key transition:
 
@@ -64,8 +64,6 @@ Here is the full pipeline we will build:
 9.  Evaluate and interpret
 
 We will move slowly and validate outputs at each stage. Again, I am keeping the training wheels on, but
-
-------------------------------------------------------------------------
 
 ## What you need before starting
 
@@ -162,6 +160,8 @@ for f in files[:10]:
     print(" ", f)
 ```
 
+This should tell you that you found [about]{.underline} 516 .txt files. **Note**: you have a [very]{.underline} slightly different training set; you are **responsible** for keeping track of how this affects things down the line (though the first few steps should match). It's my way of keeping you on your toes!
+
 You should see a list of filenames printed to the terminal. Now we want to inspect one file to make sure that we have set things up correctly (**note**: in the future, I will [**assume**]{.underline} that you will do this on your own!). To the same file as above, add the following and run the script again:
 
 ``` python
@@ -179,11 +179,11 @@ print("\nFirst 1,000 characters:\n")
 print(text[:1000])
 ```
 
-We are just making sure that we can load the data and that things look correct (that is, we have funky looking Early Modern texts).
+We are just making sure that we can load the data and that things look correct (that is, we have funky looking Early Modern texts). In my case (and it should be in your too), the file read was: `texts\A00419.txt`; number of characters: 2888252l and then you should get the first few lines of the text.
 
 ## Step 2: Segmenting Texts into Chunks
 
-Our `.txt` files are far too large to classify as single units. A supervised classifier expects many medium-sized examples and some of the texts I gave you are *very* long (I check one of them at randome and it had 2,888,252 characters!). So we need to decide what counts as a “document” for classification.
+Our `.txt` files are far too large to classify as single units. A supervised classifier expects many medium-sized examples and some of the texts I gave you are *very* long (the one above had 2,888,252 characters!). So we need to decide what counts as a “document” for classification.
 
 -   For this week, we will treat chunks of sentences as our unit of analysis. We're using sentence chunks because we want to capture enough context for semantic meaning (a single sentence might be ambiguous), but not so much that we get incorrect labels (a 50-page chapter likely discusses many topics and might lead to mislabelling: such a large "chunk" may not be about "merchants" in any meaningful sense, but, for example, it could be a biblical passage mentioning a merchants *metaphorically*–we would need a more careful approach for these kinds of texts).
 
@@ -267,13 +267,13 @@ And run the script.
 
 [You should see]{.underline}:
 
--   Thousands of chunks for a large text
+-   Thousands of chunks (`5172`)
 
--   A median chunk length around 100–120 words
+-   A median chunk length around 100–120 words (`median: 101`)
 
--   Most chunks falling in the 5–200 word range
+-   Most chunks falling in the 5–200 word range (`5009`; with the share in range: `0.968`)
 
--   Chunks that are readable and context-rich
+-   And a preview of the first chunk.
 
 This tells us that our segmentation choice is reasonable for classification.
 
@@ -349,9 +349,19 @@ Now run it. What we are doing:
 
     -   Word2Vec expects `sentences=[["token","token",...], ...]`
 
-With `genism`, tokenization creates a "list-of list" representation of tokens.
+The output should look like:
 
-⚠️ **Note of warning:** gensim may look “stuck” the first time you import it. When you import `gensim` (especially on Windows), Python may appear to freeze for 10–60 seconds. This is normal and does **not** mean your code is broken.
+`Chunks (strings): 5172`
+
+`Chunks (token lists): 5172`
+
+`--- Token preview (first 60 tokens of first chunk) --- ['the', 'first', 'booke', 'of', 'the', 'covntrie', 'farme', 'chap', 'what', 'manner', 'of', 'husbandrie', 'is', 'entreated', 'of', 'in', 'the', 'discourse', 'following', 'even', 'as', 'the', 'manner', 'of', 'building', 'vsed', 'at', 'this', 'day', 'the', 'varietie', 'of', 'countries', 'causeth', 'diuers', 'manner', 'of', 'labouring', 'of', 'the', 'earth']`
+
+`--- Token count of first chunk --- 41`
+
+### ⚠️ **Note of warning:** 
+
+gensim may look “stuck” the first time you import it. When you import `gensim` (especially on Windows), Python may appear to freeze for 10–60 seconds. This is normal and does **not** mean your code is broken.
 
 -   `gensim` loads compiled components used for Word2Vec
 -   on Windows, this initial load can be slow
@@ -369,7 +379,7 @@ Again, these thresholds are based on experience in working with Early Modern tex
 
 Create a new file: `step4_process_all_files.py`.
 
-``` Python
+``` python
 from pathlib import Path
 import nltk
 from gensim.utils import simple_preprocess
@@ -435,6 +445,430 @@ print("Total chunks kept (after filtering):", len(all_chunks))
 
 And run it. At this point, you can see:
 
--   total number of .txt files processed
+-   total number of .txt files processed: `516`
 
--   total number of chunks retained
+-   total chunks kept (after filtering): `539057`
+
+## Step 5: Train Word2 Vec on our Corpus
+
+In Week 07, we used Word2Vec as a way to represent meaning geometrically: words that occur in similar contexts end up close together in vector space.
+
+This week, we will use Word2Vec for a very practical purpose: expand a seed term into a list of conceptually related terms (so we can build a weakly supervised training set).
+
+Our seed term will be:
+
+-   `merchant`
+
+We will then have Word2Vec look for terms that are in the same (geometric) neighborhood as [merchant]{.underline}.
+
+OK, create a new file `step5_train_word2vec.py` and run it:
+
+``` Python
+from pathlib import Path
+import nltk
+from gensim.utils import simple_preprocess
+from gensim.models import Word2Vec
+
+nltk.download("punkt", quiet=True)
+nltk.download("punkt_tab", quiet=True)
+
+
+# Load and preprocess all texts (same logic as Step 4)
+
+
+TEXT_DIR = Path("texts")
+txt_paths = sorted(TEXT_DIR.glob("*.txt"))
+
+TARGET_WORDS = 120
+MIN_WORDS = 5
+MAX_WORDS = 200
+
+def chunk_text(text, target_words=120):
+    sentences = nltk.sent_tokenize(text)
+
+    chunks = []
+    current = []
+    current_len = 0
+
+    for sent in sentences:
+        words = sent.split()
+        if not words:
+            continue
+
+        if current_len + len(words) > target_words and current:
+            chunks.append(" ".join(current))
+            current = []
+            current_len = 0
+
+        current.append(sent)
+        current_len += len(words)
+
+    if current:
+        chunks.append(" ".join(current))
+
+    return chunks
+
+token_lists = []
+
+print(f"Found {len(txt_paths)} text files.")
+print("Building token lists...")
+
+for path in txt_paths:
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        text = f.read()
+
+    chunks = chunk_text(text, TARGET_WORDS)
+
+    for c in chunks:
+        tokens = simple_preprocess(c, deacc=True)
+        if MIN_WORDS <= len(tokens) <= MAX_WORDS:
+            token_lists.append(tokens)
+
+print("\nTotal tokenized chunks kept:", len(token_lists))
+
+################
+# Train Word2Vec (same logic as what we did in week 07)
+################
+
+print("\nTraining Word2Vec...")
+
+model = Word2Vec(
+    sentences=token_lists,
+    vector_size=200,   # dimensionality of word vectors
+    window=5,          # context window size
+    min_count=5,       # ignore very rare words
+    workers=4,         # adjust depending on your machine (see Week 07)
+    sg=1               # 1 = skip-gram; 0 = CBOW
+)
+
+# Save model
+
+Path("models").mkdir(exist_ok=True)
+model_path = Path("models") / "w2v_full.bin"
+model.save(str(model_path))
+
+print("\nModel saved to:", model_path)
+```
+
+This will take a little while (or more than a little while, depending on your machine). Once it's done, it will tell you: `Model saved to: models\w2v_full.bin`.
+
+### Checking the semantic neighborhood
+
+Now, we are going to load the model and ask for neighbors of our seed concept (that is, what words are near "merchant" in the vector space?).
+
+So, create another file, `step5b_query_word2vec.py`, and run it:
+
+``` Python
+from pathlib import Path
+from gensim.models import Word2Vec
+
+model_path = Path("models") / "w2v_full.bin"
+model = Word2Vec.load(str(model_path))
+
+seed = "merchant"
+
+if seed not in model.wv:
+    print(f"'{seed}' not found in the model vocabulary.")
+    print("This usually means min_count is too high or the corpus is too small.")
+else:
+    print(f"Top 30 words similar to '{seed}':")
+    for word, score in model.wv.similar_by_word(seed, topn=30):
+        print(f"  {word:20s} {score:.3f}")
+```
+
+My output is:
+
+`Top 30 words similar to 'merchant':`
+
+`marchant 0.736`
+
+`factor 0.702`
+
+`merchants 0.689`
+
+`jeweller 0.667`
+
+`customer 0.665`
+
+`purser 0.648`
+
+`tailor 0.639`
+
+`wholesale 0.637`
+
+`clothier 0.635`
+
+`worshipful 0.632`
+
+`vintner 0.629`
+
+`clothyer 0.620`
+
+`adventurer 0.620`
+
+`trade 0.620`
+
+`brewer 0.619`
+
+`venturer 0.617`
+
+`chapman 0.616`
+
+`factory 0.610`
+
+`seller 0.610`
+
+`staple 0.606`
+
+`tradesman 0.606`
+
+`adventurers 0.606`
+
+`sailor 0.604`
+
+`horner 0.603`
+
+`staplers 0.599`
+
+`easterling 0.599`
+
+`banker 0.598`
+
+`marchants 0.595`
+
+`goldsmith 0.594`
+
+`apprentice 0.592`
+
+What did you get? Anything surprising or simply unclear? The list here makes a lot of sense to me. A historical note: "Easterling merchants" would have been merchants from the Baltic regions, so that works in this list. What we have created is a [corpus-specific semantic map]{.underline} for the concept of "merchant."
+
+We will now use this list as a resource for weak supervision in the next steps in our classification task.
+
+## Step 6: Build a tiered keyword list (A/B/C)
+
+Word2Vec gives us a list of words “near” our seed term (`merchant`). But we do not want to blindly treat Word2Vec neighbors as truth. Instead, we use them as a *suggestions* and then impose an interpretive structure.
+
+A useful strategy is to split candidate terms into tiers:
+
+-   Tier A (high confidence): direct hits and spelling variants\
+    e.g., `merchant`, `marchant`, `merchants`, `marchants`
+-   Tier B (strongly related roles): terms that usually indicate commercial activity\
+    e.g., `factor`, `chapman`, `adventurer`, `venturer`, `staple`
+-   Tier C (maybe / adjacent): occupational neighborhood terms that might appear in commercial contexts but are often broader\
+    e.g., `tailor`, `clothier`, `haberdasher`
+
+This tiering is a modeling decision:
+
+-   Tier A+B will become our **CORE triggers** (high precision).
+
+-   Tier C will become a **MAYBE set** (to inspect separately).
+
+Create a new file step6_define_tiers.py and run it:
+
+``` Python
+# Tier A: direct spellings / variants of the seed concept
+TIER_A = {
+    "merchant", "merchants",
+    "marchant", "marchants"
+}
+
+# Tier B: closely related commercial roles / terms
+TIER_B = {
+    "factor", "chapman",
+    "adventurer", "adventurers",
+    "venturer", "venturers",
+    "staple", "staplers",
+    "trade",
+    "purser"
+}
+
+# Tier C: "maybe" occupational neighborhood (often adjacent, not always merchant-specific)
+TIER_C = {
+    "clothier", "clothyer",
+    "tailor", "tayler",
+    "haberdasher",
+    "goldsmith",
+    "vintner",
+    "brewer",
+    "banker",
+    "grazier",
+    "jeweller"
+}
+
+print("Tier A size:", len(TIER_A))
+print("Tier B size:", len(TIER_B))
+print("Tier C size:", len(TIER_C))
+
+print("\nTier A:", sorted(TIER_A))
+print("\nTier B:", sorted(TIER_B))
+print("\nTier C:", sorted(TIER_C))
+```
+
+Let’s walk through what each tier represents and why I set them up this way:
+
+-   Tier A: terms are direct references to the concept we care about (spelling variants common in early modern texts);
+
+-   Tier B: these terms describe occupations and roles that often involve trade; institutional or economic positions adjacent to merchants; vocabulary that appears frequently in commercial contexts. But they are not perfect synonyms for “merchant.”
+
+-   Tier C: these terms are occupational nouns that are often related to production, craft, or commerce, and they frequently appear near merchant discourse. But they are much more ambiguous.
+
+This is where interpretive judgment enters the pipeline:
+
+-    We decide what our category means.
+
+-    We decide which words count as strong evidence vs. weak evidence.
+
+-    We acknowledge that “merchant discourse” is fuzzy at the edges.
+
+## Step 7: Label chunks using tiered keywords (weak supervision)
+
+We now have:
+
+-   a large set of sentence-based chunks,
+-   tokenized into word lists,
+-   and a tiered list of keywords (A / B / C).
+
+The next step is to assign labels to chunks. This is where we can translate our decision making about tiers into rule-based labeling of the chunks. This is called **weak supervision**.
+
+### Our labeling rules
+
+For each chunk:
+
+-   CORE (label = 1)\
+    → contains *any* Tier A or Tier B word\
+    (high confidence merchant discourse)
+
+-   MAYBE (label = 2)\
+    → contains Tier C words *only*\
+    (ambiguous / adjacent cases)
+
+-   NEG (label = 0)\
+    → contains none of the above
+
+These rules encode our interpretive decisions from Step 6. OK, now we can get started with the actual labelling.
+
+### Labeling the full corpus
+
+Create a new file: `step7_label_chunks.py` and run it.
+
+``` Python
+from pathlib import Path
+import nltk
+from gensim.utils import simple_preprocess
+import json
+
+nltk.download("punkt", quiet=True)
+nltk.download("punkt_tab", quiet=True)
+
+#
+# Tier definitions (from Step 6)
+
+
+TIER_A = {
+    "merchant", "merchants",
+    "marchant", "marchants"
+}
+
+TIER_B = {
+    "factor", "chapman",
+    "adventurer", "adventurers",
+    "venturer", "venturers",
+    "staple", "staplers",
+    "trade", "purser"
+}
+
+TIER_C = {
+    "clothier", "clothyer",
+    "tailor", "tayler",
+    "haberdasher",
+    "goldsmith",
+    "vintner",
+    "brewer",
+    "banker",
+    "grazier",
+    "jeweller"
+}
+
+
+# Load and process texts
+
+
+TEXT_DIR = Path("texts")
+txt_paths = sorted(TEXT_DIR.glob("*.txt"))
+
+TARGET_WORDS = 120
+MIN_WORDS = 5
+MAX_WORDS = 200
+
+def chunk_text(text, target_words=120):
+    sentences = nltk.sent_tokenize(text)
+
+    chunks = []
+    current = []
+    current_len = 0
+
+    for sent in sentences:
+        words = sent.split()
+        if not words:
+            continue
+
+        if current_len + len(words) > target_words and current:
+            chunks.append(" ".join(current))
+            current = []
+            current_len = 0
+
+        current.append(sent)
+        current_len += len(words)
+
+    if current:
+        chunks.append(" ".join(current))
+
+    return chunks
+
+labeled = []
+
+print(f"Processing {len(txt_paths)} files...")
+
+for path in txt_paths:
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        text = f.read()
+
+    chunks = chunk_text(text, TARGET_WORDS)
+
+    for c in chunks:
+        tokens = simple_preprocess(c, deacc=True)
+        n_tokens = len(tokens)
+
+        if not (MIN_WORDS <= n_tokens <= MAX_WORDS):
+            continue
+
+        token_set = set(tokens)
+
+        if token_set & (TIER_A | TIER_B):
+            label = 1   # CORE
+        elif token_set & TIER_C:
+            label = 2   # MAYBE
+        else:
+            label = 0   # NEG
+
+        labeled.append((c, label))
+
+print("Total chunks labeled:", len(labeled))
+
+
+# Save labeled data
+
+
+Path("data").mkdir(exist_ok=True)
+
+with open(Path("data") / "merchant_labeled_chunks.json", "w", encoding="utf-8") as f:
+    json.dump(labeled, f, ensure_ascii=False)
+
+print("Saved labeled chunks to data/merchant_labeled_chunks.json")
+```
+
+What we did so far: we applied rules we designed, using the lexical triggers we chose, to create a labeled dataset. Obviously, these labels are imperfect and corpus-specific, but they are good enough to train a first classifier (that is, weak labels).
+
+At this point, we have turned unstructured text into a supervised learning dataset. All the steps that we are doing next (train/test splits, classifiers, confusion matrices) depend on the choices made up to here. We can't quite train a classifier, yet. First, we need to separate CORE, MAYBE, and NEG examples, inspect them, and think carefully about evaluation.
+
+This is where questions of [**precision** and **recall**](https://en.wikipedia.org/wiki/Precision_and_recall) enter the picture.

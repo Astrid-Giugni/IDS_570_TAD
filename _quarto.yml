@@ -39,4 +39,4 @@ website:
           - href: week-07-word2vec.qmd
             text: "Week 07: Word2Vec and LDA introduction"
           - href: week-08-09-word2vec.qmd
-            text: "Week 07: Weeks 08 & 9: Weak Supervision & Supervised Text Classification in Python"
+            text: "Week 08: Weeks 08 & 9: Weak Supervision & Supervised Text Classification in Python"
