@@ -351,8 +351,90 @@ Now run it. What we are doing:
 
 With `genism`, tokenization creates a "list-of list" representation of tokens.
 
-⚠️ **Note of warning:** gensim may look “stuck” the first time. When you import `gensim` (especially on Windows), Python may appear to freeze for 10–60 seconds. This is normal and does **not** mean your code is broken.
+⚠️ **Note of warning:** gensim may look “stuck” the first time you import it. When you import `gensim` (especially on Windows), Python may appear to freeze for 10–60 seconds. This is normal and does **not** mean your code is broken.
 
 -   `gensim` loads compiled components used for Word2Vec
 -   on Windows, this initial load can be slow
 -   Python does not print progress messages during this step If the terminal is not showing an error message, wait patiently before interrupting the process. Only stop the program if it has been unresponsive for several minutes.
+
+## Step 4: Process all Files and Filter Chunks
+
+So far, we have been working with a single example file to make sure that things are working. Now we are ready to apply the same segmentation and tokenization steps to the entire corpus. We are going to make the following sampling decisions:
+
+-   discard chunks that have fewer than 5 tokens (not enough context)
+
+-   discard chunks that have more than 200 tokens (too diffuse and hard to interpret)
+
+Again, these thresholds are based on experience in working with Early Modern texts: they are reasonable defaults to start with and we could always change them if things don't work out. The **goal** is to define a reasonable and usable training example.
+
+Create a new file: `step4_process_all_files.py`.
+
+``` Python
+from pathlib import Path
+import nltk
+from gensim.utils import simple_preprocess
+
+nltk.download("punkt", quiet=True)
+nltk.download("punkt_tab", quiet=True)
+
+TEXT_DIR = Path("texts")
+txt_paths = sorted(TEXT_DIR.glob("*.txt"))
+
+TARGET_WORDS = 120
+MIN_WORDS = 5
+MAX_WORDS = 200
+
+all_chunks = []
+all_token_lists = []
+
+def chunk_text(text, target_words=120):
+    sentences = nltk.sent_tokenize(text)
+
+    chunks = []
+    current = []
+    current_len = 0
+
+    for sent in sentences:
+        words = sent.split()
+        if not words:
+            continue
+
+        if current_len + len(words) > target_words and current:
+            chunks.append(" ".join(current))
+            current = []
+            current_len = 0
+
+        current.append(sent)
+        current_len += len(words)
+
+    if current:
+        chunks.append(" ".join(current))
+
+    return chunks
+
+print(f"Found {len(txt_paths)} text files.")
+print()
+
+for path in txt_paths:
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        text = f.read()
+
+    chunks = chunk_text(text, TARGET_WORDS)
+
+    for c in chunks:
+        tokens = simple_preprocess(c, deacc=True)
+        n_tokens = len(tokens)
+
+        # Filter by length
+        if MIN_WORDS <= n_tokens <= MAX_WORDS:
+            all_chunks.append(c)
+            all_token_lists.append(tokens)
+
+print("Total chunks kept (after filtering):", len(all_chunks))
+```
+
+And run it. At this point, you can see:
+
+-   total number of .txt files processed
+
+-   total number of chunks retained
