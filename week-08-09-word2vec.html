@@ -141,7 +141,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-08-09-word2vec.html">Week 08: Weeks 08 &amp; 9: Weak Supervision &amp; Supervised Text Classification in Python</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-08-09-word2vec.html">Week 08 and 09:Weak Supervision &amp; Supervised Text Classification in Python</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -236,7 +236,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./week-08-09-word2vec.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Week 08: Weeks 08 &amp; 9: Weak Supervision &amp; Supervised Text Classification in Python</span></a>
+ <span class="menu-text">Week 08 and 09:Weak Supervision &amp; Supervised Text Classification in Python</span></a>
   </div>
 </li>
       </ul>
@@ -250,7 +250,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-08-09-word2vec.html">Week 08: Weeks 08 &amp; 9: Weak Supervision &amp; Supervised Text Classification in Python</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-08-09-word2vec.html">Week 08 and 09:Weak Supervision &amp; Supervised Text Classification in Python</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Weeks 08 &amp; 9: Weak Supervision &amp; Supervised Text Classification in Python</h1>
 </div>
@@ -271,9 +271,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="weeks-8-and-9-goals" class="level1">
 <h1>Weeks 8 and 9 goals:</h1>
-<p>So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). During these two weeks we are going to make a key transition to supervised methods. I am grouping the two</p>
+<p>So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). During these two weeks we are going to make a key transition to supervised methods. I am grouping the two together because we need to take some time to think about how to <em>thoughtfully</em> set up the classification task–language is flexible and conceptual boundaries are porous!</p>
+<p>You can move across the code and steps for these two weeks at your own pace as you get familiar with the process. <u>In class</u>: I will move through the lectures <em>assuming</em> that everyone will finish working through this entire tutorial by March 6th (the end of week 9).</p>
 <p><u><strong>For Week 8</strong></u>:</p>
-<p>First, we will <strong>train a supervised classifier</strong> that learns to recognize a category of texts. In particular, we are going to figure out how to distinguish which texts engage in merchant-related discourse versus those that do not.</p>
+<p>The goal is to <strong>train a supervised classifier</strong> that learns to recognize a category of texts. In particular, we are going to figure out how to distinguish which texts engage in merchant-related discourse versus those that do not.</p>
 <p>In humanities (and social sciences), supervised learning is often the workhorse method for answering questions like:</p>
 <ul>
 <li>Is this text pro-trade or protectionist?</li>
@@ -281,30 +282,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Which documents are about X, versus not-X?</li>
 </ul>
 <p>But supervised learning raises a methodological question immediately: Where do labels come from?</p>
-<p>In humanities contexts, we often do <strong>not</strong> begin with a fully human-labeled dataset. So we will begin with <strong>weak supervision</strong>: we will generate <em>imperfect</em> labels using rules, then train a model, and validate it carefully.</p>
-<p><u><strong>For Week 9</strong></u><strong>:</strong></p>
-<p>kdfjalsd</p>
-<section id="week-8-what-we-are-going-to-do" class="level2">
-<h2 class="anchored" data-anchor-id="week-8-what-we-are-going-to-do">Week 8: what we are going to do</h2>
-<p>With this week’s tutorial, I want you to learn how to do the following:</p>
+<p>In humanities contexts, we often do <strong>not</strong> begin with a fully human-labeled dataset. So we will begin with <strong>weak supervision</strong>: we will generate <em>imperfect</em> labels using rules, then train a model, and validate it carefully. So, for week 8, you will:</p>
 <ol type="1">
-<li><strong>Define a category</strong> you want to detect in texts (a binary label). For us, it will be about the concept “merchant” (this will be our “seed” concept).</li>
-<li><strong>Segment texts</strong> into a usable unit of analysis (chunks).</li>
-<li>Create a <strong>weakly supervised training dataset</strong> using a seed term and related terms.</li>
-<li>Train a <strong>baseline text classifier</strong> in Python using:
+<li>Define a category you want to detect in texts (a binary label). For us, it will be about the concept “merchant” (this will be our “seed” concept).</li>
+<li>Segment texts into a usable unit of analysis (chunks).</li>
+<li>Create a weakly supervised training dataset using a seed term and related terms.</li>
+</ol>
+<p><u><strong>For Week 9</strong></u><strong>:</strong></p>
+<ol type="1">
+<li><p>Train a <strong>baseline text classifier</strong> in Python using:</p>
 <ul>
 <li>TF–IDF features</li>
 <li>Logistic regression</li>
 </ul></li>
-<li>Evaluate the classifier using:
+<li><p>Evaluate the classifier using:</p>
 <ul>
 <li>a train/test split</li>
 <li>a confusion matrix</li>
 <li>precision, recall, and F1 score</li>
 </ul></li>
-<li>Reflect on what “accuracy” means when labels come from weak supervision.</li>
+<li><p>Reflect on what “accuracy” means when labels come from weak supervision.</p></li>
 </ol>
-</section>
 <section id="big-picture-workflow" class="level2">
 <h2 class="anchored" data-anchor-id="big-picture-workflow">Big picture workflow</h2>
 <p>Here is the full pipeline we will build:</p>
@@ -337,6 +335,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul></li>
 </ul>
 <p>(We will install these together in the steps below.)</p>
+</section>
+<section id="week-8-part-iweek-supervision" class="level2">
+<h2 class="anchored" data-anchor-id="week-8-part-iweek-supervision">Week 8 (Part I–Week Supervision)</h2>
 </section>
 <section id="step-0-project-setup-environment" class="level2">
 <h2 class="anchored" data-anchor-id="step-0-project-setup-environment">Step 0: Project setup &amp; environment</h2>
@@ -1103,7 +1104,207 @@ e.g., <code>tailor</code>, <code>clothier</code>, <code>haberdasher</code></li>
 <p><code>Train size: 18196</code></p>
 <p><code>Test size : 4550</code></p>
 <p><code>MAYBE size: 510</code></p>
-<p>Now, add the following to step9 code to save the datasets:</p>
+</section>
+</section>
+<section id="week-9-part-iithe-classification-task" class="level2">
+<h2 class="anchored" data-anchor-id="week-9-part-iithe-classification-task">Week 9 (Part II–The Classification Task)</h2>
+<p>Now we are ready to create an actual classifier. So far, our training data looks like this:</p>
+<ul>
+<li><p>a chunk of text (a string),</p></li>
+<li><p>paired with a label (CORE = 1 or NEG = 0).</p></li>
+</ul>
+<p>We can read these strings directly (and have done so to check things along the way), but obviously computers cannot. A classifier cannot operate on words, sentences, or meanings. It can only operate on numbers. So before we train a model, we must transform text into a numerical representation as we have been doing in previous weeks. In particular, we will revisit our old friend <strong>TF-IDF</strong> (remember our work in <a href="https://astrid-giugni.github.io/IDS_570_TAD/week-04-representation.html">week 4</a>).</p>
+<p>Our next steps:</p>
+<ol type="1">
+<li><p>Convert text chunks into TF-IDF vectors. This helps emphasize <em>distinctive</em> vocabulary rather than common function words.</p></li>
+<li><p>Train a simple binary classifier</p></li>
+<li><p>Evaluate its performance on held-out data</p></li>
+<li><p>Apply it to the MAYBE set (review above if needed)</p></li>
+<li><p>Evaluate on what the model learned and what it did not, and see if it is useful for historical interpretation.</p></li>
+</ol>
+<p>As with week 8, we are going to build everything step by step. Create a new file, <code>step10_tfidf_representation.py</code>. Don’t run it yet, I will give explanations below and I want you to <strong>read</strong> and understand them before running the code.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.feature_extraction.text <span class="im">import</span> TfidfVectorizer</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>DATA_DIR <span class="op">=</span> Path(<span class="st">"data"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#We now load the datasets we prepared at the end of last week (step 9)</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DATA_DIR <span class="op">/</span> <span class="st">"train_core_vs_neg.json"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    train_data <span class="op">=</span> json.load(f)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DATA_DIR <span class="op">/</span> <span class="st">"test_core_vs_neg.json"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    test_data <span class="op">=</span> json.load(f)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Separate texts and labels</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>X_train_texts <span class="op">=</span> [t <span class="cf">for</span> (t, y) <span class="kw">in</span> train_data]</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> [y <span class="cf">for</span> (t, y) <span class="kw">in</span> train_data]</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>X_test_texts <span class="op">=</span> [t <span class="cf">for</span> (t, y) <span class="kw">in</span> test_data]</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> [y <span class="cf">for</span> (t, y) <span class="kw">in</span> test_data]</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Train size:"</span>, <span class="bu">len</span>(X_train_texts))</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Test size :"</span>, <span class="bu">len</span>(X_test_texts))</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="co">##### ==&gt; See explanation [A] below</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>vectorizer <span class="op">=</span> TfidfVectorizer(</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    lowercase<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    min_df<span class="op">=</span><span class="dv">5</span>,        <span class="co"># ignore very rare words</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    max_df<span class="op">=</span><span class="fl">0.9</span>       <span class="co"># ignore extremely common words; Explanation [B]</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> vectorizer.fit_transform(X_train_texts)</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> vectorizer.transform(X_test_texts)</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"TF-IDF matrix shapes:"</span>)</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"  Train:"</span>, X_train.shape)</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"  Test :"</span>, X_test.shape)</span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a><span class="co">#####  ==&gt; See explanation [C] below</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><p>Explanation [A]: after the lines above, we still have raw text, so we have to define a TF-IDF vectorizer.</p></li>
+<li><p>Explanation [B]: we set the parameters as <code>min_df=5</code> so that we remove words that appear <u>in fewer than</u> 5 documents; and <code>max_df=0.9</code> so that we remove words that appear in more than 90% of the documents.</p></li>
+<li><p>Explanation [C]: we fit the vectorizer on the training data <strong>only</strong>, then apply it to the test data. Each text chunk is now a numeric vector.</p></li>
+</ul>
+<p>We have:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Object</th>
+<th>What it contains</th>
+<th>What it’s used for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>X_train</code></td>
+<td>TF-IDF vectors</td>
+<td>Model learns patterns</td>
+</tr>
+<tr class="even">
+<td><code>y_train</code></td>
+<td>Labels</td>
+<td>Supervision signal</td>
+</tr>
+<tr class="odd">
+<td><code>X_test</code></td>
+<td>TF-IDF vectors</td>
+<td>Model makes predictions</td>
+</tr>
+<tr class="even">
+<td><code>y_test</code></td>
+<td>Labels</td>
+<td>We check how good predictions are</td>
+</tr>
+</tbody>
+</table>
+<p>I am going to belabor this more so that it’s fully clear, you can think of the X, Y part of this as:</p>
+<p>X = the input to the model → the text, represented numerically (TF-IDF vectors)</p>
+<p>y = the output we want the model to predict → the labels (CORE = 1, NEG = 0)</p>
+<p>So:</p>
+<p>X_train = text chunks (as numbers)</p>
+<p>y_train = labels for those chunks</p>
+<p>Where <strong>train</strong> = data the model is allowed to learn from; <strong>test</strong> = data the model has <em>never seen</em> before.</p>
+<p><u>When you run step 10</u>, your output will look like:</p>
+<p><code>Train size: 36874</code></p>
+<p><code>Test size : 9218</code></p>
+<p><code>TF-IDF matrix shapes:</code></p>
+<p><code>Train: (36874, 27806)</code></p>
+<p><code>Test : (9218, 27806)</code></p>
+<p>This is reassuring as it is what we want: we have the 80/20 split we created in step 9: 36,874 chunks were used to train the model; 9,218 chunks were held out for evaluation. So far so good.</p>
+<p>In addition, the TF-IDF matrix has the shape (number of documents) by (number of features), that is (36874, 27806) translates to a matrix that has:</p>
+<ul>
+<li><p>36874 rows, where each row is for a training chunk. Each row is a TF-IDF vector representing a chunk.</p></li>
+<li><p>27,806 columns, where each column is for a word feature. Each column corresponds to a specific word in the vocabulary.</p></li>
+</ul>
+<section id="looking-ahead-to-the-next-step-confusion-matrix" class="level4">
+<h4 class="anchored" data-anchor-id="looking-ahead-to-the-next-step-confusion-matrix">Looking ahead to the next step (confusion matrix):</h4>
+<p>Later, when we compute a confusion matrix:</p>
+<ul>
+<li><p>predictions come from <code>X_test</code></p></li>
+<li><p>“true labels” come from <code>y_test</code></p></li>
+</ul>
+<p>The confusion matrix will help us understand how often the model’s predictions on unseen data match the labels produced by our weak supervision rules. I will remind you below, but you want to start keeping in mind that the confusion matrix does <em>not</em> measure truth, it just measures agreement with a labeling scheme.</p>
+</section>
+<section id="train-a-classifier" class="level3">
+<h3 class="anchored" data-anchor-id="train-a-classifier">Train a classifier:</h3>
+<p>Now we can <em>finally</em> train a classifier using a <strong>logistic regression</strong> model. We discussed how a logistics regression works in class (or will do so in Week 9, if you are reading ahead). If you want an <strong>advanced</strong> version of this, see <a href="https://web.stanford.edu/~jurafsky/slp3/4.pdf">chapter 4</a> in Jurafsky and Martin.</p>
+<ul>
+<li>Note: we are <strong>not</strong> going to go into the details covered in section 4.4 forward. For the simple reason that it would require more mathematical background than I assume for the class to discuss the loss function and gradients. (We will touch on the materials from section 4.9 on how to build a confusion matrix.)</li>
+</ul>
+<p>There are many classifiers we could use. We choose logistic regression for three main reasons:</p>
+<ul>
+<li>It is simple and well understood. It works well with a binary task such as ours: CORE (1) vs NEG (0). It models:</li>
+</ul>
+<p>Logistic regression is literally designed to model:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode latex code-with-copy"><code class="sourceCode latex"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a> P(y=1∣x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>So it gives you: a probability of CORE for each chunk (via <code>predict_proba</code> ) and a clean decision rule (e.g., “predict CORE if probability ≥ 0.5”).</p>
+<ul>
+<li>It works very well with TF-IDF features. TF-IDF produces very high-dimensional vectors (tens of thousands to 100k+ features) which are mostly zeros (sparse). Linear models such as logistic regression work well for these situations (they are fast to train and are stable).</li>
+</ul>
+<p>There <em>are</em> other options (linear support vector machine or naive Bayes), but we choose logistic regression because it is a strong, interpretable baseline for binary text classification with TF-IDF features. TF-IDF creates high-dimensional sparse vectors, and linear models are known to perform very well in this setting. Logistic regression also outputs probabilities, which lets us interpret model confidence and apply the model to ambiguous cases (our MAYBE set).</p>
+<p>Create a new file, <code>step11_train_classifier.py</code>. We will build the script in chunks with explanations at each step and you will run it once it’s all put together.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> (</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    confusion_matrix,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    classification_report,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    roc_auc_score</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Next, we load the data and use the TF-IDF representations we created in <u>step 10</u> above.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.feature_extraction.text <span class="im">import</span> TfidfVectorizer</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>DATA_DIR <span class="op">=</span> Path(<span class="st">"data"</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DATA_DIR <span class="op">/</span> <span class="st">"train_core_vs_neg.json"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    train_data <span class="op">=</span> json.load(f)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DATA_DIR <span class="op">/</span> <span class="st">"test_core_vs_neg.json"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    test_data <span class="op">=</span> json.load(f)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>X_train_texts <span class="op">=</span> [t <span class="cf">for</span> (t, y) <span class="kw">in</span> train_data]</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> [y <span class="cf">for</span> (t, y) <span class="kw">in</span> train_data]</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>X_test_texts <span class="op">=</span> [t <span class="cf">for</span> (t, y) <span class="kw">in</span> test_data]</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> [y <span class="cf">for</span> (t, y) <span class="kw">in</span> test_data]</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>vectorizer <span class="op">=</span> TfidfVectorizer(</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    lowercase<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    min_df<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    max_df<span class="op">=</span><span class="fl">0.9</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> vectorizer.fit_transform(X_train_texts)</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> vectorizer.transform(X_test_texts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Now we actually <u>train</u> the classifier (yes, I know, finally!). What will happen in this section of the script: the model examines the TF-IDF features and it learns the weights that separate CORE from NEG. We then make predictions on the test set.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>clf <span class="op">=</span> LogisticRegression(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    max_iter<span class="op">=</span><span class="dv">1000</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    n_jobs<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>clf.fit(X_train, y_train)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co">#test set predictions</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> clf.predict(X_test)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>y_prob <span class="op">=</span> clf.predict_proba(X_test)[:, <span class="dv">1</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>At this point we evaluate our classifier with a confusion matrix that compares:</p>
+<ul>
+<li><p>true labels (<code>y_test</code>)</p></li>
+<li><p>model predictions (<code>y_pred</code>)</p></li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_pred)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Confusion matrix:"</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>I will go over what this does in more detail below (step 12). But the next step is to include two more evaluation components. <u>First</u>, a classification report that summarizes how reliable positive predictions are (= <strong>precision</strong>); how many positives the model found (= <strong>recall</strong>); and the balance of precision and recall (<strong>F1-score</strong>). <u>Second</u>, <a href="https://library.virginia.edu/data/articles/roc-curves-and-auc-for-models-used-for-binary-classification"><strong>ROC AUC</strong></a>, which measures how well the model separates CORE from NEG across all thresholds.</p>
+<p>Add the next bit of code to your script and then run everything in <code>step11_train_classifier.py</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Classification report:"</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_test, y_pred))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">###ROC AUC</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>auc <span class="op">=</span> roc_auc_score(y_test, y_prob)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"ROC AUC:"</span>, <span class="bu">round</span>(auc, <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 
 </section>
