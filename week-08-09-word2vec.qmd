@@ -368,7 +368,7 @@ The output should look like:
 
 `--- Token count of first chunk --- 41`
 
-### ⚠️ **Note of warning:** 
+### ⚠️ **Note of warning:**
 
 gensim may look “stuck” the first time you import it. When you import `gensim` (especially on Windows), Python may appear to freeze for 10–60 seconds. This is normal and does **not** mean your code is broken.
 
@@ -472,7 +472,7 @@ We will then have Word2Vec look for terms that are in the same (geometric) neigh
 
 OK, create a new file `step5_train_word2vec.py` and run it:
 
-``` Python
+``` python
 from pathlib import Path
 import nltk
 from gensim.utils import simple_preprocess
@@ -567,7 +567,7 @@ Now, we are going to load the model and ask for neighbors of our seed concept (t
 
 So, create another file, `step5b_query_word2vec.py`, and run it:
 
-``` Python
+``` python
 from pathlib import Path
 from gensim.models import Word2Vec
 
@@ -674,7 +674,7 @@ This tiering is a modeling decision:
 
 Create a new file step6_define_tiers.py and run it:
 
-``` Python
+``` python
 # Tier A: direct spellings / variants of the seed concept
 TIER_A = {
     "merchant", "merchants",
@@ -723,11 +723,11 @@ Let’s walk through what each tier represents and why I set them up this way:
 
 This is where interpretive judgment enters the pipeline:
 
--    We decide what our category means.
+-   We decide what our category means.
 
--    We decide which words count as strong evidence vs. weak evidence.
+-   We decide which words count as strong evidence vs. weak evidence.
 
--    We acknowledge that “merchant discourse” is fuzzy at the edges.
+-   We acknowledge that “merchant discourse” is fuzzy at the edges.
 
 ## Step 7: Label chunks using tiered keywords (weak supervision)
 
@@ -757,7 +757,7 @@ These rules encode our interpretive decisions from Step 6. OK, now we can get st
 
 Create a new file: `step7_label_chunks.py` and run it.
 
-``` Python
+``` python
 from pathlib import Path
 import nltk
 from gensim.utils import simple_preprocess
@@ -901,7 +901,7 @@ Instead, we treat the MAYBE texts as a set of texts to which we apply the traine
 
 Create a new file `step9_prepare_datasets.py` . **Before** you run it, read the explanation about the NEG step after the code sample. *Then* run it.
 
-``` Python
+``` python
 import json
 from pathlib import Path
 import random
@@ -1006,7 +1006,7 @@ Our next steps:
 
 As with week 8, we are going to build everything step by step. Create a new file, `step10_tfidf_representation.py`. Don't run it yet, I will give explanations below and I want you to **read** and understand them before running the code.
 
-``` Python
+``` python
 import json
 from pathlib import Path
 
@@ -1051,7 +1051,7 @@ print("  Test :", X_test.shape)
 
 -   Explanation \[B\]: we set the parameters as `min_df=5` so that we remove words that appear [in fewer than]{.underline} 5 documents; and `max_df=0.9` so that we remove words that appear in more than 90% of the documents.
 
-Explanation \[C\]: we fit the vectorizer on the training data **only**, then apply it to the test data. Each text chunk is now a numeric vector.
+-   Explanation \[C\]: we fit the vectorizer on the training data **only**, then apply it to the test data. Each text chunk is now a numeric vector.
 
 We have:
 
@@ -1076,12 +1076,137 @@ y_train = labels for those chunks
 
 Where **train** = data the model is allowed to learn from; **test** = data the model has *never seen* before.
 
+[When you run step 10]{.underline}, your output will look like:
+
+`Train size: 36874`
+
+`Test size : 9218`
+
+`TF-IDF matrix shapes:`
+
+`Train: (36874, 27806)`
+
+`Test : (9218, 27806)`
+
+This is reassuring as it is what we want: we have the 80/20 split we created in step 9: 36,874 chunks were used to train the model; 9,218 chunks were held out for evaluation. So far so good.
+
+In addition, the TF-IDF matrix has the shape (number of documents) by (number of features), that is (36874, 27806) translates to a matrix that has:
+
+-   36874 rows, where each row is for a training chunk. Each row is a TF-IDF vector representing a chunk.
+
+-   27,806 columns, where each column is for a word feature. Each column corresponds to a specific word in the vocabulary.
+
 #### Looking ahead to the next step (confusion matrix):
 
 Later, when we compute a confusion matrix:
 
--    predictions come from `X_test`
+-   predictions come from `X_test`
 
 -   “true labels” come from `y_test`
 
 The confusion matrix will help us understand how often the model’s predictions on unseen data match the labels produced by our weak supervision rules. I will remind you below, but you want to start keeping in mind that the confusion matrix does *not* measure truth, it just measures agreement with a labeling scheme.
+
+### Train a classifier:
+
+Now we can *finally* train a classifier using a **logistic regression** model. We discussed how a logistics regression works in class (or will do so in Week 9, if you are reading ahead). If you want an **advanced** version of this, see [chapter 4](https://web.stanford.edu/~jurafsky/slp3/4.pdf) in Jurafsky and Martin.
+
+-   Note: we are **not** going to go into the details covered in section 4.4 forward. For the simple reason that it would require more mathematical background than I assume for the class to discuss the loss function and gradients. (We will touch on the materials from section 4.9 on how to build a confusion matrix.)
+
+There are many classifiers we could use. We choose logistic regression for three main reasons:
+
+-   It is simple and well understood. It works well with a binary task such as ours: CORE (1) vs NEG (0). It models:
+
+Logistic regression is literally designed to model:
+
+``` Latex
+ P(y=1∣x)
+```
+
+So it gives you: a probability of CORE for each chunk (via `predict_proba` ) and a clean decision rule (e.g., “predict CORE if probability ≥ 0.5”).
+
+-   It works very well with TF-IDF features. TF-IDF produces very high-dimensional vectors (tens of thousands to 100k+ features) which are mostly zeros (sparse). Linear models such as logistic regression work well for these situations (they are fast to train and are stable).
+
+There *are* other options (linear support vector machine or naive Bayes), but we choose logistic regression because it is a strong, interpretable baseline for binary text classification with TF-IDF features. TF-IDF creates high-dimensional sparse vectors, and linear models are known to perform very well in this setting. Logistic regression also outputs probabilities, which lets us interpret model confidence and apply the model to ambiguous cases (our MAYBE set).
+
+Create a new file, `step11_train_classifier.py`. We will build the script in chunks with explanations at each step and you will run it once it's all put together.
+
+``` Python
+from pathlib import Path
+import json
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    confusion_matrix,
+    classification_report,
+    roc_auc_score
+)
+```
+
+Next, we load the data and use the TF-IDF representations we created in [step 10]{.underline} above.
+
+``` python
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+DATA_DIR = Path("data")
+
+with open(DATA_DIR / "train_core_vs_neg.json", "r", encoding="utf-8") as f:
+    train_data = json.load(f)
+
+with open(DATA_DIR / "test_core_vs_neg.json", "r", encoding="utf-8") as f:
+    test_data = json.load(f)
+
+X_train_texts = [t for (t, y) in train_data]
+y_train = [y for (t, y) in train_data]
+
+X_test_texts = [t for (t, y) in test_data]
+y_test = [y for (t, y) in test_data]
+
+vectorizer = TfidfVectorizer(
+    lowercase=True,
+    min_df=5,
+    max_df=0.9
+)
+
+X_train = vectorizer.fit_transform(X_train_texts)
+X_test = vectorizer.transform(X_test_texts)
+```
+
+Now we actually [train]{.underline} the classifier (yes, I know, finally!). What will happen in this section of the script: the model examines the TF-IDF features and it learns the weights that separate CORE from NEG. We then make predictions on the test set.
+
+``` Python
+clf = LogisticRegression(
+    max_iter=1000,
+    n_jobs=1
+)
+
+clf.fit(X_train, y_train)
+
+#test set predictions
+y_pred = clf.predict(X_test)
+y_prob = clf.predict_proba(X_test)[:, 1]
+```
+
+At this point we evaluate our classifier with a confusion matrix that compares:
+
+-   true labels (`y_test`)
+
+-   model predictions (`y_pred`)
+
+``` Python
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion matrix:")
+print(cm)
+```
+
+I will go over what this does in more detail below (step 12). But the next step is to include two more evaluation components. [First]{.underline}, a classification report that summarizes how reliable positive predictions are (= **precision**); how many positives the model found (= **recall**); and the balance of precision and recall (**F1-score**). [Second]{.underline}, [**ROC AUC**](https://library.virginia.edu/data/articles/roc-curves-and-auc-for-models-used-for-binary-classification), which measures how well the model separates CORE from NEG across all thresholds.
+
+Add the next bit of code to your script and then run everything in `step11_train_classifier.py`.
+
+``` Python
+print("\nClassification report:")
+print(classification_report(y_test, y_pred))
+
+###ROC AUC
+auc = roc_auc_score(y_test, y_prob)
+print("ROC AUC:", round(auc, 3))
+```
