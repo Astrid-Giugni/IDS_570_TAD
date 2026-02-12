@@ -1094,7 +1094,7 @@ In addition, the TF-IDF matrix has the shape (number of documents) by (number of
 
 -   36874 rows, where each row is for a training chunk. Each row is a TF-IDF vector representing a chunk.
 
--   27,806 columns, where each column is for a word feature. Each column corresponds to a specific word in the vocabulary.
+-   27,806 columns, where each column is for a word feature. Each column corresponds to a specific word in the vocabulary. Yes, we have 27,806 features! That's not a problem: remember, TF-IDF matrices are sparse, linear models do well with this kind of setting (see the info below about the choice of logistic regression), and this is normal for text data.
 
 #### Looking ahead to the next step (confusion matrix):
 
@@ -1118,19 +1118,21 @@ There are many classifiers we could use. We choose logistic regression for three
 
 Logistic regression is literally designed to model:
 
-``` Latex
+``` latex
  P(y=1∣x)
 ```
 
-So it gives you: a probability of CORE for each chunk (via `predict_proba` ) and a clean decision rule (e.g., “predict CORE if probability ≥ 0.5”).
+So it gives you: a probability of CORE for each chunk (via `predict_proba` ) and a clean decision rule: “predict CORE if probability ≥ 0.5”.
 
 -   It works very well with TF-IDF features. TF-IDF produces very high-dimensional vectors (tens of thousands to 100k+ features) which are mostly zeros (sparse). Linear models such as logistic regression work well for these situations (they are fast to train and are stable).
+
+-   **Note:** the default threshold in scikit-learn is 0.5. As we saw in class, logistic regression models the log-odds of class membership and a probability of 0.5 corresponds to equal odds. This is reasonable when classes are roughly balanced in the training setup (recall that we decided to downsample the negatives above). We *could* change the threshold if we had good reasons to do so. I will bring this point up again at the end.
 
 There *are* other options (linear support vector machine or naive Bayes), but we choose logistic regression because it is a strong, interpretable baseline for binary text classification with TF-IDF features. TF-IDF creates high-dimensional sparse vectors, and linear models are known to perform very well in this setting. Logistic regression also outputs probabilities, which lets us interpret model confidence and apply the model to ambiguous cases (our MAYBE set).
 
 Create a new file, `step11_train_classifier.py`. We will build the script in chunks with explanations at each step and you will run it once it's all put together.
 
-``` Python
+``` python
 from pathlib import Path
 import json
 
@@ -1173,7 +1175,7 @@ X_test = vectorizer.transform(X_test_texts)
 
 Now we actually [train]{.underline} the classifier (yes, I know, finally!). What will happen in this section of the script: the model examines the TF-IDF features and it learns the weights that separate CORE from NEG. We then make predictions on the test set.
 
-``` Python
+``` python
 clf = LogisticRegression(
     max_iter=1000,
     n_jobs=1
@@ -1192,7 +1194,7 @@ At this point we evaluate our classifier with a confusion matrix that compares:
 
 -   model predictions (`y_pred`)
 
-``` Python
+``` python
 cm = confusion_matrix(y_test, y_pred)
 print("Confusion matrix:")
 print(cm)
@@ -1202,7 +1204,7 @@ I will go over what this does in more detail below (step 12). But the next step 
 
 Add the next bit of code to your script and then run everything in `step11_train_classifier.py`.
 
-``` Python
+``` python
 print("\nClassification report:")
 print(classification_report(y_test, y_pred))
 
@@ -1210,3 +1212,207 @@ print(classification_report(y_test, y_pred))
 auc = roc_auc_score(y_test, y_prob)
 print("ROC AUC:", round(auc, 3))
 ```
+
+### Evaluating the classifier (step 12):
+
+Now that we have trained the classifier, computed the confusion matrix and ROC AUC, we can evaluate how closely do the model’s predictions agree with the labels in our test set, given a particular decision rule.
+
+Let's start with the confusion matrix. When you ran step 11, you should have gotten something like this:
+
+\[\[6943 27\]
+
+\[ 367 1881\]\]
+
+What does this mean? I am going to present it as a table to make its entries legible:
+
+|                     | Predicted NEG (0) | Predicted CORE (1) |
+|---------------------|-------------------|--------------------|
+| **Actual NEG (0)**  | 6943              | 27                 |
+| **Actual CORE (1)** | 367               | 1881               |
+
+Each cell tells us something different about model behavior. By convention in scikit-learn:
+
+-   Rows = actual (true) labels
+
+-   Columns = predicted labels
+
+So we can rewrite it structurally as:
+
+\begin{bmatrix} \text{TN} & \text{FP} \\ \text{FN} & \text{TP} \end{bmatrix}
+
+To make this clear:
+
+-   True negatives (TN) = 6943 → 6943 texts were labeled NEG in the test set, and the model correctly predicted NEG for them.
+
+-    False Positive (FP) = 27 → 27 texts were labeled NEG in the test set, and the model incorrectly predicted CORE for them.
+
+-    False Negatives (FN) = 367 → 367 texts were labeled CORE in the test set, and the model incorrectly predicted NEG for them.
+
+-    True Positives (TP) = 1881 → 1881 texts were labeled CORE in the test set, and the model correctly predicted CORE for them.
+
+**Interpretation:** our decision threshold in the logistic regression was 0.5. That is, if the predicted probability ≥ 0.5, label the text CORE; if the predicted probability \< 0.5, label the text NEG. The model is very good at recognizing texts that do *not* match our merchant criteria. It's fairly good at avoiding predicting as positive texts that are labelled negative (27 false positives), but we do lose a fair amount of CORE labeled texts (367).
+
+The confusion matrix is not the only validation tool we have. Let's look at the classification report. You should have gotten something like this:
+
+### Classification Report
+
+| Class | Precision | Recall | F1-Score | Support |
+|-------|-----------|--------|----------|---------|
+| 0     | 0.95      | 1.00   | 0.97     | 6,970   |
+| 1     | 0.99      | 0.84   | 0.91     | 2,248   |
+
+What do these numbers mean?
+
+[**For CORE (class 1)**]{.underline}**:**
+
+[Precision]{.underline} (1) = 0.99
+
+Formula: $\text{Precision} = \frac{TP}{TP+FP}$
+
+In our case, this tells us that when the model predicts CORE, it is correct 99% of the time. This matches your tiny number of false positives (27).
+
+[Recall]{.underline} (1) = 084
+
+The formula: $\text{Recall} = \frac{TP}{TP + FN}$
+
+The model finds 84% of the CORE texts and it misses 16% (those 367 false negatives).
+
+[F1-score]{.underline} (1) = 0.91
+
+F1 balances precision and recall.
+
+The formula: $F1 = 2 \cdot \frac{Precision \cdot Recall}{Precision + Recall}$
+
+0.91 is a strong F1 score, but lower than precision because recall is lower.
+
+I will leave it up to you to think through the values for the NEG class.
+
+As part of our report, we also had the following values:
+
+| Metric       | Precision  | Recall | F1-Score | Support (total) |
+|--------------|------------|--------|----------|-----------------|
+| Accuracy     |            |        | 0.96\*   | 9,218           |
+| Macro avg    | 0.97       | 0.92   | 0.94     | 9,218           |
+| Weighted avg | 0.96       | 0.96   | 0.96     | 9,218           |
+
+(\*) I know, I know, this is weird: the placement of **accuracy** in the F1-score column is just a formatting convention from sklearn's classification report. The 0.96 value had to go somewhere, and they chose that column.
+
+So, what is actually going on besides formatting weirdness:
+
+[Accuracy]{.underline} = 0.96
+
+Formula: $\frac{TP + TN}{\text{Total}}$
+
+Interpretation: the model agrees with the test labels 96% of the time. In general accuracy alone is not very informative in imbalanced tasks, which is why we look at precision and recall. But recall that we downsampled NEG to match CORE, so we had a balanced training set. Nonetheless, precision and recall are still very useful in understanding the *kinds* of errors the model is making.
+
+### Macro average
+
+Here we take a simple average of class metrics to treat both classes equally:
+
+$$
+\frac{Metric_0 + Metric_1}{2}
+$$
+
+### Weighted average
+
+Weights each class by its support (number of examples). Since NEG is larger (6970 vs 2248), the weights workout to:
+
+weight_neg = $\frac{6970}{9218}$ or about 0.756
+
+weight_core = $\frac{2248}{9218}$ or about 0.244
+
+The weighted average multiplies each class’s score by the proportion of examples in that class. Since NEG makes up about 76% of the test set and performs very well, the weighted average is pulled toward the NEG score and ends up close to overall accuracy.
+
+[For example, the weighted F1]{.underline}:
+
+Weighted F1 is:
+
+$(w_0 \times F1_0) + (w_1 \times F1_1)$
+
+Substitute values:
+
+$(0.756 \times 0.97) + (0.244 \times 0.91)$
+
+Compute each term:
+
+$0.756 \times 0.97 ≈ 0.733$
+
+$0.244 \times 0.91 ≈ 0.222$
+
+Add them and round $≈0.96$
+
+The weighted F1-score is close to overall accuracy because the model performs strongly on both classes and the larger class (NEG) dominates the weighting.
+
+### ROC AUC = 0.996
+
+Now the most important conceptual point in evaluating our model: ROC AUC does not use the 0.5 threshold. It evaluates how well the model separates the two classes across all possible thresholds.
+
+How does ROC AUC work? Instead of using one specific cutoff, it changes the threshold from 0 to 1 and tests how well the model separates CORE from NEG *at each threshold.* Then it evaluates performance across all those possibilities.
+
+Splitting this up into its components:
+
+**ROC** stands for Receiver Operating Characteristic.
+
+It plots:
+
+-    TPR: True Positive Rate (same as Recall) on the y-axis
+
+-    FPR: False Positive Rate on the x-axis
+
+As the threshold moves from 0 to 1, the curve traces out the model's performance. If the model:
+
+-    perfectly separates classes → curve hugs the top-left corner (high TPR, low FPR at all thresholds)
+
+-    guesses randomly → curve follows a diagonal line (50/50 at every threshold)
+
+**AUC** stands for Area Under the Curve. It compresses all this information into a single number (for us, 0.996). AUC is literally the area under the ROC curve. It's the integral of the True Positive Rate with respect to the False Positive Rate as we vary the threshold. This is why AUC ranges from 0.5 (diagonal line, area of triangle = 0.5) to 1.0 (perfect corner, full square = 1.0).
+
+**Math aside:** you don't need to worry about computing this ourself, but here's the integral:
+
+$$\text{AUC} = \int_0^1 \text{TPR}(t) \, d(\text{FPR}(t))$$
+
+You can think of it this way: if I randomly choose one CORE chunk and one NEG chunk, the AUC tells you the probability that the model assigns a higher probability to the CORE chunk.
+
+Just a reminder: you can see a full [**explanation here**](https://library.virginia.edu/data/articles/roc-curves-and-auc-for-models-used-for-binary-classification).
+
+We have a value of 0.996, which means that the model almost perfectly ranks CORE texts above NEG texts. This is good! Unlike accuracy or F1-score which depend on choosing a threshold, ROC AUC tells us whether our weak supervision approach is fundamentally learning the right pattern. A high AUC (like 0.996) means our lexicon-based labels are capturing something real about "merchant" discourse.
+
+### Coming back to threshold choice:
+
+Remember that I mentioned that we could change the threshold for the classification task if we had a good reason to do so. We now want to go back and think through this issue.
+
+First of all, you might want to ask: Does high ROC-AUC mean that our 0.5 threshold performed well? We want to be careful with this question:
+
+Our high ROC-AUC (0.996) tells us the model is excellent at ranking texts. It consistently assigns higher probabilities to CORE than NEG. This means that if you sorted all chunks by their probability scores, true CORE chunks would appear near the top and true NEG chunks near the bottom 99.6% of the time, regardless of where you draw the threshold line.
+
+-   True CORE chunks get higher probability scores than true NEG chunks (ranking). Whether they cross the 0.5 threshold is a separate question (classification)
+
+As an example, you could have:
+
+CORE chunk with prob = 0.48 (ranked above NEG chunks, but classified as NEG at 0.5) NEG chunk with prob = 0.02 (ranked below CORE chunks, classified correctly as NEG)
+
+The model correctly ranked them (CORE \> NEG), which gives high AUC, even though the CORE chunk was misclassified at the 0.5 threshold.
+
+This is important because we do **not** want to misread a high AUC as indicating that we picked (or were given by default) the optimal threshold for our specific research goals. As I mentioned earlier, the 0.5 threshold is a reasonable default when:
+
+-   Classes are balanced (we downsampled)
+
+-   False positives and false negatives are equally costly (In general, this depends on your research question)
+
+Now, we *might* want to explore other thresholds. Then we *could* pick one of the following approaches:
+
+-   Plot precision and recall at different thresholds
+
+-   Optimize for F1-score
+
+-   Make a domain-driven decision based on your research needs (if you ask me, this is always a question you should have in mind, but, at the end of the day, I am a humanist..)
+
+I am going to give you a couple of scenarios where this might be reasonable to do:
+
+-   I sometimes need a discovery tool to find texts (that talk about "merchant" concepts) that I might have missed. I would then lower the threshold (0.3-0.4) for high recall
+
+-   On the other hand, if I am selecting passages for close reading and want only clear examples of the discourse, then I would pick a higher threshold (0.6-0.7) for high precision
+
+-   If you want a balanced approach for further analysis (our case) → 0.5 is reasonable
+
+For our purposes, we'll stick with 0.5 since our evaluation metrics (precision, recall, F1) all look strong at this threshold, and it aligns with our balanced training set.
