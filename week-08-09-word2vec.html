@@ -104,6 +104,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -1215,7 +1244,7 @@ e.g., <code>tailor</code>, <code>clothier</code>, <code>haberdasher</code></li>
 <p>In addition, the TF-IDF matrix has the shape (number of documents) by (number of features), that is (36874, 27806) translates to a matrix that has:</p>
 <ul>
 <li><p>36874 rows, where each row is for a training chunk. Each row is a TF-IDF vector representing a chunk.</p></li>
-<li><p>27,806 columns, where each column is for a word feature. Each column corresponds to a specific word in the vocabulary.</p></li>
+<li><p>27,806 columns, where each column is for a word feature. Each column corresponds to a specific word in the vocabulary. Yes, we have 27,806 features! That’s not a problem: remember, TF-IDF matrices are sparse, linear models do well with this kind of setting (see the info below about the choice of logistic regression), and this is normal for text data.</p></li>
 </ul>
 <section id="looking-ahead-to-the-next-step-confusion-matrix" class="level4">
 <h4 class="anchored" data-anchor-id="looking-ahead-to-the-next-step-confusion-matrix">Looking ahead to the next step (confusion matrix):</h4>
@@ -1238,9 +1267,10 @@ e.g., <code>tailor</code>, <code>clothier</code>, <code>haberdasher</code></li>
 </ul>
 <p>Logistic regression is literally designed to model:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode latex code-with-copy"><code class="sourceCode latex"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a> P(y=1∣x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>So it gives you: a probability of CORE for each chunk (via <code>predict_proba</code> ) and a clean decision rule (e.g., “predict CORE if probability ≥ 0.5”).</p>
+<p>So it gives you: a probability of CORE for each chunk (via <code>predict_proba</code> ) and a clean decision rule: “predict CORE if probability ≥ 0.5”.</p>
 <ul>
-<li>It works very well with TF-IDF features. TF-IDF produces very high-dimensional vectors (tens of thousands to 100k+ features) which are mostly zeros (sparse). Linear models such as logistic regression work well for these situations (they are fast to train and are stable).</li>
+<li><p>It works very well with TF-IDF features. TF-IDF produces very high-dimensional vectors (tens of thousands to 100k+ features) which are mostly zeros (sparse). Linear models such as logistic regression work well for these situations (they are fast to train and are stable).</p></li>
+<li><p><strong>Note:</strong> the default threshold in scikit-learn is 0.5. As we saw in class, logistic regression models the log-odds of class membership and a probability of 0.5 corresponds to equal odds. This is reasonable when classes are roughly balanced in the training setup (recall that we decided to downsample the negatives above). We <em>could</em> change the threshold if we had good reasons to do so. I will bring this point up again at the end.</p></li>
 </ul>
 <p>There <em>are</em> other options (linear support vector machine or naive Bayes), but we choose logistic regression because it is a strong, interpretable baseline for binary text classification with TF-IDF features. TF-IDF creates high-dimensional sparse vectors, and linear models are known to perform very well in this setting. Logistic regression also outputs probabilities, which lets us interpret model confidence and apply the model to ambiguous cases (our MAYBE set).</p>
 <p>Create a new file, <code>step11_train_classifier.py</code>. We will build the script in chunks with explanations at each step and you will run it once it’s all put together.</p>
@@ -1305,6 +1335,211 @@ e.g., <code>tailor</code>, <code>clothier</code>, <code>haberdasher</code></li>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">###ROC AUC</span></span>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>auc <span class="op">=</span> roc_auc_score(y_test, y_prob)</span>
 <span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"ROC AUC:"</span>, <span class="bu">round</span>(auc, <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="evaluating-the-classifier-step-12" class="level3">
+<h3 class="anchored" data-anchor-id="evaluating-the-classifier-step-12">Evaluating the classifier (step 12):</h3>
+<p>Now that we have trained the classifier, computed the confusion matrix and ROC AUC, we can evaluate how closely do the model’s predictions agree with the labels in our test set, given a particular decision rule.</p>
+<p>Let’s start with the confusion matrix. When you ran step 11, you should have gotten something like this:</p>
+<p>[[6943 27]</p>
+<p>[ 367 1881]]</p>
+<p>What does this mean? I am going to present it as a table to make its entries legible:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Predicted NEG (0)</th>
+<th>Predicted CORE (1)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Actual NEG (0)</strong></td>
+<td>6943</td>
+<td>27</td>
+</tr>
+<tr class="even">
+<td><strong>Actual CORE (1)</strong></td>
+<td>367</td>
+<td>1881</td>
+</tr>
+</tbody>
+</table>
+<p>Each cell tells us something different about model behavior. By convention in scikit-learn:</p>
+<ul>
+<li><p>Rows = actual (true) labels</p></li>
+<li><p>Columns = predicted labels</p></li>
+</ul>
+<p>So we can rewrite it structurally as:</p>
+<span class="math display">\[\begin{bmatrix} \text{TN} &amp; \text{FP} \\ \text{FN} &amp; \text{TP} \end{bmatrix}\]</span>
+<p>To make this clear:</p>
+<ul>
+<li><p>True negatives (TN) = 6943 → 6943 texts were labeled NEG in the test set, and the model correctly predicted NEG for them.</p></li>
+<li><p>False Positive (FP) = 27 → 27 texts were labeled NEG in the test set, and the model incorrectly predicted CORE for them.</p></li>
+<li><p>False Negatives (FN) = 367 → 367 texts were labeled CORE in the test set, and the model incorrectly predicted NEG for them.</p></li>
+<li><p>True Positives (TP) = 1881 → 1881 texts were labeled CORE in the test set, and the model correctly predicted CORE for them.</p></li>
+</ul>
+<p><strong>Interpretation:</strong> our decision threshold in the logistic regression was 0.5. That is, if the predicted probability ≥ 0.5, label the text CORE; if the predicted probability &lt; 0.5, label the text NEG. The model is very good at recognizing texts that do <em>not</em> match our merchant criteria. It’s fairly good at avoiding predicting as positive texts that are labelled negative (27 false positives), but we do lose a fair amount of CORE labeled texts (367).</p>
+<p>The confusion matrix is not the only validation tool we have. Let’s look at the classification report. You should have gotten something like this:</p>
+</section>
+<section id="classification-report" class="level3">
+<h3 class="anchored" data-anchor-id="classification-report">Classification Report</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Class</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1-Score</th>
+<th>Support</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0.95</td>
+<td>1.00</td>
+<td>0.97</td>
+<td>6,970</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0.99</td>
+<td>0.84</td>
+<td>0.91</td>
+<td>2,248</td>
+</tr>
+</tbody>
+</table>
+<p>What do these numbers mean?</p>
+<p><u><strong>For CORE (class 1)</strong></u><strong>:</strong></p>
+<p><u>Precision</u> (1) = 0.99</p>
+<p>Formula: <span class="math inline">\(\text{Precision} = \frac{TP}{TP+FP}\)</span></p>
+<p>In our case, this tells us that when the model predicts CORE, it is correct 99% of the time. This matches your tiny number of false positives (27).</p>
+<p><u>Recall</u> (1) = 084</p>
+<p>The formula: <span class="math inline">\(\text{Recall} = \frac{TP}{TP + FN}\)</span></p>
+<p>The model finds 84% of the CORE texts and it misses 16% (those 367 false negatives).</p>
+<p><u>F1-score</u> (1) = 0.91</p>
+<p>F1 balances precision and recall.</p>
+<p>The formula: <span class="math inline">\(F1 = 2 \cdot \frac{Precision \cdot Recall}{Precision + Recall}\)</span></p>
+<p>0.91 is a strong F1 score, but lower than precision because recall is lower.</p>
+<p>I will leave it up to you to think through the values for the NEG class.</p>
+<p>As part of our report, we also had the following values:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1-Score</th>
+<th>Support (total)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Accuracy</td>
+<td></td>
+<td></td>
+<td>0.96*</td>
+<td>9,218</td>
+</tr>
+<tr class="even">
+<td>Macro avg</td>
+<td>0.97</td>
+<td>0.92</td>
+<td>0.94</td>
+<td>9,218</td>
+</tr>
+<tr class="odd">
+<td>Weighted avg</td>
+<td>0.96</td>
+<td>0.96</td>
+<td>0.96</td>
+<td>9,218</td>
+</tr>
+</tbody>
+</table>
+<p>(*) I know, I know, this is weird: the placement of <strong>accuracy</strong> in the F1-score column is just a formatting convention from sklearn’s classification report. The 0.96 value had to go somewhere, and they chose that column.</p>
+<p>So, what is actually going on besides formatting weirdness:</p>
+<p><u>Accuracy</u> = 0.96</p>
+<p>Formula: <span class="math inline">\(\frac{TP + TN}{\text{Total}}\)</span></p>
+<p>Interpretation: the model agrees with the test labels 96% of the time. In general accuracy alone is not very informative in imbalanced tasks, which is why we look at precision and recall. But recall that we downsampled NEG to match CORE, so we had a balanced training set. Nonetheless, precision and recall are still very useful in understanding the <em>kinds</em>&nbsp;of errors the model is making.</p>
+</section>
+<section id="macro-average" class="level3">
+<h3 class="anchored" data-anchor-id="macro-average">Macro average</h3>
+<p>Here we take a simple average of class metrics to treat both classes equally:</p>
+<p><span class="math display">\[
+\frac{Metric_0 + Metric_1}{2}
+\]</span></p>
+</section>
+<section id="weighted-average" class="level3">
+<h3 class="anchored" data-anchor-id="weighted-average">Weighted average</h3>
+<p>Weights each class by its support (number of examples). Since NEG is larger (6970 vs 2248), the weights workout to:</p>
+<p>weight_neg = <span class="math inline">\(\frac{6970}{9218}\)</span> or about 0.756</p>
+<p>weight_core = <span class="math inline">\(\frac{2248}{9218}\)</span> or about 0.244</p>
+<p>The weighted average multiplies each class’s score by the proportion of examples in that class. Since NEG makes up about 76% of the test set and performs very well, the weighted average is pulled toward the NEG score and ends up close to overall accuracy.</p>
+<p><u>For example, the weighted F1</u>:</p>
+<p>Weighted F1 is:</p>
+<p><span class="math inline">\((w_0 \times F1_0) + (w_1 \times F1_1)\)</span></p>
+<p>Substitute values:</p>
+<p><span class="math inline">\((0.756 \times 0.97) + (0.244 \times 0.91)\)</span></p>
+<p>Compute each term:</p>
+<p><span class="math inline">\(0.756 \times 0.97 ≈ 0.733\)</span></p>
+<p><span class="math inline">\(0.244 \times 0.91 ≈ 0.222\)</span></p>
+<p>Add them and round <span class="math inline">\(≈0.96\)</span></p>
+<p>The weighted F1-score is close to overall accuracy because the model performs strongly on both classes and the larger class (NEG) dominates the weighting.</p>
+</section>
+<section id="roc-auc-0.996" class="level3">
+<h3 class="anchored" data-anchor-id="roc-auc-0.996">ROC AUC = 0.996</h3>
+<p>Now the most important conceptual point in evaluating our model: ROC AUC does not use the 0.5 threshold. It evaluates how well the model separates the two classes across all possible thresholds.</p>
+<p>How does ROC AUC work? Instead of using one specific cutoff, it changes the threshold from 0 to 1 and tests how well the model separates CORE from NEG <em>at each threshold.</em> Then it evaluates performance across all those possibilities.</p>
+<p>Splitting this up into its components:</p>
+<p><strong>ROC</strong> stands for Receiver Operating Characteristic.</p>
+<p>It plots:</p>
+<ul>
+<li><p>TPR: True Positive Rate (same as Recall) on the y-axis</p></li>
+<li><p>FPR: False Positive Rate on the x-axis</p></li>
+</ul>
+<p>As the threshold moves from 0 to 1, the curve traces out the model’s performance. If the model:</p>
+<ul>
+<li><p>perfectly separates classes → curve hugs the top-left corner (high TPR, low FPR at all thresholds)</p></li>
+<li><p>guesses randomly → curve follows a diagonal line (50/50 at every threshold)</p></li>
+</ul>
+<p><strong>AUC</strong> stands for Area Under the Curve. It compresses all this information into a single number (for us, 0.996). AUC is literally the area under the ROC curve. It’s the integral of the True Positive Rate with respect to the False Positive Rate as we vary the threshold. This is why AUC ranges from 0.5 (diagonal line, area of triangle = 0.5) to 1.0 (perfect corner, full square = 1.0).</p>
+<p><strong>Math aside:</strong> you don’t need to worry about computing this ourself, but here’s the integral:</p>
+<p><span class="math display">\[\text{AUC} = \int_0^1 \text{TPR}(t) \, d(\text{FPR}(t))\]</span></p>
+<p>You can think of it this way: if I randomly choose one CORE chunk and one NEG chunk, the AUC tells you the probability that the model assigns a higher probability to the CORE chunk.</p>
+<p>Just a reminder: you can see a full <a href="https://library.virginia.edu/data/articles/roc-curves-and-auc-for-models-used-for-binary-classification"><strong>explanation here</strong></a>.</p>
+<p>We have a value of 0.996, which means that the model almost perfectly ranks CORE texts above NEG texts. This is good! Unlike accuracy or F1-score which depend on choosing a threshold, ROC AUC tells us whether our weak supervision approach is fundamentally learning the right pattern. A high AUC (like 0.996) means our lexicon-based labels are capturing something real about “merchant” discourse.</p>
+</section>
+<section id="coming-back-to-threshold-choice" class="level3">
+<h3 class="anchored" data-anchor-id="coming-back-to-threshold-choice">Coming back to threshold choice:</h3>
+<p>Remember that I mentioned that we could change the threshold for the classification task if we had a good reason to do so. We now want to go back and think through this issue.</p>
+<p>First of all, you might want to ask: Does high ROC-AUC mean that our 0.5 threshold performed well? We want to be careful with this question:</p>
+<p>Our high ROC-AUC (0.996) tells us the model is excellent at ranking texts. It consistently assigns higher probabilities to CORE than NEG. This means that if you sorted all chunks by their probability scores, true CORE chunks would appear near the top and true NEG chunks near the bottom 99.6% of the time, regardless of where you draw the threshold line.</p>
+<ul>
+<li>True CORE chunks get higher probability scores than true NEG chunks (ranking). Whether they cross the 0.5 threshold is a separate question (classification)</li>
+</ul>
+<p>As an example, you could have:</p>
+<p>CORE chunk with prob = 0.48 (ranked above NEG chunks, but classified as NEG at 0.5) NEG chunk with prob = 0.02 (ranked below CORE chunks, classified correctly as NEG)</p>
+<p>The model correctly ranked them (CORE &gt; NEG), which gives high AUC, even though the CORE chunk was misclassified at the 0.5 threshold.</p>
+<p>This is important because we do <strong>not</strong> want to misread a high AUC as indicating that we picked (or were given by default) the optimal threshold for our specific research goals. As I mentioned earlier, the 0.5 threshold is a reasonable default when:</p>
+<ul>
+<li><p>Classes are balanced (we downsampled)</p></li>
+<li><p>False positives and false negatives are equally costly (In general, this depends on your research question)</p></li>
+</ul>
+<p>Now, we <em>might</em> want to explore other thresholds. Then we <em>could</em> pick one of the following approaches:</p>
+<ul>
+<li><p>Plot precision and recall at different thresholds</p></li>
+<li><p>Optimize for F1-score</p></li>
+<li><p>Make a domain-driven decision based on your research needs (if you ask me, this is always a question you should have in mind, but, at the end of the day, I am a humanist..)</p></li>
+</ul>
+<p>I am going to give you a couple of scenarios where this might be reasonable to do:</p>
+<ul>
+<li><p>I sometimes need a discovery tool to find texts (that talk about “merchant” concepts) that I might have missed. I would then lower the threshold (0.3-0.4) for high recall</p></li>
+<li><p>On the other hand, if I am selecting passages for close reading and want only clear examples of the discourse, then I would pick a higher threshold (0.6-0.7) for high precision</p></li>
+<li><p>If you want a balanced approach for further analysis (our case) → 0.5 is reasonable</p></li>
+</ul>
+<p>For our purposes, we’ll stick with 0.5 since our evaluation metrics (precision, recall, F1) all look strong at this threshold, and it aligns with our balanced training set.</p>
 
 
 </section>
