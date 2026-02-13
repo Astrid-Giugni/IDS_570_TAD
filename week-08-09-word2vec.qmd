@@ -121,7 +121,13 @@ then, in Windows:
 
 `.venv\Scripts\Activate.ps1`
 
-And in Mac/Linux
+Note, if this fails try:
+
+`Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+
+Then try activation again.
+
+**OR** in Mac/Linux
 
 `source .venv/bin/activate`
 
@@ -879,6 +885,36 @@ At this point, we have turned unstructured text into a supervised learning datas
 
 This is where questions of [**precision** and **recall**](https://en.wikipedia.org/wiki/Precision_and_recall) enter the picture.
 
+## Step 8: Sample and Inspect
+
+At the end of `step7_label_chunks.py` add the following code and run it.
+
+``` Python
+print("\nLabel distribution:")
+print(f"  CORE (1): {sum(1 for _, y in labeled if y == 1)}")
+print(f"  NEG  (0): {sum(1 for _, y in labeled if y == 0)}")
+print(f"  MAYBE(2): {sum(1 for _, y in labeled if y == 2)}")
+
+# Sample one from each category
+for label_name, label_val in [("CORE", 1), ("MAYBE", 2), ("NEG", 0)]:
+    example = next((text for text, y in labeled if y == label_val), None)
+    if example:
+        print(f"\n{label_name} example (first 200 chars):")
+        print(example[:200])
+```
+
+This code will count how many chunks we got for each label and show examples of each type. When you get the results:
+
+-   Does the CORE example actually contain merchant language?
+
+<!-- -->
+
+-   Does the MAYBE example feel ambiguous?
+
+<!-- -->
+
+-   Does the NEG example clearly not relate to merchants?
+
 ## Step 9: Decide what to train on
 
 Now we have three kinds of labeled chunks of text:
@@ -906,7 +942,7 @@ import json
 from pathlib import Path
 import random
 
-random.seed(42)
+random.seed(42) # For reproducibility--same random sample each time [see (*) below]
 
 DATA_PATH = Path("data") / "merchant_labeled_chunks.json"
 
@@ -981,6 +1017,8 @@ OK, this is what I got back from this step:
 `Test size : 4550`
 
 `MAYBE size: 510`
+
+**One more point (\*)**: we use Python's built-in pseudo-random number generator to, first, `random.sample()` from the full NEG list when we are downsampling the NEG to the same size as CORE \[note that we are asking it to select as many NEG as `len(core)`\]. Second, we use random.shuffle() to randomly reorder the combined CORE+NEG list because *otherwise* when we do our 80/20, all the CORE examples would be first and all the NEG examples would be after (**not** what we want!).
 
 ## Week 9 (Part II--The Classification Task)
 
@@ -1244,11 +1282,11 @@ To make this clear:
 
 -   True negatives (TN) = 6943 → 6943 texts were labeled NEG in the test set, and the model correctly predicted NEG for them.
 
--    False Positive (FP) = 27 → 27 texts were labeled NEG in the test set, and the model incorrectly predicted CORE for them.
+-   False Positive (FP) = 27 → 27 texts were labeled NEG in the test set, and the model incorrectly predicted CORE for them.
 
--    False Negatives (FN) = 367 → 367 texts were labeled CORE in the test set, and the model incorrectly predicted NEG for them.
+-   False Negatives (FN) = 367 → 367 texts were labeled CORE in the test set, and the model incorrectly predicted NEG for them.
 
--    True Positives (TP) = 1881 → 1881 texts were labeled CORE in the test set, and the model correctly predicted CORE for them.
+-   True Positives (TP) = 1881 → 1881 texts were labeled CORE in the test set, and the model correctly predicted CORE for them.
 
 **Interpretation:** our decision threshold in the logistic regression was 0.5. That is, if the predicted probability ≥ 0.5, label the text CORE; if the predicted probability \< 0.5, label the text NEG. The model is very good at recognizing texts that do *not* match our merchant criteria. It's fairly good at avoiding predicting as positive texts that are labelled negative (27 false positives), but we do lose a fair amount of CORE labeled texts (367).
 
@@ -1289,11 +1327,11 @@ I will leave it up to you to think through the values for the NEG class.
 
 As part of our report, we also had the following values:
 
-| Metric       | Precision  | Recall | F1-Score | Support (total) |
-|--------------|------------|--------|----------|-----------------|
-| Accuracy     |            |        | 0.96\*   | 9,218           |
-| Macro avg    | 0.97       | 0.92   | 0.94     | 9,218           |
-| Weighted avg | 0.96       | 0.96   | 0.96     | 9,218           |
+| Metric       | Precision | Recall | F1-Score | Support (total) |
+|--------------|-----------|--------|----------|-----------------|
+| Accuracy     |           |        | 0.96\*   | 9,218           |
+| Macro avg    | 0.97      | 0.92   | 0.94     | 9,218           |
+| Weighted avg | 0.96      | 0.96   | 0.96     | 9,218           |
 
 (\*) I know, I know, this is weird: the placement of **accuracy** in the F1-score column is just a formatting convention from sklearn's classification report. The 0.96 value had to go somewhere, and they chose that column.
 
@@ -1355,15 +1393,15 @@ Splitting this up into its components:
 
 It plots:
 
--    TPR: True Positive Rate (same as Recall) on the y-axis
+-   TPR: True Positive Rate (same as Recall) on the y-axis
 
--    FPR: False Positive Rate on the x-axis
+-   FPR: False Positive Rate on the x-axis
 
 As the threshold moves from 0 to 1, the curve traces out the model's performance. If the model:
 
--    perfectly separates classes → curve hugs the top-left corner (high TPR, low FPR at all thresholds)
+-   perfectly separates classes → curve hugs the top-left corner (high TPR, low FPR at all thresholds)
 
--    guesses randomly → curve follows a diagonal line (50/50 at every threshold)
+-   guesses randomly → curve follows a diagonal line (50/50 at every threshold)
 
 **AUC** stands for Area Under the Curve. It compresses all this information into a single number (for us, 0.996). AUC is literally the area under the ROC curve. It's the integral of the True Positive Rate with respect to the False Positive Rate as we vary the threshold. This is why AUC ranges from 0.5 (diagonal line, area of triangle = 0.5) to 1.0 (perfect corner, full square = 1.0).
 
