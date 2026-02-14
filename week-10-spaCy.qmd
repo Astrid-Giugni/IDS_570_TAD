@@ -1,0 +1,114 @@
+---
+title: "Week 10: Classifying New Text & spaCy"
+editor: visual
+editor: visual
+format: html
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| include: false
+
+library(reticulate)
+
+use_python("C:/Users/astri/miniconda3/envs/tad/python.exe", required = TRUE)
+py_config()
+```
+
+## Step 0: Load a folder of `.txt` files and build a JSON dataset
+
+So far, we have been working with folders of .txt files. This was fine while we were working with one folder of texts and with only a few of them. Now that our corpus is growing, we want to find a better way to organize our data. Enter JSON (JavaScript Object Notation)! This is a structured text format that stores data as key-value pairs, similar to a Python dictionary. Instead of managing hundreds of separate .txt files scattered across folders, JSON lets us bundle all our texts together in a single, organized file where each text has a unique identifier and associated metadata (like filename, author, date, printer, publisher, location of publication...). This makes our life a lot easier: we can load everything with one command, texts can't accidentally get separated from their metadata, and we can easily add new information fields without reorganizing our entire file system.
+
+This is the format that I (and pretty much everyone else in my line of work) uses. So, how do we do this? First of all, download the folder named "Post_Spring_Break_Texts" from **Canvas** (it should contain 147 files).
+
+Start by creating a new python file (I named it `text_store.py`, we won't reuse it, so it doesn't matter all that much). Now we can read each .txt file, store it in JSON format, and save:
+
+``` Python
+import json
+from pathlib import Path
+
+# Point to the folder with our new Post Spring Break Texts (or whatever you named it)
+NEW_TEXTS_DIR = Path.cwd() / "Post_Spring_Break_Texts"
+
+
+# Read all .txt files
+paths = sorted(NEW_TEXTS_DIR.glob("*.txt"))
+print("Found .txt files:", len(paths))
+
+# How the JSON file will be organized
+records = []
+for p in paths:
+    text = p.read_text(encoding="utf-8", errors="ignore")
+    records.append({
+        "doc_id": p.stem,           # filename without extension
+        "filename": p.name,         # full filename
+        "text": text                # raw text
+    })
+
+# Quick check
+print("First record keys:", records[0].keys())
+print("First doc_id:", records[0]["doc_id"])
+print("First text snippet:", records[0]["text"][:200])
+
+# Save the corpus as JSON
+OUT_JSON = Path.cwd() / "new_texts.json"
+
+with open(OUT_JSON, "w", encoding="utf-8") as f:
+    json.dump(records, f, ensure_ascii=False, indent=2)
+
+print("Saved:", OUT_JSON)
+```
+
+Run the code and take a look at the file by opening it. Each entry should look something like:
+
+`{`
+
+`"doc_id": "A01923",`
+
+`"filename": "A01923.txt",`
+
+`"text": "a Panegyrique of congratulation for the concord of the realm of great Britain in unity of religion under one King a ancient writer say that the ground and maintenance of all monarchy and empire be concord their ruin...."`
+
+`}`
+
+The files that I have you don't have much metadata associated with them. What if we had a different type of text file? Well, a lot will depend on the format, but I often have to turn folders of `.xml` files into JSON format. I know that you **all** remember the `.xml` info that I liked to on the syllabus in week 3 (here it is again in the very unlikely case that you don't have it memorized: TEI and XML: [guide here](https://guides.library.illinois.edu/xml/tei#:~:text=The%20Text%20Encoding%20Initiative%20(TEI)%20is%20an,the%20guidelines%20for%20text%20encoding%20in%20TEI.); make sure to look over the examples ♠). You can use this to help you modify the section of code under "How the JSON file will be organized" in the file we just created to look something like:
+
+``` Python
+records = []
+for p in paths:
+    # Parse the XML file
+    tree = ET.parse(p)
+    root = tree.getroot()
+    
+    # Extract metadata (these paths depend on your XML structure--which are often inconsistent, yes, life does suck a lot of times)
+    # Common patterns for TEI XML:
+    
+    # Try to find author
+    author = None
+    author_elem = root.find(".//{http://www.tei-c.org/ns/1.0}author")
+    if author_elem is not None and author_elem.text:
+        author = author_elem.text.strip()
+    
+    # Try to find publication date
+    date = None
+    date_elem = root.find(".//{http://www.tei-c.org/ns/1.0}date")
+    if date_elem is not None and date_elem.text:
+        date = date_elem.text.strip()
+    
+    # Extract the full text (removing XML tags)
+    # Get all text content from the document
+    text = " ".join(root.itertext())
+    
+    records.append({
+        "doc_id": p.stem,
+        "filename": p.name,
+        "author": author,
+        "date": date,
+        "text": text
+    })
+```
+
+This can get really messy unfortunately.

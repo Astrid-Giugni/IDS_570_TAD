@@ -1146,7 +1146,7 @@ The confusion matrix will help us understand how often the model’s predictions
 
 ### Train a classifier:
 
-Now we can *finally* train a classifier using a **logistic regression** model. We discussed how a logistics regression works in class (or will do so in Week 9, if you are reading ahead). If you want an **advanced** version of this, see [chapter 4](https://web.stanford.edu/~jurafsky/slp3/4.pdf) in Jurafsky and Martin.
+Now we can *finally* train a classifier using a **logistic regression** model. We discussed how a logistic regression works in class (or will do so in Week 9, if you are reading ahead). If you want an **advanced** version of this, see [chapter 4](https://web.stanford.edu/~jurafsky/slp3/4.pdf) in Jurafsky and Martin.
 
 -   Note: we are **not** going to go into the details covered in section 4.4 forward. For the simple reason that it would require more mathematical background than I assume for the class to discuss the loss function and gradients. (We will touch on the materials from section 4.9 on how to build a confusion matrix.)
 
@@ -1156,9 +1156,9 @@ There are many classifiers we could use. We choose logistic regression for three
 
 Logistic regression is literally designed to model:
 
-``` latex
- P(y=1∣x)
-```
+$$
+P(y =1 \mid x)
+$$
 
 So it gives you: a probability of CORE for each chunk (via `predict_proba` ) and a clean decision rule: “predict CORE if probability ≥ 0.5”.
 

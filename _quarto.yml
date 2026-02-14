@@ -40,3 +40,5 @@ website:
             text: "Week 07: Word2Vec and LDA introduction"
           - href: week-08-09-word2vec.qmd
             text: "Week 08 and 09:Weak Supervision & Supervised Text Classification in Python"
+          - href: week-10-spaCy.qmd
+            text: "Week 10: Classifying New Text & spaCy"
