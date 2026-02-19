@@ -19,7 +19,7 @@ py_config()
 
 # Weeks 8 and 9 goals:
 
-So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). During these two weeks we are going to make a key transition to supervised methods. I am grouping the two together because we need to take some time to think about how to *thoughtfully* set up the classification task–language is flexible and conceptual boundaries are porous!
+So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). During these two weeks we are going to make a key transition to supervised methods. I am grouping the two together because we need to take some time to think about how to *thoughtfully* set up the classification task: language is flexible and conceptual boundaries are porous!
 
 You can move across the code and steps for these two weeks at your own pace as you get familiar with the process. [In class]{.underline}: I will move through the lectures *assuming* that everyone will finish working through this entire tutorial by March 6th (the end of week 9).
 
@@ -35,7 +35,7 @@ In humanities (and social sciences), supervised learning is often the workhorse 
 
 But supervised learning raises a methodological question immediately: Where do labels come from?
 
-In humanities contexts, we often do **not** begin with a fully human-labeled dataset. So we will begin with **weak supervision**: we will generate *imperfect* labels using rules, then train a model, and validate it carefully. So, for week 8, you will:
+In humanities contexts, we often do **not** begin with a fully human-labeled dataset (though sometimes there is no getting around to labelling things by hand as I demonstrated with NER code book a couple of weeks ago). So we will begin with **weak supervision**: we will generate *imperfect* labels using rules, then train a model, and validate it carefully. So, for week 8, [you will use Word2Vec]{.underline} to:
 
 1.  Define a category you want to detect in texts (a binary label). For us, it will be about the concept "merchant" (this will be our "seed" concept).
 2.  Segment texts into a usable unit of analysis (chunks).
@@ -79,10 +79,10 @@ We will move slowly and validate outputs at each stage. Again, I am keeping the 
 -   A subfolder: `texts/` containing your `.txt` files
 -   A Python virtual environment (`.venv`) activated in VSCode
 -   Packages we will use:
-    -   `nltk`
-    -   `gensim`
-    -   `scikit-learn`
-    -   `tqdm`
+    -   `nltk` –\> we will use this in Step 2 for sentence tokenization (`nltk` has strong sentence boundary detection)
+    -   `gensim` –\> we will use this in Step 5 to train Word2Vec
+    -   `scikit-learn` –\> we will use this in Step 10-11 for TF-IDF and logistic regression
+    -   `tqdm` -\> to make sure we don't lose [our minds](https://tqdm.github.io/) while we wait.
 
 (We will install these together in the steps below.)
 
@@ -889,7 +889,7 @@ This is where questions of [**precision** and **recall**](https://en.wikipedia.o
 
 At the end of `step7_label_chunks.py` add the following code and run it.
 
-``` Python
+``` python
 print("\nLabel distribution:")
 print(f"  CORE (1): {sum(1 for _, y in labeled if y == 1)}")
 print(f"  NEG  (0): {sum(1 for _, y in labeled if y == 0)}")
@@ -1454,3 +1454,25 @@ I am going to give you a couple of scenarios where this might be reasonable to d
 -   If you want a balanced approach for further analysis (our case) → 0.5 is reasonable
 
 For our purposes, we'll stick with 0.5 since our evaluation metrics (precision, recall, F1) all look strong at this threshold, and it aligns with our balanced training set.
+
+We can also visualize this in one graph to see how different threshold values affect both precision and recall. As we move to the right on the x-axis and the threshold increases, we can see that precision goes up (we get fewer false positives) but recall goes down (more false negatives).
+
+![](images/week_9-01.png)
+
+### Saving TF-IDF vectorizer and classifier:
+
+We will reuse what we did in this tutorial for Week 10, so we want to save our work!
+
+``` Python
+from pathlib import Path
+import joblib
+
+MODEL_DIR = Path.cwd() / "models"
+MODEL_DIR.mkdir(exist_ok=True)
+
+joblib.dump(vectorizer, MODEL_DIR / "tfidf_vectorizer.joblib")
+joblib.dump(clf, MODEL_DIR / "merchant_logreg.joblib")
+
+print("Saved TF-IDF vectorizer and classifier to /models/")
+
+```

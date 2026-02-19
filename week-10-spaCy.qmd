@@ -18,6 +18,28 @@ use_python("C:/Users/astri/miniconda3/envs/tad/python.exe", required = TRUE)
 py_config()
 ```
 
+This week's plan: our goal is to use our classifier from Week 9 to learn how to do Named Entity Recognition (NER) using spaCy.
+
+**Named Entity Recognition:** I mentioned NER earlier in the semester and it is a core task in NLP. It's goal is to identify and classify spans of text into predefined semantic categories: people, organizations, locations, dates, and quantities (and you train it to add your own categories to fit your own questions). Formally, it can be framed as a sequence labeling problem, where each token is assigned a tag indicating whether it begins, continues, or falls outside a named entity. Modern NER systems typically rely on contextual word embeddings (e.g., from transformer models like BERT--our next topic, so stay tune for that!) to capture long-range dependencies and disambiguate surface forms such as "Washington" as a person versus a place, for instance.
+
+[**spaCy** aka, your new best friend]{.underline}: [spaCy](#0) is a powerful Python library for NLP. It provides an integrated pipeline architecture (tokenization, part-of-speech tagging, dependency parsing, lemmatization, and NER) all accessible through a clean, consistent API. Its NER component is quite powerful and it has served me well with complex NER questions on Early Modern Texts (which I find impressive given the various inconsistencies and idiosyncrasies in my corpora). The other option is [NLTK](#0), which was built primarily as a teaching toolkit. I have successfully worked with both and we use NLTK in the tutorial for Weeks 08 and 9, but spaCy prioritizes speed and memory efficiency, making it well-suited for processing large corpora. NLTK returns results more slowly than spaCy, but spaCy does trade off higher memory usage for that speed... ymmv. I want you to be exposed to both libraries.
+
+You should feel free to experiment with both, but I will use spaCy for this tutorial as it tends to be more widely used outside of academia. I do want to emphasize that spaCy is not always superior:
+
+-   I tend to work with NLTK in early stages of research as it tends to be used more often in academic contexts, making it easier to compare results. If you are planning to stay in academia, do look into NLTK. But NLTK doesn't have native word vector support at all, which is one of the meaningful gaps between it and more modern libraries.
+
+-   spaCy ships with pre-trained pipelines that include word vectors, so when you call `token.vector` on spaCy, you are not training your own model, but you're getting a pre-trained word vector. Compare this with what we did with word2vec last week in order to expand on our seed term "merchant." SpaCy loads vectors that were trained externally and baked into the pipeline. So you can't easily swap in "custom" vectors the way `Gensim` lets you.
+
+You need to think through your corpus and your research questions to make meaningful choices here.
+
+[**Overview of this week's tutorial**]{.underline}:
+
+1.  Reuse last week's model: organize your corpus and use the model we trained in Weeks 8-9 [to find the subset]{.underline} we want to focus on (that is, texts that discuss the theme/topic/concept of "merchant" as we defined last time)
+
+2.  Switch to spaCy: learn to use spaCy's pipeline on our target subset of texts from step 1.
+
+3.  Extract entities as structured data and analyze the results.
+
 ## Step 0: Load a folder of `.txt` files and build a JSON dataset
 
 So far, we have been working with folders of .txt files. This was fine while we were working with one folder of texts and with only a few of them. Now that our corpus is growing, we want to find a better way to organize our data. Enter JSON (JavaScript Object Notation)! This is a structured text format that stores data as key-value pairs, similar to a Python dictionary. Instead of managing hundreds of separate .txt files scattered across folders, JSON lets us bundle all our texts together in a single, organized file where each text has a unique identifier and associated metadata (like filename, author, date, printer, publisher, location of publication...). This makes our life a lot easier: we can load everything with one command, texts can't accidentally get separated from their metadata, and we can easily add new information fields without reorganizing our entire file system.
@@ -26,7 +48,7 @@ This is the format that I (and pretty much everyone else in my line of work) use
 
 Start by creating a new python file (I named it `text_store.py`, we won't reuse it, so it doesn't matter all that much). Now we can read each .txt file, store it in JSON format, and save:
 
-``` Python
+``` python
 import json
 from pathlib import Path
 
@@ -74,9 +96,13 @@ Run the code and take a look at the file by opening it. Each entry should look s
 
 `}`
 
-The files that I have you don't have much metadata associated with them. What if we had a different type of text file? Well, a lot will depend on the format, but I often have to turn folders of `.xml` files into JSON format. I know that you **all** remember the `.xml` info that I liked to on the syllabus in week 3 (here it is again in the very unlikely case that you don't have it memorized: TEI and XML: [guide here](https://guides.library.illinois.edu/xml/tei#:~:text=The%20Text%20Encoding%20Initiative%20(TEI)%20is%20an,the%20guidelines%20for%20text%20encoding%20in%20TEI.); make sure to look over the examples ♠). You can use this to help you modify the section of code under "How the JSON file will be organized" in the file we just created to look something like:
+**A quick aside:**
 
-``` Python
+The files that we have in this folder don't have much metadata associated with them. What if we had a different type of text file? Well, a lot will depend on the format, but I often have to turn folders of `.xml` files into JSON format. I know that you **all** remember the `.xml` info that I linked to on the syllabus in week 3 (here it is again in the very unlikely case that you don't have it memorized: TEI and XML: [guide here](https://guides.library.illinois.edu/xml/tei#:~:text=The%20Text%20Encoding%20Initiative%20(TEI)%20is%20an,the%20guidelines%20for%20text%20encoding%20in%20TEI.); make sure to look over the examples ♠).
+
+I am going to give you an example of how to do this. We **won't** use this for our tutorial, but I want to give you this example as a resource. You can use this to help you modify the section of code under "How the JSON file will be organized" in the file we just created to look something like:
+
+``` python
 records = []
 for p in paths:
     # Parse the XML file
@@ -111,4 +137,118 @@ for p in paths:
     })
 ```
 
-This can get really messy unfortunately.
+This can get really messy unfortunately! OK, back to our regularly scheduled program.
+
+## Step 1: Load the classifier artifacts from Week 9
+
+Create one file for this step. Mine is: `week10_step1.py` because I am creative that way. Add the chunks of code as you move through the step. **NOTE**: You will want to add comments as well! I am commenting less than usual *within* the code because I am narrating what I am doing as part of the tutorial. This is your chance to start practicing good commenting!
+
+As I mentioned at the end of Week 9 tutorial, we want to reuse what we created there. So we are going to load the TF-IDF vectorizer and classifier that we trained then and apply it to the texts we just organized as "new_texts.json":
+
+``` Python
+from pathlib import Path
+import joblib
+
+MODEL_DIR = Path.cwd() / "models"
+
+# Load the SAME TF-IDF vectorizer and classifier you trained in Week 08–09
+vectorizer = joblib.load(MODEL_DIR / "tfidf_vectorizer.joblib")
+clf        = joblib.load(MODEL_DIR / "merchant_logreg.joblib")
+
+print("Loaded TF-IDF vectorizer + logistic regression classifier.")
+
+### apply to JSON corpus
+
+texts = [r["text"] for r in records]
+
+X_new = vectorizer.transform(texts)    # IMPORTANT: transform, not fit_transform
+probs = clf.predict_proba(X_new)[:, 1]
+preds = (probs >= 0.50).astype(int)
+
+for r, p, yhat in zip(records, probs, preds):
+    r["pred_prob_merchant"] = float(p)
+    r["pred_merchant"] = int(yhat)
+
+print("Classified:", len(records), "documents")
+print("Predicted merchant (threshold .50):", sum(preds))
+```
+
+From this process, you should be seeing that:
+
+-   You found and loaded **147** `.txt` files.
+
+-   The JSON serialization worked `new_texts.json`
+
+<!-- -->
+
+-    You successfully loaded **both** classifier artifacts (vectorizer + logreg) from last week.
+
+In my case, I classified all documents, and at threshold **0.50**, I got **36 “merchant”** predictions. You *might* have something slightly different (I am genuinely curious) because I changed the training set before loading it on Canvas for Weeks 08 and 09.
+
+In any case, now we want to (1) save the classified JSON and (2) create a high-confidence “merchant” subset. That is, we set the threshold at 0.5, which is pretty forgiving. It would be good to have a subset with a stricter threshold for our analysis. For spaCy, you usually want precision over recall (fewer false positives
+
+First, we will save the classified corpus by adding the predictions into the JSON file:
+
+``` Python
+import json
+from pathlib import Path
+
+OUT_CLASSIFIED = Path.cwd() / "classified_texts.json"
+
+with open(OUT_CLASSIFIED, "w", encoding="utf-8") as f:
+    json.dump(records, f, ensure_ascii=False, indent=2)
+
+print("Saved classified dataset:", OUT_CLASSIFIED.resolve())
+```
+
+Then, we will create our higher confidence subset, setting the threshold to 0.70, and then check the results. This is a good starting point for a higher confidence level for "merchant", but in real-life scenarios, we might have to adjust it based on the requirements of our project.
+
+``` Python
+THRESH = 0.70
+
+merchant_only = [r for r in records if r["pred_prob_merchant"] >= THRESH]
+
+OUT_MERCHANT = Path.cwd() / "merchant_texts_for_spacy.json"
+
+with open(OUT_MERCHANT, "w", encoding="utf-8") as f:
+    json.dump(merchant_only, f, ensure_ascii=False, indent=2)
+
+print(f"High-confidence merchant texts (p >= {THRESH}):", len(merchant_only))
+print("Saved:", OUT_MERCHANT.resolve())
+
+### checking how this higher threshold compares with the 0.50 one
+
+top5 = sorted(records, key=lambda r: r["pred_prob_merchant"], reverse=True)[:5]
+for r in top5:
+    print(r["doc_id"], r["pred_prob_merchant"])
+```
+
+My results are promising. I had 36 predicted merchant texts at 0.50 threshold and now I have 23 "high-confidence" merchant texts at threshold 0.70. The top five confidence scores look very reassuring:
+
+`B14801 => 0.9999994900493665
+A22547``=>``0.996078735040299
+B11348``=>``0.987688407922301
+A68617``=>``0.9688126041191412
+A02626``=>``0.9271125403503189`
+
+Just to be safe, we can take a quick look at a couple of the results to double check that they are indeed "merchant" texts. Text B14801 (the highest confidence score) is Edward Misselden's *Free trade* (1622) and text A22547 (second highest confidence score) is a royal proclamation by Charles I [*Concerning the trade of Ginney, Binney, in the parts of Africa*](https://quod.lib.umich.edu/e/eebo/A22547.0001.001?rgn=main;view=fulltext) (1631) \[this is a short text, if you are interested in reading it!\]. Both are documents that I recognize as related, and highly so, to the topic of "merchant"--so far, so good!
+
+### What about the "lost" documents:
+
+Going from 0.50 threshold to 0.70 decreased out subset of text from 36 to 23, so we "lost" 13 documents. Does this matter? Maybe or maybe not! It's hard to know at this stage. My approach to a problem like this is the following:
+
+-   work with the smaller, "high-confidence" subset
+
+-   look at the results of the NER task and evaluate how well the model is performing
+
+-   manually examine a few (2-3) of the "lost" 13 documents and see if I want to include them for a second analysis
+
+## Step 2: 
+
+Now we are ready to move f[rom classification to linguistic annotation]{.underline}: we will run spaCy on our corpus in order to perform NER and extract entities that we want to analyze. We are going to do this *slowly* so as to make our reasoning explicit.
+
+-   First, we will load one document into spaCy and inspect it
+
+-   Then, we will extract entities from that one document
+
+Once we understand what the process looks like for one document, we can loop over all 23 documents and export a structured entity table (we will do JSON, but CSV is also a common choice).
