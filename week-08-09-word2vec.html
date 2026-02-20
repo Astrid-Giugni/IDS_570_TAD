@@ -268,6 +268,12 @@ window.Quarto = {
  <span class="menu-text">Week 08 and 09:Weak Supervision &amp; Supervised Text Classification in Python</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./week-10-spaCy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 10: Classifying New Text &amp; spaCy</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -300,7 +306,7 @@ window.Quarto = {
 
 <section id="weeks-8-and-9-goals" class="level1">
 <h1>Weeks 8 and 9 goals:</h1>
-<p>So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). During these two weeks we are going to make a key transition to supervised methods. I am grouping the two together because we need to take some time to think about how to <em>thoughtfully</em> set up the classification task–language is flexible and conceptual boundaries are porous!</p>
+<p>So far, we have done unsupervised and semi-structured approaches to text analysis (frequency, TF–IDF, similarity, co-occurrence, and Word2Vec). During these two weeks we are going to make a key transition to supervised methods. I am grouping the two together because we need to take some time to think about how to <em>thoughtfully</em> set up the classification task: language is flexible and conceptual boundaries are porous!</p>
 <p>You can move across the code and steps for these two weeks at your own pace as you get familiar with the process. <u>In class</u>: I will move through the lectures <em>assuming</em> that everyone will finish working through this entire tutorial by March 6th (the end of week 9).</p>
 <p><u><strong>For Week 8</strong></u>:</p>
 <p>The goal is to <strong>train a supervised classifier</strong> that learns to recognize a category of texts. In particular, we are going to figure out how to distinguish which texts engage in merchant-related discourse versus those that do not.</p>
@@ -311,7 +317,7 @@ window.Quarto = {
 <li>Which documents are about X, versus not-X?</li>
 </ul>
 <p>But supervised learning raises a methodological question immediately: Where do labels come from?</p>
-<p>In humanities contexts, we often do <strong>not</strong> begin with a fully human-labeled dataset. So we will begin with <strong>weak supervision</strong>: we will generate <em>imperfect</em> labels using rules, then train a model, and validate it carefully. So, for week 8, you will:</p>
+<p>In humanities contexts, we often do <strong>not</strong> begin with a fully human-labeled dataset (though sometimes there is no getting around to labelling things by hand as I demonstrated with NER code book a couple of weeks ago). So we will begin with <strong>weak supervision</strong>: we will generate <em>imperfect</em> labels using rules, then train a model, and validate it carefully. So, for week 8, <u>you will use Word2Vec</u> to:</p>
 <ol type="1">
 <li>Define a category you want to detect in texts (a binary label). For us, it will be about the concept “merchant” (this will be our “seed” concept).</li>
 <li>Segment texts into a usable unit of analysis (chunks).</li>
@@ -357,10 +363,10 @@ window.Quarto = {
 <li>A Python virtual environment (<code>.venv</code>) activated in VSCode</li>
 <li>Packages we will use:
 <ul>
-<li><code>nltk</code></li>
-<li><code>gensim</code></li>
-<li><code>scikit-learn</code></li>
-<li><code>tqdm</code></li>
+<li><code>nltk</code> –&gt; we will use this in Step 2 for sentence tokenization (<code>nltk</code> has strong sentence boundary detection)</li>
+<li><code>gensim</code> –&gt; we will use this in Step 5 to train Word2Vec</li>
+<li><code>scikit-learn</code> –&gt; we will use this in Step 10-11 for TF-IDF and logistic regression</li>
+<li><code>tqdm</code> -&gt; to make sure we don’t lose <a href="https://tqdm.github.io/">our minds</a> while we wait.</li>
 </ul></li>
 </ul>
 <p>(We will install these together in the steps below.)</p>
@@ -1573,6 +1579,22 @@ P(y =1 \mid x)
 <li><p>If you want a balanced approach for further analysis (our case) → 0.5 is reasonable</p></li>
 </ul>
 <p>For our purposes, we’ll stick with 0.5 since our evaluation metrics (precision, recall, F1) all look strong at this threshold, and it aligns with our balanced training set.</p>
+<p>We can also visualize this in one graph to see how different threshold values affect both precision and recall. As we move to the right on the x-axis and the threshold increases, we can see that precision goes up (we get fewer false positives) but recall goes down (more false negatives).</p>
+<p><img src="images/week_9-01.png" class="img-fluid"></p>
+</section>
+<section id="saving-tf-idf-vectorizer-and-classifier" class="level3">
+<h3 class="anchored" data-anchor-id="saving-tf-idf-vectorizer-and-classifier">Saving TF-IDF vectorizer and classifier:</h3>
+<p>We will reuse what we did in this tutorial for Week 10, so we want to save our work!</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> joblib</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>MODEL_DIR <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"models"</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>MODEL_DIR.mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>joblib.dump(vectorizer, MODEL_DIR <span class="op">/</span> <span class="st">"tfidf_vectorizer.joblib"</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>joblib.dump(clf, MODEL_DIR <span class="op">/</span> <span class="st">"merchant_logreg.joblib"</span>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Saved TF-IDF vectorizer and classifier to /models/"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 
 </section>
