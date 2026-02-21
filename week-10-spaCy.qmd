@@ -1,7 +1,6 @@
 ---
 title: "Week 10: Classifying New Text & spaCy"
 editor: visual
-editor: visual
 format: html
 execute:
   echo: true
@@ -145,7 +144,7 @@ Create one file for this step. Mine is: `week10_step1.py` because I am creative 
 
 As I mentioned at the end of Week 9 tutorial, we want to reuse what we created there. So we are going to load the TF-IDF vectorizer and classifier that we trained then and apply it to the texts we just organized as "new_texts.json":
 
-``` Python
+``` python
 from pathlib import Path
 import joblib
 
@@ -161,7 +160,7 @@ print("Loaded TF-IDF vectorizer + logistic regression classifier.")
 
 texts = [r["text"] for r in records]
 
-X_new = vectorizer.transform(texts)    # IMPORTANT: transform, not fit_transform
+X_new = vectorizer.transform(texts)    # IMPORTANT: use transform, not fit_transform
 probs = clf.predict_proba(X_new)[:, 1]
 preds = (probs >= 0.50).astype(int)
 
@@ -181,7 +180,7 @@ From this process, you should be seeing that:
 
 <!-- -->
 
--    You successfully loaded **both** classifier artifacts (vectorizer + logreg) from last week.
+-   You successfully loaded **both** classifier artifacts (vectorizer + logreg) from last week.
 
 In my case, I classified all documents, and at threshold **0.50**, I got **36 “merchant”** predictions. You *might* have something slightly different (I am genuinely curious) because I changed the training set before loading it on Canvas for Weeks 08 and 09.
 
@@ -189,7 +188,7 @@ In any case, now we want to (1) save the classified JSON and (2) create a high-c
 
 First, we will save the classified corpus by adding the predictions into the JSON file:
 
-``` Python
+``` python
 import json
 from pathlib import Path
 
@@ -203,7 +202,7 @@ print("Saved classified dataset:", OUT_CLASSIFIED.resolve())
 
 Then, we will create our higher confidence subset, setting the threshold to 0.70, and then check the results. This is a good starting point for a higher confidence level for "merchant", but in real-life scenarios, we might have to adjust it based on the requirements of our project.
 
-``` Python
+``` python
 THRESH = 0.70
 
 merchant_only = [r for r in records if r["pred_prob_merchant"] >= THRESH]
@@ -225,11 +224,15 @@ for r in top5:
 
 My results are promising. I had 36 predicted merchant texts at 0.50 threshold and now I have 23 "high-confidence" merchant texts at threshold 0.70. The top five confidence scores look very reassuring:
 
-`B14801 => 0.9999994900493665
-A22547``=>``0.996078735040299
-B11348``=>``0.987688407922301
-A68617``=>``0.9688126041191412
-A02626``=>``0.9271125403503189`
+`B14801 => 0.9999994900493665`
+
+``` A22547``=>``0.996078735040299 ```
+
+``` B11348``=>``0.987688407922301 ```
+
+``` A68617``=>``0.9688126041191412 ```
+
+``` A02626``=>``0.9271125403503189 ```
 
 Just to be safe, we can take a quick look at a couple of the results to double check that they are indeed "merchant" texts. Text B14801 (the highest confidence score) is Edward Misselden's *Free trade* (1622) and text A22547 (second highest confidence score) is a royal proclamation by Charles I [*Concerning the trade of Ginney, Binney, in the parts of Africa*](https://quod.lib.umich.edu/e/eebo/A22547.0001.001?rgn=main;view=fulltext) (1631) \[this is a short text, if you are interested in reading it!\]. Both are documents that I recognize as related, and highly so, to the topic of "merchant"--so far, so good!
 
@@ -243,7 +246,7 @@ Going from 0.50 threshold to 0.70 decreased out subset of text from 36 to 23, so
 
 -   manually examine a few (2-3) of the "lost" 13 documents and see if I want to include them for a second analysis
 
-## Step 2: 
+## Step 2:
 
 Now we are ready to move f[rom classification to linguistic annotation]{.underline}: we will run spaCy on our corpus in order to perform NER and extract entities that we want to analyze. We are going to do this *slowly* so as to make our reasoning explicit.
 
@@ -252,3 +255,389 @@ Now we are ready to move f[rom classification to linguistic annotation]{.underli
 -   Then, we will extract entities from that one document
 
 Once we understand what the process looks like for one document, we can loop over all 23 documents and export a structured entity table (we will do JSON, but CSV is also a common choice).
+
+Before using spaCy, we have to install it and download the English model. Open the terminal [in your project folder]{.underline}, then:
+
+`pip install spacy`
+
+`python -m spacy download en_core_web_sm`
+
+Here's the [**full installation guide**](https://spacy.io/usage) and below is a quick reference summarizing the steps (including creating and activating venv in case you need to redo this step from Weeks-08-09):
+
+| Task | Windows | macOS |
+|--------------------|-----------------------------|-----------------------|
+| Create venv | `python -m venv .venv` | `python3 -m venv .venv` |
+| Activate venv | `.venv\Scripts\Activate.ps1` | `source .venv/bin/activate` |
+| Update pip | `python -m pip install --upgrade pip setuptools wheel` | `python -m pip install --upgrade pip setuptools wheel` |
+| Install spaCy | `pip install spacy` | `pip install spacy` |
+| Download model | `python -m spacy download en_core_web_sm` | `python -m spacy download en_core_web_sm` |
+| Verify install | `python -m spacy info` | `python -m spacy info` |
+
+[Note:]{.underline} there are a number of ways in which spaCy's installation can go wrong (you are in the wrong directory, you did other work in between and so you need to reactivate venv, you are a Mac user and my suggestions don't match your needs, ...): youtube is your friend. There are a lot of tutorials that go through all possible scenarios for installation.
+
+For future reference: you can see that there are a number of languages with trained pipelines that you can use instead of English. We will stick to English for now.
+
+Now that we have the tools that we need, we can load spaCy and our high-confidence merchant corpus. Create a new file named `week10-step2.py`, run the following code to import spaCy, the json we created, and process one file:
+
+``` python
+import spacy
+import json
+from pathlib import Path
+
+# Load the English model
+nlp = spacy.load("en_core_web_sm")
+
+print("spaCy model loaded.")
+MERCHANT_PATH = Path.cwd() / "merchant_texts_for_spacy.json"
+
+with open(MERCHANT_PATH, "r", encoding="utf-8") as f:
+    merchant_records = json.load(f)
+
+print("Number of merchant texts:", len(merchant_records))
+
+sample_text = merchant_records[0]["text"]
+
+doc = nlp(sample_text) ## All the good stuff happens here: see note below at [1]
+
+print("Processed one document.")
+print("Number of tokens:", len(doc))
+```
+
+\[1\] The line `doc = nlp (sample_text)` passes raw text into a processing pipeline that:
+
+-   tokenizes the text
+
+-   splits sentences
+
+-   assigns part-of-speech tag
+
+-   computes syntactic dependencies
+
+-   identifies named entities
+
+The result of this pipeline is a structured [spaCy Doc](https://spacy.io/api/doc)object that contains:
+
+-   The original text
+
+-   A sequence of tokens
+
+-   Sentence boundaries
+
+-   POS tags
+
+-   Dependency relations
+
+-   Named entities
+
+-   Character offsets
+
+Imagine you have a small, sample sentence: "William went to London in 1603." It's now going to be in a data structure:
+
+| Token  | POS   | Dependency | Entity |
+|--------|-------|------------|--------|
+| John   | PROPN | nsubj      | PERSON |
+| went   | VERB  | ROOT       | —      |
+| to     | ADP   | prep       | —      |
+| London | PROPN | pobj       | GPE    |
+| in     | ADP   | prep       | —      |
+| 1605   | NUM   | pobj       | DATE   |
+
+Once you run the code, the output will look like this:
+
+`spaCy model loaded.`
+
+`Number of merchant texts: 23`
+
+`Processed one document.`
+
+`Number of tokens: 6341`
+
+Now we are going to extract the named entities for that single document and inspect them:
+
+``` Python
+for ent in doc.ents:
+    print(ent.text, "|", ent.label_)
+
+from collections import Counter
+
+Counter([ent.label_ for ent in doc.ents]) 
+```
+
+What is going on in this section of code? First of all, `doc.ents` is a list of entity span objects, where each `ent` has attributes like: `ent.text` and `ent.label_`. For example:
+
+```         
+[Span("christian", label="NORP"),
+ Span("America", label="GPE"),
+ Span("two", label="Cardinal")]
+```
+
+You can see this when you `print(ent.text, "|", ent.label_)`. We then extract the labels (NORP, GPE, etc) by creating a [new]{.underline} list with this syntax `[ent.label_ for ent in doc.ents]`. This is called a list comprehension ([see here](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions)) and, in our case, it will produce something like this: `["PERSON", "PERSON", "GPE", "NORP", "Ordinal", "DATE", "DATE",...]`. We then use `Counter()` to create a dictionary-like object (you can review [dictionaries here](https://docs.python.org/3/tutorial/datastructures.html#dictionaries)) that counts the frequency of each entity:
+
+```         
+Counter({
+    "PERSON": 2,
+    "DATE": 2,
+    "GPE": 1
+})
+```
+
+This may not be very meaningful yet, but this is a helpful step in understanding the composition of texts for steps down the line in your process. For example, I will use this kind of dictionary to filter and/or route documents based on the kind of entities it contains. A document with, say, more than 5 "PERSON" entities will be flagged for further analysis when I am trying to track demographic data for migration.
+
+Now we are ready to scale up to all 23 documents:
+
+``` Python
+all_entities = []
+
+for record in merchant_records:
+    doc = nlp(record["text"])
+    
+    for ent in doc.ents:
+        all_entities.append({
+            "doc_id": record["doc_id"],
+            "entity_text": ent.text,
+            "entity_label": ent.label_
+        })
+
+print("Total entities extracted:", len(all_entities))
+```
+
+When you run this, you **will** get an error message:
+
+> ValueError: \[E088\] Text of length 1100120 exceeds maximum of 1000000. The parser and NER models require roughly 1GB of temporary memory per 100,000 characters in the input. This means long texts may cause memory allocation errors. If you're not using the parser or NER, it's probably safe to increase the `nlp.max_length` limit. The limit is in number of characters, so you can check whether your inputs are too long by checking `len(text)`.
+
+The problem that we are running into is that one of our texts is very long: 1,100,120 characters. SpaCy's default maximum length is [1,000,000](https://spacy.io/api/language). You *could* increase the maximum length (see the link I just gave you), but that's probably going to be a bad idea for your machine (when you look at the error message, you can see that the "parser and NER models require roughly 1GB of temporary memory per 100,000 characters in the input").
+
+The solution is to break up our texts into smaller segments and process them in chunks. Remove the code that we just added and [instead]{.underline} add the following:
+
+``` Python
+all_entities = []
+
+CHUNK_SIZE = 50000  # characters per chunk
+
+for record in merchant_records:
+    text = record["text"]
+    
+    # Split text into chunks
+    for i in range(0, len(text), CHUNK_SIZE):
+        chunk = text[i:i + CHUNK_SIZE]
+        doc = nlp(chunk)
+        
+        for ent in doc.ents:
+            all_entities.append({
+                "doc_id": record["doc_id"],
+                "entity_text": ent.text,
+                "entity_label": ent.label_
+            })
+
+print("Total entities extracted:", len(all_entities)) 
+
+#### IMPORTANT STEP: save all the raw entities
+
+import json
+from pathlib import Path
+
+OUT_ENTS_RAW = Path.cwd() / "merchant_entities_raw.json"
+
+with open(OUT_ENTS_RAW, "w", encoding="utf-8") as f:
+    json.dump(all_entities, f, ensure_ascii=False, indent=2)
+
+print("Saved raw entity mentions:", OUT_ENTS_RAW.resolve())
+```
+
+Now try running it: this will take a while, but that's ok! At the end, you should see:
+
+`Total entities extracted: 269702`
+
+Running spaCy is the slowest step in today's tutorial, so we are going to do it once, save the results, and then create a new file fo the rest of our work!
+
+### An aside: refining this process
+
+This isn't without risks. There is a real possibility that an entity might split across segment boundary. For example, something like "the Virginia Company of London" might end up with "Virginia Company" in one chunk and "of London" in another.
+
+We can improve on this (at least a bit!) by doing the following instead:
+
+-   Cut at \~50,000 characters.
+
+-   Look forward a limited distance (a “lookahead window”) for the first boundary mark among: `. ! ? ; :` (and optionally a newline if this makes sense for your type of text).
+
+-   Extend the chunk to that boundary.
+
+We are **not** going to implement this code, but it would look like this:
+
+``` Python
+import re
+
+CHUNK_SIZE = 50000
+LOOKAHEAD  = 5000   # don't search forever; keeps chunks bounded
+
+boundary_re = re.compile(r"[.!?;:\n]")
+
+def next_boundary(text: str, start_idx: int) -> int:
+    """
+    Return index *after* the next boundary punctuation (or newline) found
+    between start_idx and start_idx+LOOKAHEAD.
+    If none found, return start_idx (meaning: no extension).
+    """
+    m = boundary_re.search(text, pos=start_idx, endpos=min(len(text), start_idx + LOOKAHEAD))
+    if m:
+        return m.end()
+    return start_idx  # no boundary found in lookahead window
+
+all_entities = []
+
+for record in merchant_records:
+    text = record["text"]
+    start = 0
+
+    while start < len(text):
+        end = min(len(text), start + CHUNK_SIZE)
+
+        if end < len(text):
+            extended_end = next_boundary(text, end)
+            if extended_end > end:
+                end = extended_end
+
+        chunk = text[start:end]
+        doc = nlp(chunk)
+
+        for ent in doc.ents:
+            all_entities.append({
+                "doc_id": record["doc_id"],
+                "entity_text": ent.text,
+                "entity_label": ent.label_
+            })
+
+        start = end
+
+print("Total entities extracted:", len(all_entities))
+```
+
+Why am I not running this version? Well, it's going to potentially create its own problems (especially for Early Modern texts). While this makes chunk boundaries more linguistically plausible, it still won’t guarantee you never split an entity. Entities can cross punctuation and in Early Modern English, they do so in unexpected ways: “Mr. John Smith” = "Mr: John Smith" = "Mr J. Smith" and many other horrors. I still want you to see this option in case you need it.
+
+### Back to our task:
+
+Create a new file named `week10-step3.py` and run it:
+
+``` Python
+# Imports
+import json
+import re
+from pathlib import Path
+from collections import Counter
+
+# Load entity mentions from our spaCy work
+ENT_PATH = Path.cwd() / "merchant_entities_raw.json"
+
+with open(ENT_PATH, "r", encoding="utf-8") as f:
+    all_entities = json.load(f)
+
+print("Loaded entity mentions:", len(all_entities))
+
+# Minimal normalization to remove unecessary whitespace
+def normalize_ent(text: str) -> str:
+    text = text.strip()
+    text = re.sub(r"\s+", " ", text)
+    return text
+
+# 4. Count
+entity_text_counts = Counter(
+    normalize_ent(e["entity_text"]) for e in all_entities
+)
+
+print("Unique entity strings:", len(entity_text_counts))
+print("Top 20 entity strings:")
+for ent_text, n in entity_text_counts.most_common(20):
+    print(f"{n:>7}  {ent_text}")
+```
+
+**Regarding "normalization":** we want to be very restrained with this step. SpaCy gives us mentions as they appear in the text. Before counting them, I want to remove trivial formatting differences so that whitespace inconsistencies do not create artificial duplicates. For example: we want `"   London"` = `"London"`.
+
+I am **not** lowercasing, removing punctuation, striping hyphens, or modernizing spelling! This would risk collapsing *important* differences: while "company" = "companie"; a given instance of the lastname "Smith" may or *may not* equal "Smythe" even though sometimes the same person spelled his name both ways (it depends on the person and who wrote their name in that particular document).
+
+When you run this step, you should get:
+
+Loaded entity mentions: 269702
+Unique entity strings: 48301
+Top 20 entity strings:
+8193 two
+7015 one
+6141 three
+5782 first
+4260 four
+3178 indian
+2843 christian
+2757 five
+2750 english
+2308 six
+2243 England
+1867 second
+1811 seven
+1663 eight
+1591 ten
+1527 Spain
+1473 twenty
+1435 Portugal
+1325 half
+1175 this day
+
+Now, some of these entities are not all that interesting to us (or maybe not to me). I really don't care for all the numbers ("one" "first" "two"...). This is obviously dependent on the research question, but I am going to filter for the kinds of entities that I am interested in:
+
+``` Python
+#### Count entity strings for desired labels ONLY
+
+from collections import Counter
+
+KEEP_LABELS = {"PERSON", "ORG", "GPE", "LOC", "NORP"} #these are the labels I want
+
+filtered = [                                        #filter for them
+    e for e in all_entities
+    if e["entity_label"] in KEEP_LABELS
+]
+
+print("Filtered entity mentions:", len(filtered))
+
+
+## Count by label and separate counts by entity type
+
+counts_by_label = {lab: Counter() for lab in KEEP_LABELS}
+
+for e in filtered:
+    lab = e["entity_label"]
+    txt = normalize_ent(e["entity_text"])
+    counts_by_label[lab][txt] += 1
+
+for lab in ["ORG", "GPE", "PERSON", "LOC", "NORP"]:
+    print(f"\nTop 15 {lab}:")
+    for ent_text, n in counts_by_label[lab].most_common(15):
+        print(f"{n:>7}  {ent_text}")
+```
+
+This is what we get:
+
+[Top 20 entity strings (filtered)]{.underline}:
+
+> 3178 indian 2843 christian 2243 England 1611 english 1527 Spain 1435 Portugal 1143 China 1036 India 1012 portugal 972 spanish 881 french 746 Fez 711 dutch 676 Africa 661 Rome 593 Italy 569 Egypt 569 Peru 565 France 552 John
+
+[Top 15 ORG:]{.underline}
+
+> 371 Tyrone 271 Constantinople 209 senate 181 Banda 153 Christendom 134 Inca 133 Connaght 119 Nanquin 103 rey 97 Pegu 96 Florence 93 Cortes 93 Helena 93 Tercera 91 Caesar
+
+[Top 15 GPE]{.underline}:
+
+> 2242 England 1527 Spain 1435 Portugal 1143 China 1036 India 1012 portugal 660 Rome 593 Italy 569 Egypt 568 Peru 565 France 551 jerusalem 511 Mexico 499 London 472 Ireland
+
+[Top 15 PERSON]{.underline}:
+
+> 552 John 507 Thomas 392 Turk 342 Bantam 301 Fez 295 Solomon 292 Chan 283 Peter 279 Henry 278 William 278 Chinois 272 Francis 267 Alexander 247 Charles 237 Guiana
+
+[Top 15 LOC]{.underline}:
+
+> 675 Africa 522 Europe 418 Asia 318 Sea 231 the red sea 187 the south sea 91 the ocean sea 88 the sea coast 79 Alps 72 west south-west 67 east north-east 62 the north sea 59 the Mediterran sea 49 gulf 45 Peninsula
+
+[Top 15 NORP]{.underline}:
+
+> 3178 indian 2843 christian 1611 english 972 spanish 881 french 708 dutch 541 italian 528 greek 350 irish 325 german 322 latin 287 persian 283 Spaniard 274 african 252 mexican
+
+Well, these are mixed results, clearly. Entities like "Christendom" or "Constantinople" are [not]{.underline} ORG. Similarly, entities like "Bantam" and "Guiana" are [nor]{.underline} PERSON.
+
+Overall this isn't surprising: I am asking spaCy to work with Early Modern texts and this is not what it was designed to do. At the same time, spaCy should be able to recognize "Guiana" as a LOC (the term "Guianas" is still used to talk about Guyana, Suriname, and French Guiana).
