@@ -354,7 +354,7 @@ Once you run the code, the output will look like this:
 
 Now we are going to extract the named entities for that single document and inspect them:
 
-``` Python
+``` python
 for ent in doc.ents:
     print(ent.text, "|", ent.label_)
 
@@ -385,7 +385,7 @@ This may not be very meaningful yet, but this is a helpful step in understanding
 
 Now we are ready to scale up to all 23 documents:
 
-``` Python
+``` python
 all_entities = []
 
 for record in merchant_records:
@@ -409,7 +409,7 @@ The problem that we are running into is that one of our texts is very long: 1,10
 
 The solution is to break up our texts into smaller segments and process them in chunks. Remove the code that we just added and [instead]{.underline} add the following:
 
-``` Python
+``` python
 all_entities = []
 
 CHUNK_SIZE = 50000  # characters per chunk
@@ -464,7 +464,7 @@ We can improve on this (at least a bit!) by doing the following instead:
 
 We are **not** going to implement this code, but it would look like this:
 
-``` Python
+``` python
 import re
 
 CHUNK_SIZE = 50000
@@ -518,7 +518,7 @@ Why am I not running this version? Well, it's going to potentially create its ow
 
 Create a new file named `week10-step3.py` and run it:
 
-``` Python
+``` python
 # Imports
 import json
 import re
@@ -556,33 +556,11 @@ I am **not** lowercasing, removing punctuation, striping hyphens, or modernizing
 
 When you run this step, you should get:
 
-Loaded entity mentions: 269702
-Unique entity strings: 48301
-Top 20 entity strings:
-8193 two
-7015 one
-6141 three
-5782 first
-4260 four
-3178 indian
-2843 christian
-2757 five
-2750 english
-2308 six
-2243 England
-1867 second
-1811 seven
-1663 eight
-1591 ten
-1527 Spain
-1473 twenty
-1435 Portugal
-1325 half
-1175 this day
+Loaded entity mentions: 269702 Unique entity strings: 48301 Top 20 entity strings: 8193 two 7015 one 6141 three 5782 first 4260 four 3178 indian 2843 christian 2757 five 2750 english 2308 six 2243 England 1867 second 1811 seven 1663 eight 1591 ten 1527 Spain 1473 twenty 1435 Portugal 1325 half 1175 this day
 
 Now, some of these entities are not all that interesting to us (or maybe not to me). I really don't care for all the numbers ("one" "first" "two"...). This is obviously dependent on the research question, but I am going to filter for the kinds of entities that I am interested in:
 
-``` Python
+``` python
 #### Count entity strings for desired labels ONLY
 
 from collections import Counter
@@ -641,3 +619,173 @@ This is what we get:
 Well, these are mixed results, clearly. Entities like "Christendom" or "Constantinople" are [not]{.underline} ORG. Similarly, entities like "Bantam" and "Guiana" are [nor]{.underline} PERSON.
 
 Overall this isn't surprising: I am asking spaCy to work with Early Modern texts and this is not what it was designed to do. At the same time, spaCy should be able to recognize "Guiana" as a LOC (the term "Guianas" is still used to talk about Guyana, Suriname, and French Guiana).
+
+What can we do about this?
+
+We are going to train fine-tune spaCy to improve its ability to correctly label Early Modern text for NER.
+
+### Step 3: Fine-tuning spaCy for LOC and GPE identification
+
+For the purposes of this tutorial, we are going to focus on two labels only. This can be extended to a full set of labels (or even create custom labels), but it will take more time to run.
+
+As we did before, we want to keep the time consuming parts of the process as self-contained units, so create a new file `week-10-step4.py` for the fine-tuning step. You will need the file `location_train_data.json`, which you can find on Canvas, under "Files", in the "Week 10" folder. With the code below, we are going to use the labelled data in the file `location_train_data.json` to improve spaCy's ability to recognize entities correctly.
+
+**Note I:** some of the labels in the training data might look weird to you. This is because I am including historically relevant assumptions. For example, I have "Peru" labelled as a LOC rather than a GPE because it would have been considered a geographical region and not a political entity. On the other hand, while "Judea" was not a political entity in the 17th century, it would have been used as a historical political entity and therefore it would be classified as GPE.
+
+**Note II:** this code will look more complex than you are used to. I am going to comment it extensively, but it is something that I have developed over time to work with hard to deal with texts (and with a healthy dose of help from GTP and Claude to help me tinker with the configuration given my data). What you need to get out of it is a sense of the steps and understanding of the data that informs what the code is doing. Once you know what you need to do and why, the actual code will make a lot more sense!
+
+``` Python
+import json
+import random
+from pathlib import Path
+
+import spacy
+from spacy.training.example import Example
+from spacy.scorer import Scorer
+
+
+# CONFIGURATION
+
+TRAIN_PATH    = Path.cwd() / "location_train_data.json"   
+OUT_MODEL_DIR = Path.cwd() / "models" / "spacy_loc_tuned" 
+BASE_MODEL    = "en_core_web_sm"                           # pretrained model to start from
+N_EPOCHS      = 20          # number of full passes over the training data
+TRAIN_SPLIT   = 0.8         # 80 % train, 20 % dev
+RANDOM_SEED   = 42          # for reproducibility
+DROP_RATE     = 0.3         # dropout: randomly disables 30 % of neurons each
+                            # update so the model doesn't memorise the training
+                            # data too closely (helps generalisation given the                               # small training set). SEE [1] below.
+
+
+# LOAD THE LABELLED DATA
+
+with open(TRAIN_PATH, "r", encoding="utf-8") as f:
+    ALL_DATA = json.load(f)
+
+print(f"Loaded {len(ALL_DATA)} labelled examples from {TRAIN_PATH.name}")
+
+
+# TRAIN / DEV SPLIT (shuffle the order of the documents so that the model isn't biased by order)
+### SEE [2] below
+
+random.seed(RANDOM_SEED)
+random.shuffle(ALL_DATA)
+
+split = int(TRAIN_SPLIT * len(ALL_DATA))
+TRAIN = ALL_DATA[:split]
+DEV   = ALL_DATA[split:]
+
+print(f"Train: {len(TRAIN)}   Dev: {len(DEV)}")
+
+
+# LOAD THE BASE MODEL AND PREPARE THE NER PIPE
+
+nlp = spacy.load(BASE_MODEL) # SEE [3] below
+
+# The NER component already exists in en_core_web_sm.  We just need to
+# make sure it knows about the two labels we care about.  If they are
+# already present (GPE and LOC are standard labels) this is a "no-operation".It's # here for completeness sake.
+
+ner = nlp.get_pipe("ner")
+ner.add_label("GPE")
+ner.add_label("LOC")
+
+
+# CREATE THE OPTIMIZER
+
+optimizer = nlp.resume_training() #SEE [4] below
+
+#####
+# TRAINING LOOP
+#
+#    Each epoch:
+#      a) Shuffle the training data (avoids the model learning order-
+#         dependent patterns and smooths out loss spikes).
+#      b) Loop over every example, convert it to a spaCy Example object,
+#         and call nlp.update() to adjust the model weights.
+#      c) Evaluate on the held-out dev set so we can track precision,
+#         recall, and F1 — the metrics that actually matter for NER.
+#      d) Save the model if it achieves the best dev F1 so far.
+#####
+
+best_f1 = 0.0               # track the best dev F1 we've seen
+best_epoch = 0               # which epoch produced that best score
+
+print(f"\n{'Epoch':>5}  {'Loss':>10}  {'Precision':>9}  {'Recall':>6}  {'F1':>6}")
+print("─" * 48)
+
+for epoch in range(N_EPOCHS):
+
+    # (a) Shuffle training data each epoch
+    random.shuffle(TRAIN)
+
+    # (b) Train on every example
+    losses = {}
+    for text, annots in TRAIN:
+        # make_doc creates a blank Doc from the raw text (no predictions yet)
+        doc = nlp.make_doc(text)
+        # Example pairs a blank doc with gold-standard annotations so spaCy
+        # can compare its predictions to the truth and compute the loss
+        example = Example.from_dict(doc, annots)
+        # update() runs the forward pass, computes loss, and adjusts weights
+        nlp.update([example], sgd=optimizer, losses=losses, drop=DROP_RATE)
+
+    # (c) Evaluate on dev set
+    #     We create Example objects where .predicted is the model's output
+    #     and .reference is the gold standard, then use the built-in scorer.
+    dev_examples = []
+    for text, annots in DEV:
+        gold_doc = nlp.make_doc(text)
+        example  = Example.from_dict(gold_doc, annots)
+        # Run the full pipeline on the raw text to get predictions
+        example.predicted = nlp(text)
+        dev_examples.append(example)
+
+    scores = Scorer.score_spans(dev_examples, "ents")
+    p  = scores["ents_p"]    # precision: of everything the model labelled,
+                              #            what fraction was correct?
+    r  = scores["ents_r"]    # recall:    of all true entities in the text,
+                              #            what fraction did the model find?
+    f1 = scores["ents_f"]    # F1:        harmonic mean of P and R — the
+                              #            single number that balances both
+
+    print(f"{epoch:>5}  {losses['ner']:>10.2f}  {p:>9.2f}  {r:>6.2f}  {f1:>6.2f}")
+
+    # (d) Save if this is the best epoch so far (by dev F1)
+    if f1 >= best_f1:
+        best_f1    = f1
+        best_epoch = epoch
+        nlp.to_disk(OUT_MODEL_DIR)
+
+
+# DONE
+
+print("─" * 48)
+print(f"\nBest dev F1: {best_f1:.2f} (epoch {best_epoch})")
+print(f"Model saved to: {OUT_MODEL_DIR.resolve()}")
+print(f"\nTo use the model later:")
+print(f'    nlp = spacy.load("{OUT_MODEL_DIR}")')
+print(f'    doc = nlp("your text here")')
+print(f'    for ent in doc.ents:')
+print(f'        print(ent.text, ent.label_)')
+```
+
+More details about the code:
+
+1.  [[**Dropout**]{.underline}](https://spacy.io/usage/training) is a regularisation technique that prevents the model from becoming too dependent on any individual neuron. During each training update, a random 30% of neurons (at drop=0.3) are temporarily "switched off", that is, their outputs are set to zero. This forces the remaining neurons to learn more robust, redundant representations rather than relying on a few specific pathways. At inference time (when you actually use the model), dropout is turned off and all neurons participate. The drop rate is a number between 0.0 (no dropout) and 1.0 (drop everything — the model learns nothing). In practice, NER models almost always use something between 0.1 and 0.5. The decision comes down to how much data you have relative to model complexity. With very small datasets like yours (31 examples), the risk of overfitting is high. Higher dropout (0.3–0.5) combats this by making memorisation harder. With large datasets (thousands of examples), overfitting is less of a concern and you can use lower dropout (0.1–0.2) so the model learns faster.
+
+2.  While I stand by this set up, I do want to point out the limitations of my training data. I have 39 labelled paragraphs, so the validation set (dev set) is only 8 examples. Unfortunately, with only 8 dev examples containing 10 entities total, the evaluation is noisy. A single entity being found or missed swings F1 by about 10 points, which is why the dev scores bounced between 0.70 and 0.95 across epochs. This doesn't mean the model is unstable! It just means that the measuring instrument (8 examples) is imprecise. Ideally we would have a larger labelled data set, but this is a pretty realistic case of a first "proof of concept" approach. Building human labelled data sets for highly technical language takes a lot of time.
+
+3.  When we load `nlp = spacy.load(BASE_MODEL)`, we get a whole sequence of processing components that text flows through:
+
+    -   Tokenizer — splits raw text into individual tokens (words, punctuation)
+
+    -   tok2vec — converts each token into a numerical vector that captures its meaning in context
+
+    -   Tagger — assigns part-of-speech tags (noun, verb, adjective, etc.)
+
+    -   Parser — determines syntactic dependencies (which words modify which)
+
+    -   NER — identifies named entities and classifies them (person, place, organisation, etc.)
+
+4.  The [[**optimizer**]{.underline}](https://thinc.ai/docs/api-optimizers) is the algorithm that decides how to adjust the model's weights after each training example. The optimizer used by spaCy is called Adam and you can use the link I just gave you to learn about the details of how it works if you are so inclined. The other key choice in this section of the code is [`resume_training()`](https://spacy.io/api/language#resume_training) \[`instead of initialize()`\]. By calling `nlp.resume_training()`, the optimizer is configured with a smaller learning rate appropriate for fine-tuning, where we only want small adjustments. If we had called `nlp.initialize()`, the optimizer would use a larger learning rate because it would assume that the weights are random and need big moves to get anywhere useful. To use `nlp.initialize()`, we would need a much, much larger training set (in the order of thousands)!

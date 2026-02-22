@@ -1463,7 +1463,7 @@ We can also visualize this in one graph to see how different threshold values af
 
 We will reuse what we did in this tutorial for Week 10, so we want to save our work!
 
-``` Python
+``` python
 from pathlib import Path
 import joblib
 
@@ -1474,5 +1474,4 @@ joblib.dump(vectorizer, MODEL_DIR / "tfidf_vectorizer.joblib")
 joblib.dump(clf, MODEL_DIR / "merchant_logreg.joblib")
 
 print("Saved TF-IDF vectorizer and classifier to /models/")
-
 ```
