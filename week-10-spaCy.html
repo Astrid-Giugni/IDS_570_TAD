@@ -831,6 +831,162 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </blockquote>
 <p>Well, these are mixed results, clearly. Entities like “Christendom” or “Constantinople” are <u>not</u> ORG. Similarly, entities like “Bantam” and “Guiana” are <u>nor</u> PERSON.</p>
 <p>Overall this isn’t surprising: I am asking spaCy to work with Early Modern texts and this is not what it was designed to do. At the same time, spaCy should be able to recognize “Guiana” as a LOC (the term “Guianas” is still used to talk about Guyana, Suriname, and French Guiana).</p>
+<p>What can we do about this?</p>
+<p>We are going to train fine-tune spaCy to improve its ability to correctly label Early Modern text for NER.</p>
+</section>
+<section id="step-3-fine-tuning-spacy-for-loc-and-gpe-identification" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-fine-tuning-spacy-for-loc-and-gpe-identification">Step 3: Fine-tuning spaCy for LOC and GPE identification</h3>
+<p>For the purposes of this tutorial, we are going to focus on two labels only. This can be extended to a full set of labels (or even create custom labels), but it will take more time to run.</p>
+<p>As we did before, we want to keep the time consuming parts of the process as self-contained units, so create a new file <code>week-10-step4.py</code> for the fine-tuning step. You will need the file <code>location_train_data.json</code>, which you can find on Canvas, under “Files”, in the “Week 10” folder. With the code below, we are going to use the labelled data in the file <code>location_train_data.json</code> to improve spaCy’s ability to recognize entities correctly.</p>
+<p><strong>Note I:</strong> some of the labels in the training data might look weird to you. This is because I am including historically relevant assumptions. For example, I have “Peru” labelled as a LOC rather than a GPE because it would have been considered a geographical region and not a political entity. On the other hand, while “Judea” was not a political entity in the 17th century, it would have been used as a historical political entity and therefore it would be classified as GPE.</p>
+<p><strong>Note II:</strong> this code will look more complex than you are used to. I am going to comment it extensively, but it is something that I have developed over time to work with hard to deal with texts (and with a healthy dose of help from GTP and Claude to help me tinker with the configuration given my data). What you need to get out of it is a sense of the steps and understanding of the data that informs what the code is doing. Once you know what you need to do and why, the actual code will make a lot more sense!</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> spacy.training.example <span class="im">import</span> Example</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> spacy.scorer <span class="im">import</span> Scorer</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># CONFIGURATION</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>TRAIN_PATH    <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"location_train_data.json"</span>   </span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>OUT_MODEL_DIR <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"models"</span> <span class="op">/</span> <span class="st">"spacy_loc_tuned"</span> </span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>BASE_MODEL    <span class="op">=</span> <span class="st">"en_core_web_sm"</span>                           <span class="co"># pretrained model to start from</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>N_EPOCHS      <span class="op">=</span> <span class="dv">20</span>          <span class="co"># number of full passes over the training data</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>TRAIN_SPLIT   <span class="op">=</span> <span class="fl">0.8</span>         <span class="co"># 80 % train, 20 % dev</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>RANDOM_SEED   <span class="op">=</span> <span class="dv">42</span>          <span class="co"># for reproducibility</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>DROP_RATE     <span class="op">=</span> <span class="fl">0.3</span>         <span class="co"># dropout: randomly disables 30 % of neurons each</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>                            <span class="co"># update so the model doesn't memorise the training</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>                            <span class="co"># data too closely (helps generalisation given the                               # small training set). SEE [1] below.</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="co"># LOAD THE LABELLED DATA</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(TRAIN_PATH, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    ALL_DATA <span class="op">=</span> json.load(f)</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Loaded </span><span class="sc">{</span><span class="bu">len</span>(ALL_DATA)<span class="sc">}</span><span class="ss"> labelled examples from </span><span class="sc">{</span>TRAIN_PATH<span class="sc">.</span>name<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a><span class="co"># TRAIN / DEV SPLIT (shuffle the order of the documents so that the model isn't biased by order)</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="co">### SEE [2] below</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>random.seed(RANDOM_SEED)</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>random.shuffle(ALL_DATA)</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>split <span class="op">=</span> <span class="bu">int</span>(TRAIN_SPLIT <span class="op">*</span> <span class="bu">len</span>(ALL_DATA))</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>TRAIN <span class="op">=</span> ALL_DATA[:split]</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>DEV   <span class="op">=</span> ALL_DATA[split:]</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Train: </span><span class="sc">{</span><span class="bu">len</span>(TRAIN)<span class="sc">}</span><span class="ss">   Dev: </span><span class="sc">{</span><span class="bu">len</span>(DEV)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a><span class="co"># LOAD THE BASE MODEL AND PREPARE THE NER PIPE</span></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(BASE_MODEL) <span class="co"># SEE [3] below</span></span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a><span class="co"># The NER component already exists in en_core_web_sm.  We just need to</span></span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a><span class="co"># make sure it knows about the two labels we care about.  If they are</span></span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a><span class="co"># already present (GPE and LOC are standard labels) this is a "no-operation".It's # here for completeness sake.</span></span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>ner <span class="op">=</span> nlp.get_pipe(<span class="st">"ner"</span>)</span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>ner.add_label(<span class="st">"GPE"</span>)</span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a>ner.add_label(<span class="st">"LOC"</span>)</span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a><span class="co"># CREATE THE OPTIMIZER</span></span>
+<span id="cb15-58"><a href="#cb15-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> nlp.resume_training() <span class="co">#SEE [4] below</span></span>
+<span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a><span class="co">#####</span></span>
+<span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a><span class="co"># TRAINING LOOP</span></span>
+<span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a><span class="co">#    Each epoch:</span></span>
+<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a><span class="co">#      a) Shuffle the training data (avoids the model learning order-</span></span>
+<span id="cb15-66"><a href="#cb15-66" aria-hidden="true" tabindex="-1"></a><span class="co">#         dependent patterns and smooths out loss spikes).</span></span>
+<span id="cb15-67"><a href="#cb15-67" aria-hidden="true" tabindex="-1"></a><span class="co">#      b) Loop over every example, convert it to a spaCy Example object,</span></span>
+<span id="cb15-68"><a href="#cb15-68" aria-hidden="true" tabindex="-1"></a><span class="co">#         and call nlp.update() to adjust the model weights.</span></span>
+<span id="cb15-69"><a href="#cb15-69" aria-hidden="true" tabindex="-1"></a><span class="co">#      c) Evaluate on the held-out dev set so we can track precision,</span></span>
+<span id="cb15-70"><a href="#cb15-70" aria-hidden="true" tabindex="-1"></a><span class="co">#         recall, and F1 — the metrics that actually matter for NER.</span></span>
+<span id="cb15-71"><a href="#cb15-71" aria-hidden="true" tabindex="-1"></a><span class="co">#      d) Save the model if it achieves the best dev F1 so far.</span></span>
+<span id="cb15-72"><a href="#cb15-72" aria-hidden="true" tabindex="-1"></a><span class="co">#####</span></span>
+<span id="cb15-73"><a href="#cb15-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-74"><a href="#cb15-74" aria-hidden="true" tabindex="-1"></a>best_f1 <span class="op">=</span> <span class="fl">0.0</span>               <span class="co"># track the best dev F1 we've seen</span></span>
+<span id="cb15-75"><a href="#cb15-75" aria-hidden="true" tabindex="-1"></a>best_epoch <span class="op">=</span> <span class="dv">0</span>               <span class="co"># which epoch produced that best score</span></span>
+<span id="cb15-76"><a href="#cb15-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-77"><a href="#cb15-77" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="sc">{</span><span class="st">'Epoch'</span><span class="sc">:&gt;5}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'Loss'</span><span class="sc">:&gt;10}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'Precision'</span><span class="sc">:&gt;9}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'Recall'</span><span class="sc">:&gt;6}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'F1'</span><span class="sc">:&gt;6}</span><span class="ss">"</span>)</span>
+<span id="cb15-78"><a href="#cb15-78" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"─"</span> <span class="op">*</span> <span class="dv">48</span>)</span>
+<span id="cb15-79"><a href="#cb15-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-80"><a href="#cb15-80" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(N_EPOCHS):</span>
+<span id="cb15-81"><a href="#cb15-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-82"><a href="#cb15-82" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (a) Shuffle training data each epoch</span></span>
+<span id="cb15-83"><a href="#cb15-83" aria-hidden="true" tabindex="-1"></a>    random.shuffle(TRAIN)</span>
+<span id="cb15-84"><a href="#cb15-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-85"><a href="#cb15-85" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (b) Train on every example</span></span>
+<span id="cb15-86"><a href="#cb15-86" aria-hidden="true" tabindex="-1"></a>    losses <span class="op">=</span> {}</span>
+<span id="cb15-87"><a href="#cb15-87" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> text, annots <span class="kw">in</span> TRAIN:</span>
+<span id="cb15-88"><a href="#cb15-88" aria-hidden="true" tabindex="-1"></a>        <span class="co"># make_doc creates a blank Doc from the raw text (no predictions yet)</span></span>
+<span id="cb15-89"><a href="#cb15-89" aria-hidden="true" tabindex="-1"></a>        doc <span class="op">=</span> nlp.make_doc(text)</span>
+<span id="cb15-90"><a href="#cb15-90" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Example pairs a blank doc with gold-standard annotations so spaCy</span></span>
+<span id="cb15-91"><a href="#cb15-91" aria-hidden="true" tabindex="-1"></a>        <span class="co"># can compare its predictions to the truth and compute the loss</span></span>
+<span id="cb15-92"><a href="#cb15-92" aria-hidden="true" tabindex="-1"></a>        example <span class="op">=</span> Example.from_dict(doc, annots)</span>
+<span id="cb15-93"><a href="#cb15-93" aria-hidden="true" tabindex="-1"></a>        <span class="co"># update() runs the forward pass, computes loss, and adjusts weights</span></span>
+<span id="cb15-94"><a href="#cb15-94" aria-hidden="true" tabindex="-1"></a>        nlp.update([example], sgd<span class="op">=</span>optimizer, losses<span class="op">=</span>losses, drop<span class="op">=</span>DROP_RATE)</span>
+<span id="cb15-95"><a href="#cb15-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-96"><a href="#cb15-96" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (c) Evaluate on dev set</span></span>
+<span id="cb15-97"><a href="#cb15-97" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     We create Example objects where .predicted is the model's output</span></span>
+<span id="cb15-98"><a href="#cb15-98" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     and .reference is the gold standard, then use the built-in scorer.</span></span>
+<span id="cb15-99"><a href="#cb15-99" aria-hidden="true" tabindex="-1"></a>    dev_examples <span class="op">=</span> []</span>
+<span id="cb15-100"><a href="#cb15-100" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> text, annots <span class="kw">in</span> DEV:</span>
+<span id="cb15-101"><a href="#cb15-101" aria-hidden="true" tabindex="-1"></a>        gold_doc <span class="op">=</span> nlp.make_doc(text)</span>
+<span id="cb15-102"><a href="#cb15-102" aria-hidden="true" tabindex="-1"></a>        example  <span class="op">=</span> Example.from_dict(gold_doc, annots)</span>
+<span id="cb15-103"><a href="#cb15-103" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Run the full pipeline on the raw text to get predictions</span></span>
+<span id="cb15-104"><a href="#cb15-104" aria-hidden="true" tabindex="-1"></a>        example.predicted <span class="op">=</span> nlp(text)</span>
+<span id="cb15-105"><a href="#cb15-105" aria-hidden="true" tabindex="-1"></a>        dev_examples.append(example)</span>
+<span id="cb15-106"><a href="#cb15-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-107"><a href="#cb15-107" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> Scorer.score_spans(dev_examples, <span class="st">"ents"</span>)</span>
+<span id="cb15-108"><a href="#cb15-108" aria-hidden="true" tabindex="-1"></a>    p  <span class="op">=</span> scores[<span class="st">"ents_p"</span>]    <span class="co"># precision: of everything the model labelled,</span></span>
+<span id="cb15-109"><a href="#cb15-109" aria-hidden="true" tabindex="-1"></a>                              <span class="co">#            what fraction was correct?</span></span>
+<span id="cb15-110"><a href="#cb15-110" aria-hidden="true" tabindex="-1"></a>    r  <span class="op">=</span> scores[<span class="st">"ents_r"</span>]    <span class="co"># recall:    of all true entities in the text,</span></span>
+<span id="cb15-111"><a href="#cb15-111" aria-hidden="true" tabindex="-1"></a>                              <span class="co">#            what fraction did the model find?</span></span>
+<span id="cb15-112"><a href="#cb15-112" aria-hidden="true" tabindex="-1"></a>    f1 <span class="op">=</span> scores[<span class="st">"ents_f"</span>]    <span class="co"># F1:        harmonic mean of P and R — the</span></span>
+<span id="cb15-113"><a href="#cb15-113" aria-hidden="true" tabindex="-1"></a>                              <span class="co">#            single number that balances both</span></span>
+<span id="cb15-114"><a href="#cb15-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-115"><a href="#cb15-115" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>epoch<span class="sc">:&gt;5}</span><span class="ss">  </span><span class="sc">{</span>losses[<span class="st">'ner'</span>]<span class="sc">:&gt;10.2f}</span><span class="ss">  </span><span class="sc">{</span>p<span class="sc">:&gt;9.2f}</span><span class="ss">  </span><span class="sc">{</span>r<span class="sc">:&gt;6.2f}</span><span class="ss">  </span><span class="sc">{</span>f1<span class="sc">:&gt;6.2f}</span><span class="ss">"</span>)</span>
+<span id="cb15-116"><a href="#cb15-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-117"><a href="#cb15-117" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (d) Save if this is the best epoch so far (by dev F1)</span></span>
+<span id="cb15-118"><a href="#cb15-118" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> f1 <span class="op">&gt;=</span> best_f1:</span>
+<span id="cb15-119"><a href="#cb15-119" aria-hidden="true" tabindex="-1"></a>        best_f1    <span class="op">=</span> f1</span>
+<span id="cb15-120"><a href="#cb15-120" aria-hidden="true" tabindex="-1"></a>        best_epoch <span class="op">=</span> epoch</span>
+<span id="cb15-121"><a href="#cb15-121" aria-hidden="true" tabindex="-1"></a>        nlp.to_disk(OUT_MODEL_DIR)</span>
+<span id="cb15-122"><a href="#cb15-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-123"><a href="#cb15-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-124"><a href="#cb15-124" aria-hidden="true" tabindex="-1"></a><span class="co"># DONE</span></span>
+<span id="cb15-125"><a href="#cb15-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-126"><a href="#cb15-126" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"─"</span> <span class="op">*</span> <span class="dv">48</span>)</span>
+<span id="cb15-127"><a href="#cb15-127" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Best dev F1: </span><span class="sc">{</span>best_f1<span class="sc">:.2f}</span><span class="ss"> (epoch </span><span class="sc">{</span>best_epoch<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb15-128"><a href="#cb15-128" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Model saved to: </span><span class="sc">{</span>OUT_MODEL_DIR<span class="sc">.</span>resolve()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb15-129"><a href="#cb15-129" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">To use the model later:"</span>)</span>
+<span id="cb15-130"><a href="#cb15-130" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'    nlp = spacy.load("</span><span class="sc">{</span>OUT_MODEL_DIR<span class="sc">}</span><span class="ss">")'</span>)</span>
+<span id="cb15-131"><a href="#cb15-131" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'    doc = nlp("your text here")'</span>)</span>
+<span id="cb15-132"><a href="#cb15-132" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'    for ent in doc.ents:'</span>)</span>
+<span id="cb15-133"><a href="#cb15-133" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'        print(ent.text, ent.label_)'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>More details about the code:</p>
+<ol type="1">
+<li><p><a href="https://spacy.io/usage/training"><u><strong>Dropout</strong></u></a> is a regularisation technique that prevents the model from becoming too dependent on any individual neuron. During each training update, a random 30% of neurons (at drop=0.3) are temporarily “switched off”, that is, their outputs are set to zero. This forces the remaining neurons to learn more robust, redundant representations rather than relying on a few specific pathways. At inference time (when you actually use the model), dropout is turned off and all neurons participate. The drop rate is a number between 0.0 (no dropout) and 1.0 (drop everything — the model learns nothing). In practice, NER models almost always use something between 0.1 and 0.5. The decision comes down to how much data you have relative to model complexity. With very small datasets like yours (31 examples), the risk of overfitting is high. Higher dropout (0.3–0.5) combats this by making memorisation harder. With large datasets (thousands of examples), overfitting is less of a concern and you can use lower dropout (0.1–0.2) so the model learns faster.</p></li>
+<li><p>While I stand by this set up, I do want to point out the limitations of my training data. I have 39 labelled paragraphs, so the validation set (dev set) is only 8 examples. Unfortunately, with only 8 dev examples containing 10 entities total, the evaluation is noisy. A single entity being found or missed swings F1 by about 10 points, which is why the dev scores bounced between 0.70 and 0.95 across epochs. This doesn’t mean the model is unstable! It just means that the measuring instrument (8 examples) is imprecise. Ideally we would have a larger labelled data set, but this is a pretty realistic case of a first “proof of concept” approach. Building human labelled data sets for highly technical language takes a lot of time.</p></li>
+<li><p>When we load <code>nlp = spacy.load(BASE_MODEL)</code>, we get a whole sequence of processing components that text flows through:</p>
+<ul>
+<li><p>Tokenizer — splits raw text into individual tokens (words, punctuation)</p></li>
+<li><p>tok2vec — converts each token into a numerical vector that captures its meaning in context</p></li>
+<li><p>Tagger — assigns part-of-speech tags (noun, verb, adjective, etc.)</p></li>
+<li><p>Parser — determines syntactic dependencies (which words modify which)</p></li>
+<li><p>NER — identifies named entities and classifies them (person, place, organisation, etc.)</p></li>
+</ul></li>
+<li><p>The <a href="https://thinc.ai/docs/api-optimizers"><u><strong>optimizer</strong></u></a> is the algorithm that decides how to adjust the model’s weights after each training example. The optimizer used by spaCy is called Adam and you can use the link I just gave you to learn about the details of how it works if you are so inclined. The other key choice in this section of the code is <a href="https://spacy.io/api/language#resume_training"><code>resume_training()</code></a> [<code>instead of initialize()</code>]. By calling <code>nlp.resume_training()</code>, the optimizer is configured with a smaller learning rate appropriate for fine-tuning, where we only want small adjustments. If we had called <code>nlp.initialize()</code>, the optimizer would use a larger learning rate because it would assume that the weights are random and need big moves to get anywhere useful. To use <code>nlp.initialize()</code>, we would need a much, much larger training set (in the order of thousands)!</p></li>
+</ol>
 
 
 </section>
