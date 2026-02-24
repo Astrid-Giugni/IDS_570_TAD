@@ -693,19 +693,11 @@ ner.add_label("LOC")
 
 # CREATE THE OPTIMIZER
 
-optimizer = nlp.resume_training() #SEE [4] below
+optimizer = nlp.resume_training() ####SEE [4] below
 
 #####
 # TRAINING LOOP
-#
-#    Each epoch:
-#      a) Shuffle the training data (avoids the model learning order-
-#         dependent patterns and smooths out loss spikes).
-#      b) Loop over every example, convert it to a spaCy Example object,
-#         and call nlp.update() to adjust the model weights.
-#      c) Evaluate on the held-out dev set so we can track precision,
-#         recall, and F1 — the metrics that actually matter for NER.
-#      d) Save the model if it achieves the best dev F1 so far.
+## SEE [5] below
 #####
 
 best_f1 = 0.0               # track the best dev F1 we've seen
@@ -722,17 +714,14 @@ for epoch in range(N_EPOCHS):
     # (b) Train on every example
     losses = {}
     for text, annots in TRAIN:
-        # make_doc creates a blank Doc from the raw text (no predictions yet)
         doc = nlp.make_doc(text)
-        # Example pairs a blank doc with gold-standard annotations so spaCy
-        # can compare its predictions to the truth and compute the loss
         example = Example.from_dict(doc, annots)
-        # update() runs the forward pass, computes loss, and adjusts weights
         nlp.update([example], sgd=optimizer, losses=losses, drop=DROP_RATE)
 
     # (c) Evaluate on dev set
     #     We create Example objects where .predicted is the model's output
     #     and .reference is the gold standard, then use the built-in scorer.
+    #     SEE weeks 08-09 on precision, recall, and F1.
     dev_examples = []
     for text, annots in DEV:
         gold_doc = nlp.make_doc(text)
@@ -789,3 +778,15 @@ More details about the code:
     -   NER — identifies named entities and classifies them (person, place, organisation, etc.)
 
 4.  The [[**optimizer**]{.underline}](https://thinc.ai/docs/api-optimizers) is the algorithm that decides how to adjust the model's weights after each training example. The optimizer used by spaCy is called Adam and you can use the link I just gave you to learn about the details of how it works if you are so inclined. The other key choice in this section of the code is [`resume_training()`](https://spacy.io/api/language#resume_training) \[`instead of initialize()`\]. By calling `nlp.resume_training()`, the optimizer is configured with a smaller learning rate appropriate for fine-tuning, where we only want small adjustments. If we had called `nlp.initialize()`, the optimizer would use a larger learning rate because it would assume that the weights are random and need big moves to get anywhere useful. To use `nlp.initialize()`, we would need a much, much larger training set (in the order of thousands)!
+
+5.  Here we are setting up our training loop. An epoch is one complete pass through the entire training set. If we have 31 training examples, one epoch means the model has seen and learned from all 31 of them once. When we set N_EPOCHS = 20, the model goes through that full set of 31 examples twenty times. Each pass gives the model another chance to refine its weights: the first time through it makes rough adjustments, and subsequent passes let it fine-tune those adjustments based on what it's learned so far.
+
+    -   `random.shuffle(TRAIN)`: Before each epoch, the training examples are put in a new random order. This matters because the model updates its weights after every single example, and those updates accumulate.
+
+    -   [Step b in the code]{.underline}: Four things happen for each of the 31 examples: First, `nlp.make_doc(text)` creates a blank spaCy `Doc` from the raw text (it tokenizes the words at this step). Second, `Example.from_dict(doc, annots)` pairs that blank doc with the gold-standard annotations I labelled. Third, [`nlp.update()`](https://spacy.io/api/language#update) does the actual learning. Fourth, `drop=DROP_RATE` applies dropout during this update, randomly disabling 30% of neurons so the model doesn't over-rely on any single pathway (see \[1\] above). After all 31 examples, the model's weights have been adjusted 31 times. That completes one epoch of training.
+
+### Step 4: Rerun NER with the fine-tuned model
+
+Now that we have completed our fine-tuning of spaCy, we want to actually see if we can get some better results on our 23 target texts (the chunked merchant texts). Then we are going to export a locations-only dataset (mentions + counts) that you can analyze or use for further work (such as mapping of Early Modern locations mentioned in our documents).
+
+\######################## START AT STEP 5 OF "CLASSIFIER APPLICATION" IN GPT.

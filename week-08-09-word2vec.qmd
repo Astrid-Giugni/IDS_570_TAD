@@ -86,7 +86,7 @@ We will move slowly and validate outputs at each stage. Again, I am keeping the 
 
 (We will install these together in the steps below.)
 
-## Week 8 (Part I--Week Supervision)
+## Week 8 (Part I--Weak Supervision)
 
 ## Step 0: Project setup & environment
 
@@ -294,12 +294,11 @@ This tells us that our segmentation choice is reasonable for classification.
 
 ## Step 3: Tokenize Chunks for Modelling
 
-This step will be conceptually familiar from when we used `unnest_tokens()` in tidytext.\
-we transform a text column into word tokens.
+This step will be conceptually familiar from when we used `unnest_tokens()` in tidytext: we transform a text column into word tokens.
 
 We will do this using [`gensim.utils.simple_preprocess()`](https://tedboy.github.io/nlps/generated/generated/gensim.utils.simple_preprocess.html).
 
-Create a new file: `step3_tokenize_chunks.py`. This new script is going to **build on** what we did in the "step2" script, s you will find the same logic repeated at the beginning.
+Create a new file: `step3_tokenize_chunks.py`. This new script is going to **build on** what we did in the "step2" script, so you will find the same logic repeated at the beginning.
 
 ``` python
 from pathlib import Path
