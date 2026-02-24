@@ -371,8 +371,8 @@ window.Quarto = {
 </ul>
 <p>(We will install these together in the steps below.)</p>
 </section>
-<section id="week-8-part-iweek-supervision" class="level2">
-<h2 class="anchored" data-anchor-id="week-8-part-iweek-supervision">Week 8 (Part I–Week Supervision)</h2>
+<section id="week-8-part-iweak-supervision" class="level2">
+<h2 class="anchored" data-anchor-id="week-8-part-iweak-supervision">Week 8 (Part I–Weak Supervision)</h2>
 </section>
 <section id="step-0-project-setup-environment" class="level2">
 <h2 class="anchored" data-anchor-id="step-0-project-setup-environment">Step 0: Project setup &amp; environment</h2>
@@ -541,10 +541,9 @@ window.Quarto = {
 </section>
 <section id="step-3-tokenize-chunks-for-modelling" class="level2">
 <h2 class="anchored" data-anchor-id="step-3-tokenize-chunks-for-modelling">Step 3: Tokenize Chunks for Modelling</h2>
-<p>This step will be conceptually familiar from when we used <code>unnest_tokens()</code> in tidytext.<br>
-we transform a text column into word tokens.</p>
+<p>This step will be conceptually familiar from when we used <code>unnest_tokens()</code> in tidytext: we transform a text column into word tokens.</p>
 <p>We will do this using <a href="https://tedboy.github.io/nlps/generated/generated/gensim.utils.simple_preprocess.html"><code>gensim.utils.simple_preprocess()</code></a>.</p>
-<p>Create a new file: <code>step3_tokenize_chunks.py</code>. This new script is going to <strong>build on</strong> what we did in the “step2” script, s you will find the same logic repeated at the beginning.</p>
+<p>Create a new file: <code>step3_tokenize_chunks.py</code>. This new script is going to <strong>build on</strong> what we did in the “step2” script, so you will find the same logic repeated at the beginning.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> nltk</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gensim.utils <span class="im">import</span> simple_preprocess</span>

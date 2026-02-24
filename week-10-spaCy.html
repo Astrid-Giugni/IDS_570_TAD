@@ -898,81 +898,70 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a><span class="co"># CREATE THE OPTIMIZER</span></span>
 <span id="cb15-58"><a href="#cb15-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> nlp.resume_training() <span class="co">#SEE [4] below</span></span>
+<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> nlp.resume_training() <span class="co">####SEE [4] below</span></span>
 <span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a><span class="co">#####</span></span>
 <span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a><span class="co"># TRAINING LOOP</span></span>
-<span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a><span class="co">#    Each epoch:</span></span>
-<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a><span class="co">#      a) Shuffle the training data (avoids the model learning order-</span></span>
-<span id="cb15-66"><a href="#cb15-66" aria-hidden="true" tabindex="-1"></a><span class="co">#         dependent patterns and smooths out loss spikes).</span></span>
-<span id="cb15-67"><a href="#cb15-67" aria-hidden="true" tabindex="-1"></a><span class="co">#      b) Loop over every example, convert it to a spaCy Example object,</span></span>
-<span id="cb15-68"><a href="#cb15-68" aria-hidden="true" tabindex="-1"></a><span class="co">#         and call nlp.update() to adjust the model weights.</span></span>
-<span id="cb15-69"><a href="#cb15-69" aria-hidden="true" tabindex="-1"></a><span class="co">#      c) Evaluate on the held-out dev set so we can track precision,</span></span>
-<span id="cb15-70"><a href="#cb15-70" aria-hidden="true" tabindex="-1"></a><span class="co">#         recall, and F1 — the metrics that actually matter for NER.</span></span>
-<span id="cb15-71"><a href="#cb15-71" aria-hidden="true" tabindex="-1"></a><span class="co">#      d) Save the model if it achieves the best dev F1 so far.</span></span>
-<span id="cb15-72"><a href="#cb15-72" aria-hidden="true" tabindex="-1"></a><span class="co">#####</span></span>
+<span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a><span class="co">## SEE [5] below</span></span>
+<span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a><span class="co">#####</span></span>
+<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-66"><a href="#cb15-66" aria-hidden="true" tabindex="-1"></a>best_f1 <span class="op">=</span> <span class="fl">0.0</span>               <span class="co"># track the best dev F1 we've seen</span></span>
+<span id="cb15-67"><a href="#cb15-67" aria-hidden="true" tabindex="-1"></a>best_epoch <span class="op">=</span> <span class="dv">0</span>               <span class="co"># which epoch produced that best score</span></span>
+<span id="cb15-68"><a href="#cb15-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-69"><a href="#cb15-69" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="sc">{</span><span class="st">'Epoch'</span><span class="sc">:&gt;5}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'Loss'</span><span class="sc">:&gt;10}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'Precision'</span><span class="sc">:&gt;9}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'Recall'</span><span class="sc">:&gt;6}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'F1'</span><span class="sc">:&gt;6}</span><span class="ss">"</span>)</span>
+<span id="cb15-70"><a href="#cb15-70" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"─"</span> <span class="op">*</span> <span class="dv">48</span>)</span>
+<span id="cb15-71"><a href="#cb15-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-72"><a href="#cb15-72" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(N_EPOCHS):</span>
 <span id="cb15-73"><a href="#cb15-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-74"><a href="#cb15-74" aria-hidden="true" tabindex="-1"></a>best_f1 <span class="op">=</span> <span class="fl">0.0</span>               <span class="co"># track the best dev F1 we've seen</span></span>
-<span id="cb15-75"><a href="#cb15-75" aria-hidden="true" tabindex="-1"></a>best_epoch <span class="op">=</span> <span class="dv">0</span>               <span class="co"># which epoch produced that best score</span></span>
+<span id="cb15-74"><a href="#cb15-74" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (a) Shuffle training data each epoch</span></span>
+<span id="cb15-75"><a href="#cb15-75" aria-hidden="true" tabindex="-1"></a>    random.shuffle(TRAIN)</span>
 <span id="cb15-76"><a href="#cb15-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-77"><a href="#cb15-77" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="sc">{</span><span class="st">'Epoch'</span><span class="sc">:&gt;5}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'Loss'</span><span class="sc">:&gt;10}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'Precision'</span><span class="sc">:&gt;9}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'Recall'</span><span class="sc">:&gt;6}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'F1'</span><span class="sc">:&gt;6}</span><span class="ss">"</span>)</span>
-<span id="cb15-78"><a href="#cb15-78" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"─"</span> <span class="op">*</span> <span class="dv">48</span>)</span>
-<span id="cb15-79"><a href="#cb15-79" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-80"><a href="#cb15-80" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(N_EPOCHS):</span>
-<span id="cb15-81"><a href="#cb15-81" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-82"><a href="#cb15-82" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (a) Shuffle training data each epoch</span></span>
-<span id="cb15-83"><a href="#cb15-83" aria-hidden="true" tabindex="-1"></a>    random.shuffle(TRAIN)</span>
-<span id="cb15-84"><a href="#cb15-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-85"><a href="#cb15-85" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (b) Train on every example</span></span>
-<span id="cb15-86"><a href="#cb15-86" aria-hidden="true" tabindex="-1"></a>    losses <span class="op">=</span> {}</span>
-<span id="cb15-87"><a href="#cb15-87" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> text, annots <span class="kw">in</span> TRAIN:</span>
-<span id="cb15-88"><a href="#cb15-88" aria-hidden="true" tabindex="-1"></a>        <span class="co"># make_doc creates a blank Doc from the raw text (no predictions yet)</span></span>
-<span id="cb15-89"><a href="#cb15-89" aria-hidden="true" tabindex="-1"></a>        doc <span class="op">=</span> nlp.make_doc(text)</span>
-<span id="cb15-90"><a href="#cb15-90" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Example pairs a blank doc with gold-standard annotations so spaCy</span></span>
-<span id="cb15-91"><a href="#cb15-91" aria-hidden="true" tabindex="-1"></a>        <span class="co"># can compare its predictions to the truth and compute the loss</span></span>
-<span id="cb15-92"><a href="#cb15-92" aria-hidden="true" tabindex="-1"></a>        example <span class="op">=</span> Example.from_dict(doc, annots)</span>
-<span id="cb15-93"><a href="#cb15-93" aria-hidden="true" tabindex="-1"></a>        <span class="co"># update() runs the forward pass, computes loss, and adjusts weights</span></span>
-<span id="cb15-94"><a href="#cb15-94" aria-hidden="true" tabindex="-1"></a>        nlp.update([example], sgd<span class="op">=</span>optimizer, losses<span class="op">=</span>losses, drop<span class="op">=</span>DROP_RATE)</span>
+<span id="cb15-77"><a href="#cb15-77" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (b) Train on every example</span></span>
+<span id="cb15-78"><a href="#cb15-78" aria-hidden="true" tabindex="-1"></a>    losses <span class="op">=</span> {}</span>
+<span id="cb15-79"><a href="#cb15-79" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> text, annots <span class="kw">in</span> TRAIN:</span>
+<span id="cb15-80"><a href="#cb15-80" aria-hidden="true" tabindex="-1"></a>        doc <span class="op">=</span> nlp.make_doc(text)</span>
+<span id="cb15-81"><a href="#cb15-81" aria-hidden="true" tabindex="-1"></a>        example <span class="op">=</span> Example.from_dict(doc, annots)</span>
+<span id="cb15-82"><a href="#cb15-82" aria-hidden="true" tabindex="-1"></a>        nlp.update([example], sgd<span class="op">=</span>optimizer, losses<span class="op">=</span>losses, drop<span class="op">=</span>DROP_RATE)</span>
+<span id="cb15-83"><a href="#cb15-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-84"><a href="#cb15-84" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (c) Evaluate on dev set</span></span>
+<span id="cb15-85"><a href="#cb15-85" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     We create Example objects where .predicted is the model's output</span></span>
+<span id="cb15-86"><a href="#cb15-86" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     and .reference is the gold standard, then use the built-in scorer.</span></span>
+<span id="cb15-87"><a href="#cb15-87" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     SEE weeks 08-09 on precision, recall, and F1.</span></span>
+<span id="cb15-88"><a href="#cb15-88" aria-hidden="true" tabindex="-1"></a>    dev_examples <span class="op">=</span> []</span>
+<span id="cb15-89"><a href="#cb15-89" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> text, annots <span class="kw">in</span> DEV:</span>
+<span id="cb15-90"><a href="#cb15-90" aria-hidden="true" tabindex="-1"></a>        gold_doc <span class="op">=</span> nlp.make_doc(text)</span>
+<span id="cb15-91"><a href="#cb15-91" aria-hidden="true" tabindex="-1"></a>        example  <span class="op">=</span> Example.from_dict(gold_doc, annots)</span>
+<span id="cb15-92"><a href="#cb15-92" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Run the full pipeline on the raw text to get predictions</span></span>
+<span id="cb15-93"><a href="#cb15-93" aria-hidden="true" tabindex="-1"></a>        example.predicted <span class="op">=</span> nlp(text)</span>
+<span id="cb15-94"><a href="#cb15-94" aria-hidden="true" tabindex="-1"></a>        dev_examples.append(example)</span>
 <span id="cb15-95"><a href="#cb15-95" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-96"><a href="#cb15-96" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (c) Evaluate on dev set</span></span>
-<span id="cb15-97"><a href="#cb15-97" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     We create Example objects where .predicted is the model's output</span></span>
-<span id="cb15-98"><a href="#cb15-98" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     and .reference is the gold standard, then use the built-in scorer.</span></span>
-<span id="cb15-99"><a href="#cb15-99" aria-hidden="true" tabindex="-1"></a>    dev_examples <span class="op">=</span> []</span>
-<span id="cb15-100"><a href="#cb15-100" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> text, annots <span class="kw">in</span> DEV:</span>
-<span id="cb15-101"><a href="#cb15-101" aria-hidden="true" tabindex="-1"></a>        gold_doc <span class="op">=</span> nlp.make_doc(text)</span>
-<span id="cb15-102"><a href="#cb15-102" aria-hidden="true" tabindex="-1"></a>        example  <span class="op">=</span> Example.from_dict(gold_doc, annots)</span>
-<span id="cb15-103"><a href="#cb15-103" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Run the full pipeline on the raw text to get predictions</span></span>
-<span id="cb15-104"><a href="#cb15-104" aria-hidden="true" tabindex="-1"></a>        example.predicted <span class="op">=</span> nlp(text)</span>
-<span id="cb15-105"><a href="#cb15-105" aria-hidden="true" tabindex="-1"></a>        dev_examples.append(example)</span>
-<span id="cb15-106"><a href="#cb15-106" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-107"><a href="#cb15-107" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> Scorer.score_spans(dev_examples, <span class="st">"ents"</span>)</span>
-<span id="cb15-108"><a href="#cb15-108" aria-hidden="true" tabindex="-1"></a>    p  <span class="op">=</span> scores[<span class="st">"ents_p"</span>]    <span class="co"># precision: of everything the model labelled,</span></span>
-<span id="cb15-109"><a href="#cb15-109" aria-hidden="true" tabindex="-1"></a>                              <span class="co">#            what fraction was correct?</span></span>
-<span id="cb15-110"><a href="#cb15-110" aria-hidden="true" tabindex="-1"></a>    r  <span class="op">=</span> scores[<span class="st">"ents_r"</span>]    <span class="co"># recall:    of all true entities in the text,</span></span>
-<span id="cb15-111"><a href="#cb15-111" aria-hidden="true" tabindex="-1"></a>                              <span class="co">#            what fraction did the model find?</span></span>
-<span id="cb15-112"><a href="#cb15-112" aria-hidden="true" tabindex="-1"></a>    f1 <span class="op">=</span> scores[<span class="st">"ents_f"</span>]    <span class="co"># F1:        harmonic mean of P and R — the</span></span>
-<span id="cb15-113"><a href="#cb15-113" aria-hidden="true" tabindex="-1"></a>                              <span class="co">#            single number that balances both</span></span>
+<span id="cb15-96"><a href="#cb15-96" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> Scorer.score_spans(dev_examples, <span class="st">"ents"</span>)</span>
+<span id="cb15-97"><a href="#cb15-97" aria-hidden="true" tabindex="-1"></a>    p  <span class="op">=</span> scores[<span class="st">"ents_p"</span>]    <span class="co"># precision: of everything the model labelled,</span></span>
+<span id="cb15-98"><a href="#cb15-98" aria-hidden="true" tabindex="-1"></a>                              <span class="co">#            what fraction was correct?</span></span>
+<span id="cb15-99"><a href="#cb15-99" aria-hidden="true" tabindex="-1"></a>    r  <span class="op">=</span> scores[<span class="st">"ents_r"</span>]    <span class="co"># recall:    of all true entities in the text,</span></span>
+<span id="cb15-100"><a href="#cb15-100" aria-hidden="true" tabindex="-1"></a>                              <span class="co">#            what fraction did the model find?</span></span>
+<span id="cb15-101"><a href="#cb15-101" aria-hidden="true" tabindex="-1"></a>    f1 <span class="op">=</span> scores[<span class="st">"ents_f"</span>]    <span class="co"># F1:        harmonic mean of P and R — the</span></span>
+<span id="cb15-102"><a href="#cb15-102" aria-hidden="true" tabindex="-1"></a>                              <span class="co">#            single number that balances both</span></span>
+<span id="cb15-103"><a href="#cb15-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-104"><a href="#cb15-104" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>epoch<span class="sc">:&gt;5}</span><span class="ss">  </span><span class="sc">{</span>losses[<span class="st">'ner'</span>]<span class="sc">:&gt;10.2f}</span><span class="ss">  </span><span class="sc">{</span>p<span class="sc">:&gt;9.2f}</span><span class="ss">  </span><span class="sc">{</span>r<span class="sc">:&gt;6.2f}</span><span class="ss">  </span><span class="sc">{</span>f1<span class="sc">:&gt;6.2f}</span><span class="ss">"</span>)</span>
+<span id="cb15-105"><a href="#cb15-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-106"><a href="#cb15-106" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (d) Save if this is the best epoch so far (by dev F1)</span></span>
+<span id="cb15-107"><a href="#cb15-107" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> f1 <span class="op">&gt;=</span> best_f1:</span>
+<span id="cb15-108"><a href="#cb15-108" aria-hidden="true" tabindex="-1"></a>        best_f1    <span class="op">=</span> f1</span>
+<span id="cb15-109"><a href="#cb15-109" aria-hidden="true" tabindex="-1"></a>        best_epoch <span class="op">=</span> epoch</span>
+<span id="cb15-110"><a href="#cb15-110" aria-hidden="true" tabindex="-1"></a>        nlp.to_disk(OUT_MODEL_DIR)</span>
+<span id="cb15-111"><a href="#cb15-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-112"><a href="#cb15-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-113"><a href="#cb15-113" aria-hidden="true" tabindex="-1"></a><span class="co"># DONE</span></span>
 <span id="cb15-114"><a href="#cb15-114" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-115"><a href="#cb15-115" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>epoch<span class="sc">:&gt;5}</span><span class="ss">  </span><span class="sc">{</span>losses[<span class="st">'ner'</span>]<span class="sc">:&gt;10.2f}</span><span class="ss">  </span><span class="sc">{</span>p<span class="sc">:&gt;9.2f}</span><span class="ss">  </span><span class="sc">{</span>r<span class="sc">:&gt;6.2f}</span><span class="ss">  </span><span class="sc">{</span>f1<span class="sc">:&gt;6.2f}</span><span class="ss">"</span>)</span>
-<span id="cb15-116"><a href="#cb15-116" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-117"><a href="#cb15-117" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (d) Save if this is the best epoch so far (by dev F1)</span></span>
-<span id="cb15-118"><a href="#cb15-118" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> f1 <span class="op">&gt;=</span> best_f1:</span>
-<span id="cb15-119"><a href="#cb15-119" aria-hidden="true" tabindex="-1"></a>        best_f1    <span class="op">=</span> f1</span>
-<span id="cb15-120"><a href="#cb15-120" aria-hidden="true" tabindex="-1"></a>        best_epoch <span class="op">=</span> epoch</span>
-<span id="cb15-121"><a href="#cb15-121" aria-hidden="true" tabindex="-1"></a>        nlp.to_disk(OUT_MODEL_DIR)</span>
-<span id="cb15-122"><a href="#cb15-122" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-123"><a href="#cb15-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-124"><a href="#cb15-124" aria-hidden="true" tabindex="-1"></a><span class="co"># DONE</span></span>
-<span id="cb15-125"><a href="#cb15-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-126"><a href="#cb15-126" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"─"</span> <span class="op">*</span> <span class="dv">48</span>)</span>
-<span id="cb15-127"><a href="#cb15-127" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Best dev F1: </span><span class="sc">{</span>best_f1<span class="sc">:.2f}</span><span class="ss"> (epoch </span><span class="sc">{</span>best_epoch<span class="sc">}</span><span class="ss">)"</span>)</span>
-<span id="cb15-128"><a href="#cb15-128" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Model saved to: </span><span class="sc">{</span>OUT_MODEL_DIR<span class="sc">.</span>resolve()<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb15-129"><a href="#cb15-129" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">To use the model later:"</span>)</span>
-<span id="cb15-130"><a href="#cb15-130" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'    nlp = spacy.load("</span><span class="sc">{</span>OUT_MODEL_DIR<span class="sc">}</span><span class="ss">")'</span>)</span>
-<span id="cb15-131"><a href="#cb15-131" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'    doc = nlp("your text here")'</span>)</span>
-<span id="cb15-132"><a href="#cb15-132" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'    for ent in doc.ents:'</span>)</span>
-<span id="cb15-133"><a href="#cb15-133" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'        print(ent.text, ent.label_)'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb15-115"><a href="#cb15-115" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"─"</span> <span class="op">*</span> <span class="dv">48</span>)</span>
+<span id="cb15-116"><a href="#cb15-116" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Best dev F1: </span><span class="sc">{</span>best_f1<span class="sc">:.2f}</span><span class="ss"> (epoch </span><span class="sc">{</span>best_epoch<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb15-117"><a href="#cb15-117" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Model saved to: </span><span class="sc">{</span>OUT_MODEL_DIR<span class="sc">.</span>resolve()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb15-118"><a href="#cb15-118" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">To use the model later:"</span>)</span>
+<span id="cb15-119"><a href="#cb15-119" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'    nlp = spacy.load("</span><span class="sc">{</span>OUT_MODEL_DIR<span class="sc">}</span><span class="ss">")'</span>)</span>
+<span id="cb15-120"><a href="#cb15-120" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'    doc = nlp("your text here")'</span>)</span>
+<span id="cb15-121"><a href="#cb15-121" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'    for ent in doc.ents:'</span>)</span>
+<span id="cb15-122"><a href="#cb15-122" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'        print(ent.text, ent.label_)'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>More details about the code:</p>
 <ol type="1">
 <li><p><a href="https://spacy.io/usage/training"><u><strong>Dropout</strong></u></a> is a regularisation technique that prevents the model from becoming too dependent on any individual neuron. During each training update, a random 30% of neurons (at drop=0.3) are temporarily “switched off”, that is, their outputs are set to zero. This forces the remaining neurons to learn more robust, redundant representations rather than relying on a few specific pathways. At inference time (when you actually use the model), dropout is turned off and all neurons participate. The drop rate is a number between 0.0 (no dropout) and 1.0 (drop everything — the model learns nothing). In practice, NER models almost always use something between 0.1 and 0.5. The decision comes down to how much data you have relative to model complexity. With very small datasets like yours (31 examples), the risk of overfitting is high. Higher dropout (0.3–0.5) combats this by making memorisation harder. With large datasets (thousands of examples), overfitting is less of a concern and you can use lower dropout (0.1–0.2) so the model learns faster.</p></li>
@@ -986,7 +975,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p>NER — identifies named entities and classifies them (person, place, organisation, etc.)</p></li>
 </ul></li>
 <li><p>The <a href="https://thinc.ai/docs/api-optimizers"><u><strong>optimizer</strong></u></a> is the algorithm that decides how to adjust the model’s weights after each training example. The optimizer used by spaCy is called Adam and you can use the link I just gave you to learn about the details of how it works if you are so inclined. The other key choice in this section of the code is <a href="https://spacy.io/api/language#resume_training"><code>resume_training()</code></a> [<code>instead of initialize()</code>]. By calling <code>nlp.resume_training()</code>, the optimizer is configured with a smaller learning rate appropriate for fine-tuning, where we only want small adjustments. If we had called <code>nlp.initialize()</code>, the optimizer would use a larger learning rate because it would assume that the weights are random and need big moves to get anywhere useful. To use <code>nlp.initialize()</code>, we would need a much, much larger training set (in the order of thousands)!</p></li>
+<li><p>Here we are setting up our training loop. An epoch is one complete pass through the entire training set. If we have 31 training examples, one epoch means the model has seen and learned from all 31 of them once. When we set N_EPOCHS = 20, the model goes through that full set of 31 examples twenty times. Each pass gives the model another chance to refine its weights: the first time through it makes rough adjustments, and subsequent passes let it fine-tune those adjustments based on what it’s learned so far.</p>
+<ul>
+<li><p><code>random.shuffle(TRAIN)</code>: Before each epoch, the training examples are put in a new random order. This matters because the model updates its weights after every single example, and those updates accumulate.</p></li>
+<li><p><u>Step b in the code</u>: Four things happen for each of the 31 examples: First, <code>nlp.make_doc(text)</code> creates a blank spaCy <code>Doc</code> from the raw text (it tokenizes the words at this step). Second, <code>Example.from_dict(doc, annots)</code> pairs that blank doc with the gold-standard annotations I labelled. Third, <a href="https://spacy.io/api/language#update"><code>nlp.update()</code></a> does the actual learning. Fourth, <code>drop=DROP_RATE</code> applies dropout during this update, randomly disabling 30% of neurons so the model doesn’t over-rely on any single pathway (see [1] above). After all 31 examples, the model’s weights have been adjusted 31 times. That completes one epoch of training.</p></li>
+</ul></li>
 </ol>
+</section>
+<section id="step-4-rerun-ner-with-the-fine-tuned-model" class="level3">
+<h3 class="anchored" data-anchor-id="step-4-rerun-ner-with-the-fine-tuned-model">Step 4: Rerun NER with the fine-tuned model</h3>
+<p>Now that we have completed our fine-tuning of spaCy, we want to actually see if we can get some better results on our 23 target texts (the chunked merchant texts). Then we are going to export a locations-only dataset (mentions + counts) that you can analyze or use for further work (such as mapping of Early Modern locations mentioned in our documents).</p>
+<p>######################## START AT STEP 5 OF “CLASSIFIER APPLICATION” IN GPT.</p>
 
 
 </section>

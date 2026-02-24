@@ -659,64 +659,64 @@ Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Nearest neighbors for 'trade':
-    carrying  0.886
-       round  0.862
-    branches  0.853
-     carried  0.832
-advantageous  0.822
-     returns  0.817
-      direct  0.816
-      branch  0.816
-       carry  0.815
-      forced  0.814
+    carrying  0.874
+       round  0.866
+     carried  0.838
+       carry  0.819
+     returns  0.810
+advantageous  0.810
+      forced  0.805
+      direct  0.805
+    shipping  0.804
+    branches  0.795
 
 Nearest neighbors for 'labor':
-        adds  0.870
-      motion  0.868
-        puts  0.867
- distributed  0.847
-     laborer  0.835
-      powers  0.835
-   increases  0.826
-        vary  0.825
-     enables  0.824
-       sinks  0.822
+      motion  0.851
+        adds  0.850
+        puts  0.847
+     laborer  0.843
+ constitutes  0.818
+ distributed  0.818
+   increases  0.815
+        vary  0.815
+     augment  0.811
+    produces  0.808
 
 Nearest neighbors for 'price':
-       rises  0.829
-        sink  0.816
-         low  0.816
-      barley  0.810
-      prices  0.794
-        rise  0.793
-       bread  0.790
-       lower  0.789
-        meat  0.784
-    somewhat  0.778
+       rises  0.864
+         low  0.846
+        sink  0.827
+       bread  0.817
+      barley  0.815
+       lower  0.814
+        meat  0.809
+     butcher  0.799
+   commodity  0.799
+      prices  0.797
 
 Nearest neighbors for 'capital':
-    capitals  0.880
-    replaces  0.844
-   withdrawn  0.836
-     employs  0.833
-   regularly  0.830
-    reserved  0.828
-      unless  0.820
-     hinders  0.819
-       fixed  0.817
-     replace  0.815
+    capitals  0.878
+    replaces  0.835
+   withdrawn  0.832
+       stock  0.824
+     replace  0.823
+   regularly  0.815
+       fixed  0.815
+     hinders  0.815
+     employs  0.809
+    reserved  0.807
 
 Nearest neighbors for 'market':
-   effectual  0.810
-    supplied  0.798
-      demand  0.789
-     thither  0.773
-     brought  0.769
-     markets  0.762
-      import  0.755
-     cheaper  0.754
-    produced  0.751
-      dearer  0.751</code></pre>
+    supplied  0.817
+     thither  0.806
+   effectual  0.799
+     brought  0.790
+     markets  0.785
+       cheap  0.781
+      growth  0.776
+       bring  0.775
+     cheaper  0.770
+        come  0.769</code></pre>
 </div>
 </div>
 <p>For <strong>trade</strong>: the terms that we are getting indicate that Smith is using structural and institutional language in conjunction with this term. We have verbs like carrying, carried, and shipping (possibly used as a noun…), as well as structural qualifiers such as branches, returns, and direct. Some words are perhaps more surprising and would require more investigation (such as round).</p>
@@ -1030,7 +1030,7 @@ manufactures  0.007</code></pre>
 <span id="cb66-18"><a href="#cb66-18" aria-hidden="true" tabindex="-1"></a>plt.bar(<span class="bu">range</span>(K), topic_share)</span>
 <span id="cb66-19"><a href="#cb66-19" aria-hidden="true" tabindex="-1"></a>plt.xticks(<span class="bu">range</span>(K), [<span class="ss">f"T</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>([&lt;matplotlib.axis.XTick object at 0x00000222F1671410&gt;, &lt;matplotlib.axis.XTick object at 0x00000222F1646B10&gt;, &lt;matplotlib.axis.XTick object at 0x00000222F16B33D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000222F16BD710&gt;, &lt;matplotlib.axis.XTick object at 0x00000222F16B17D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000222F16A5410&gt;, &lt;matplotlib.axis.XTick object at 0x00000222F16A7850&gt;, &lt;matplotlib.axis.XTick object at 0x00000222F16C5DD0&gt;], [Text(0, 0, 'T0'), Text(1, 0, 'T1'), Text(2, 0, 'T2'), Text(3, 0, 'T3'), Text(4, 0, 'T4'), Text(5, 0, 'T5'), Text(6, 0, 'T6'), Text(7, 0, 'T7')])</code></pre>
+<pre><code>([&lt;matplotlib.axis.XTick object at 0x00000218E09CA8D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000218E0A63350&gt;, &lt;matplotlib.axis.XTick object at 0x00000218DC362B90&gt;, &lt;matplotlib.axis.XTick object at 0x00000218E0ABD310&gt;, &lt;matplotlib.axis.XTick object at 0x00000218E0AAE4D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000218E0AA8E10&gt;, &lt;matplotlib.axis.XTick object at 0x00000218E0AAB1D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000218E0AC1550&gt;], [Text(0, 0, 'T0'), Text(1, 0, 'T1'), Text(2, 0, 'T2'), Text(3, 0, 'T3'), Text(4, 0, 'T4'), Text(5, 0, 'T5'), Text(6, 0, 'T6'), Text(7, 0, 'T7')])</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Share of topic mass (across segments)"</span>)</span>
 <span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Topic"</span>)</span>
