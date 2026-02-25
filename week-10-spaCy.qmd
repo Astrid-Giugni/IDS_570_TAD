@@ -789,4 +789,4 @@ More details about the code:
 
 Now that we have completed our fine-tuning of spaCy, we want to actually see if we can get some better results on our 23 target texts (the chunked merchant texts). Then we are going to export a locations-only dataset (mentions + counts) that you can analyze or use for further work (such as mapping of Early Modern locations mentioned in our documents).
 
-\######################## START AT STEP 5 OF "CLASSIFIER APPLICATION" IN GPT.
+\######################## START AT STEP 5 OF "CLASSIFIER APPLICATION".
