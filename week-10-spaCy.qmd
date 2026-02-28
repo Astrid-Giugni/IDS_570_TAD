@@ -19,7 +19,7 @@ py_config()
 
 This week's plan: our goal is to use our classifier from Week 9 to learn how to do Named Entity Recognition (NER) using spaCy.
 
-**Named Entity Recognition:** I mentioned NER earlier in the semester and it is a core task in NLP. It's goal is to identify and classify spans of text into predefined semantic categories: people, organizations, locations, dates, and quantities (and you train it to add your own categories to fit your own questions). Formally, it can be framed as a sequence labeling problem, where each token is assigned a tag indicating whether it begins, continues, or falls outside a named entity. Modern NER systems typically rely on contextual word embeddings (e.g., from transformer models like BERT--our next topic, so stay tune for that!) to capture long-range dependencies and disambiguate surface forms such as "Washington" as a person versus a place, for instance.
+**Named Entity Recognition:** I mentioned NER earlier in the semester and it is a core task in NLP. Its goal is to identify and classify spans of text into predefined semantic categories: people, organizations, locations, dates, and quantities (and you train it to add your own categories to fit your own questions). Formally, it can be framed as a sequence labeling problem, where each token is assigned a tag indicating whether it begins, continues, or falls outside a named entity. Modern NER systems typically rely on contextual word embeddings (e.g., from transformer models like BERT--our next topic, so stay tuned for that!) to capture long-range dependencies and disambiguate surface forms such as "Washington" as a person versus a place, for instance.
 
 [**spaCy** aka, your new best friend]{.underline}: [spaCy](#0) is a powerful Python library for NLP. It provides an integrated pipeline architecture (tokenization, part-of-speech tagging, dependency parsing, lemmatization, and NER) all accessible through a clean, consistent API. Its NER component is quite powerful and it has served me well with complex NER questions on Early Modern Texts (which I find impressive given the various inconsistencies and idiosyncrasies in my corpora). The other option is [NLTK](#0), which was built primarily as a teaching toolkit. I have successfully worked with both and we use NLTK in the tutorial for Weeks 08 and 9, but spaCy prioritizes speed and memory efficiency, making it well-suited for processing large corpora. NLTK returns results more slowly than spaCy, but spaCy does trade off higher memory usage for that speed... ymmv. I want you to be exposed to both libraries.
 
@@ -27,7 +27,7 @@ You should feel free to experiment with both, but I will use spaCy for this tuto
 
 -   I tend to work with NLTK in early stages of research as it tends to be used more often in academic contexts, making it easier to compare results. If you are planning to stay in academia, do look into NLTK. But NLTK doesn't have native word vector support at all, which is one of the meaningful gaps between it and more modern libraries.
 
--   spaCy ships with pre-trained pipelines that include word vectors, so when you call `token.vector` on spaCy, you are not training your own model, but you're getting a pre-trained word vector. Compare this with what we did with word2vec last week in order to expand on our seed term "merchant." SpaCy loads vectors that were trained externally and baked into the pipeline. So you can't easily swap in "custom" vectors the way `Gensim` lets you.
+-   In general spaCy ships with pre-trained pipelines that (can) include word vectors, so when you call `token.vector` on spaCy, you are not training your own model, but you're getting a pre-trained word vector. Compare this with what we did with word2vec last week in order to expand on our seed term "merchant." SpaCy loads vectors that were trained externally and baked into the pipeline. So you can't easily swap in "custom" vectors the way `Gensim` lets you. **Importantly for this tutorial**: `en_core_web_sm` (which is what we install below) doesn't include real word vectors. It relies on contextual representations rather than static word vectors. This distinction doesn't matter for our NER workflow at all (NER uses the `tok2vec` representations regardless). If you want full word vectors, you can install `en_core_web_md` or `en_core_web_lg`.
 
 You need to think through your corpus and your research questions to make meaningful choices here.
 
@@ -157,6 +157,10 @@ clf        = joblib.load(MODEL_DIR / "merchant_logreg.joblib")
 print("Loaded TF-IDF vectorizer + logistic regression classifier.")
 
 ### apply to JSON corpus
+import json
+
+with open(Path.cwd() / "new_texts.json", "r", encoding="utf-8") as f:
+    records = json.load(f)
 
 texts = [r["text"] for r in records]
 
@@ -178,13 +182,11 @@ From this process, you should be seeing that:
 
 -   The JSON serialization worked `new_texts.json`
 
-<!-- -->
-
 -   You successfully loaded **both** classifier artifacts (vectorizer + logreg) from last week.
 
 In my case, I classified all documents, and at threshold **0.50**, I got **36 “merchant”** predictions. You *might* have something slightly different (I am genuinely curious) because I changed the training set before loading it on Canvas for Weeks 08 and 09.
 
-In any case, now we want to (1) save the classified JSON and (2) create a high-confidence “merchant” subset. That is, we set the threshold at 0.5, which is pretty forgiving. It would be good to have a subset with a stricter threshold for our analysis. For spaCy, you usually want precision over recall (fewer false positives
+In any case, now we want to (1) save the classified JSON and (2) create a high-confidence “merchant” subset. That is, we set the threshold at 0.5, which is pretty forgiving. It would be good to have a subset with a stricter threshold for our analysis. For spaCy, you usually want precision over recall (fewer false positives).
 
 First, we will save the classified corpus by adding the predictions into the JSON file:
 
@@ -238,7 +240,7 @@ Just to be safe, we can take a quick look at a couple of the results to double c
 
 ### What about the "lost" documents:
 
-Going from 0.50 threshold to 0.70 decreased out subset of text from 36 to 23, so we "lost" 13 documents. Does this matter? Maybe or maybe not! It's hard to know at this stage. My approach to a problem like this is the following:
+Going from 0.50 threshold to 0.70 decreased our subset of text from 36 to 23, so we "lost" 13 documents. Does this matter? Maybe or maybe not! It's hard to know at this stage. My approach to a problem like this is the following:
 
 -   work with the smaller, "high-confidence" subset
 
@@ -246,9 +248,9 @@ Going from 0.50 threshold to 0.70 decreased out subset of text from 36 to 23, so
 
 -   manually examine a few (2-3) of the "lost" 13 documents and see if I want to include them for a second analysis
 
-## Step 2:
+## Steps 2 and 3:
 
-Now we are ready to move f[rom classification to linguistic annotation]{.underline}: we will run spaCy on our corpus in order to perform NER and extract entities that we want to analyze. We are going to do this *slowly* so as to make our reasoning explicit.
+Now we are ready to move [from classification to linguistic annotation]{.underline}: we will run spaCy on our corpus in order to perform NER and extract entities that we want to analyze. We are going to do this *slowly* so as to make our reasoning explicit.
 
 -   First, we will load one document into spaCy and inspect it
 
@@ -265,7 +267,7 @@ Before using spaCy, we have to install it and download the English model. Open t
 Here's the [**full installation guide**](https://spacy.io/usage) and below is a quick reference summarizing the steps (including creating and activating venv in case you need to redo this step from Weeks-08-09):
 
 | Task | Windows | macOS |
-|--------------------|-----------------------------|-----------------------|
+|----|----|----|
 | Create venv | `python -m venv .venv` | `python3 -m venv .venv` |
 | Activate venv | `.venv\Scripts\Activate.ps1` | `source .venv/bin/activate` |
 | Update pip | `python -m pip install --upgrade pip setuptools wheel` | `python -m pip install --upgrade pip setuptools wheel` |
@@ -277,11 +279,14 @@ Here's the [**full installation guide**](https://spacy.io/usage) and below is a 
 
 For future reference: you can see that there are a number of languages with trained pipelines that you can use instead of English. We will stick to English for now.
 
-Now that we have the tools that we need, we can load spaCy and our high-confidence merchant corpus. Create a new file named `week10-step2.py`, run the following code to import spaCy, the json we created, and process one file:
+Now that we have the tools that we need, we can load spaCy and our high-confidence merchant corpus. Create a new file named `week10-step2.py`, we will keep adding blocks to this same file as we go along **until** we got to step 3. I am splitting this up to explain what we are doing along the way!
+
+First, run the following code to import spaCy, the json we created, and process one file:
 
 ``` python
 import spacy
 import json
+import re
 from pathlib import Path
 
 # Load the English model
@@ -315,7 +320,7 @@ print("Number of tokens:", len(doc))
 
 -   identifies named entities
 
-The result of this pipeline is a structured [spaCy Doc](https://spacy.io/api/doc)object that contains:
+The result of this pipeline is a structured [spaCy Doc](https://spacy.io/api/doc) object that contains:
 
 -   The original text
 
@@ -327,11 +332,11 @@ The result of this pipeline is a structured [spaCy Doc](https://spacy.io/api/doc
 
 -   Dependency relations
 
--   Named entities
+-   Named entities: see the [**spaCy documentation**](https://spacy.io/usage/linguistic-features#named-entities). We are going to be interested in LOC: "location" and GPE: Geopolitical entities such as countries, cities, states, etc.
 
 -   Character offsets
 
-Imagine you have a small, sample sentence: "William went to London in 1603." It's now going to be in a data structure:
+Imagine you have a small, sample sentence: "John went to London in 1605." It's now going to be in a data structure:
 
 | Token  | POS   | Dependency | Entity |
 |--------|-------|------------|--------|
@@ -407,6 +412,18 @@ When you run this, you **will** get an error message:
 
 The problem that we are running into is that one of our texts is very long: 1,100,120 characters. SpaCy's default maximum length is [1,000,000](https://spacy.io/api/language). You *could* increase the maximum length (see the link I just gave you), but that's probably going to be a bad idea for your machine (when you look at the error message, you can see that the "parser and NER models require roughly 1GB of temporary memory per 100,000 characters in the input").
 
+### A note on chunking strategies:
+
+When we split a long text into pieces for spaCy, we have to decide where to cut. There are [three reasonable approaches]{.underline} that fit our needs and you will encounter all of them in this tutorial (that way you have options to choose from in the future). Here's what we will do:
+
+-   Fixed-size chunks (what we'll use in this step): Cut every 50,000 characters, no matter what. This is simple and fast. The risk is that we might slice through the middle of a word or even a multi-word entity like "the Virginia Company of London."
+
+-   Boundary-aware chunks (the "aside" code below that we won't run): After reaching \~50,000 characters, look ahead for the next sentence-ending punctuation mark (. ! ? ;) and cut there. This is more linguistically principled, but Early Modern punctuation is so inconsistent that it can create as many problems as it solves for our texts.
+
+-   Whitespace-safe chunks (what we'll use in Step 5): After reaching \~50,000 characters, back up to the nearest space so we never split a word in half. This is a pragmatic middle ground—it doesn't guarantee we won't split a multi-word entity, but it does guarantee every individual token is intact, which is what spaCy's NER model cares about most.
+
+For now, approach #1 is fine for getting our baseline counts. When we run the fine-tuned model in Step 5, we'll upgrade to approach #3.
+
 The solution is to break up our texts into smaller segments and process them in chunks. Remove the code that we just added and [instead]{.underline} add the following:
 
 ``` python
@@ -435,6 +452,8 @@ print("Total entities extracted:", len(all_entities))
 
 import json
 from pathlib import Path
+import re
+from collections import Counter
 
 OUT_ENTS_RAW = Path.cwd() / "merchant_entities_raw.json"
 
@@ -442,13 +461,38 @@ with open(OUT_ENTS_RAW, "w", encoding="utf-8") as f:
     json.dump(all_entities, f, ensure_ascii=False, indent=2)
 
 print("Saved raw entity mentions:", OUT_ENTS_RAW.resolve())
+
+
+# SAVE baseline location counts (GPE and LOC) for later comparison with trained  # (see Step 5 later in the tutorial)
+
+KEEP_LABELS = {"GPE", "LOC"}
+
+def normalize_ent(text: str) -> str:
+    text = text.strip()
+    text = re.sub(r"\s+", " ", text)
+    return text.lower()
+
+counts_by_label = {lab: Counter() for lab in KEEP_LABELS}
+
+for e in all_entities:
+    lab = e["entity_label"]
+    if lab in KEEP_LABELS:
+        counts_by_label[lab][normalize_ent(e["entity_text"])] += 1
+
+OUT_BASE_COUNTS = Path.cwd() / "merchant_locations_counts_base.json"
+counts_out = {lab: dict(c.most_common()) for lab, c in counts_by_label.items()}
+
+with open(OUT_BASE_COUNTS, "w", encoding="utf-8") as f:
+    json.dump(counts_out, f, ensure_ascii=False, indent=2)
+
+print("Saved baseline counts:", OUT_BASE_COUNTS.resolve())
 ```
 
 Now try running it: this will take a while, but that's ok! At the end, you should see:
 
 `Total entities extracted: 269702`
 
-Running spaCy is the slowest step in today's tutorial, so we are going to do it once, save the results, and then create a new file fo the rest of our work!
+Running spaCy is the slowest step in today's tutorial, so we are going to do it once, save the results, and then create a new file for the rest of our work!
 
 ### An aside: refining this process
 
@@ -516,6 +560,8 @@ Why am I not running this version? Well, it's going to potentially create its ow
 
 ### Back to our task:
 
+Before we create the next file, let's make sure that everything is in in place. At this point your project folder should contain: `week10_step1.py`, `classified_texts.json`, `merchant_texts_for_spacy.json`, `week10-step2.py`, `merchant_entities_raw.json`, `merchant_locations_counts_base.json`.
+
 Create a new file named `week10-step3.py` and run it:
 
 ``` python
@@ -533,11 +579,11 @@ with open(ENT_PATH, "r", encoding="utf-8") as f:
 
 print("Loaded entity mentions:", len(all_entities))
 
-# Minimal normalization to remove unecessary whitespace
+# Minimal normalization to remove unnecessary whitespace
 def normalize_ent(text: str) -> str:
     text = text.strip()
     text = re.sub(r"\s+", " ", text)
-    return text
+    return text.lower()
 
 # 4. Count
 entity_text_counts = Counter(
@@ -550,13 +596,15 @@ for ent_text, n in entity_text_counts.most_common(20):
     print(f"{n:>7}  {ent_text}")
 ```
 
-**Regarding "normalization":** we want to be very restrained with this step. SpaCy gives us mentions as they appear in the text. Before counting them, I want to remove trivial formatting differences so that whitespace inconsistencies do not create artificial duplicates. For example: we want `"   London"` = `"London"`.
-
-I am **not** lowercasing, removing punctuation, striping hyphens, or modernizing spelling! This would risk collapsing *important* differences: while "company" = "companie"; a given instance of the lastname "Smith" may or *may not* equal "Smythe" even though sometimes the same person spelled his name both ways (it depends on the person and who wrote their name in that particular document).
+**Regarding "normalization":** we want to be very restrained with this step. SpaCy gives us mentions as they appear in the text. Before counting them, I want to remove trivial formatting differences so that whitespace inconsistencies do not create artificial duplicates. For example: we want `"   London"` = `"London"`. I am also lowercasing since case use in Early Modern English is not standardized.
 
 When you run this step, you should get:
 
-Loaded entity mentions: 269702 Unique entity strings: 48301 Top 20 entity strings: 8193 two 7015 one 6141 three 5782 first 4260 four 3178 indian 2843 christian 2757 five 2750 english 2308 six 2243 England 1867 second 1811 seven 1663 eight 1591 ten 1527 Spain 1473 twenty 1435 Portugal 1325 half 1175 this day
+Loaded entity mentions: 269702
+
+Unique entity strings: 48301
+
+Top 20 entity strings: 8193 two 7015 one 6141 three 5782 first 4260 four 3178 indian 2843 christian 2757 five 2750 english 2308 six 2243 england 1867 second 1811 seven 1663 eight 1591 ten 1527 spain 1473 twenty 1435 portugal 1325 half 1175 this day
 
 Now, some of these entities are not all that interesting to us (or maybe not to me). I really don't care for all the numbers ("one" "first" "two"...). This is obviously dependent on the research question, but I am going to filter for the kinds of entities that I am interested in:
 
@@ -592,39 +640,39 @@ for lab in ["ORG", "GPE", "PERSON", "LOC", "NORP"]:
 
 This is what we get:
 
-[Top 20 entity strings (filtered)]{.underline}:
+[Top 15 entity strings (filtered)]{.underline}:
 
-> 3178 indian 2843 christian 2243 England 1611 english 1527 Spain 1435 Portugal 1143 China 1036 India 1012 portugal 972 spanish 881 french 746 Fez 711 dutch 676 Africa 661 Rome 593 Italy 569 Egypt 569 Peru 565 France 552 John
+> 3178 indian 2843 christian 2243 england 1611 english 1527 spain 1435 portugal 1143 china 1036 india 1012 portugal 972 spanish 881 french 746 fez 711 dutch 676 africa 661 rome 593 italy 569 egypt 569 peru 565 france 552 john
 
 [Top 15 ORG:]{.underline}
 
-> 371 Tyrone 271 Constantinople 209 senate 181 Banda 153 Christendom 134 Inca 133 Connaght 119 Nanquin 103 rey 97 Pegu 96 Florence 93 Cortes 93 Helena 93 Tercera 91 Caesar
+> 371 tyrone 271 constantinople 209 senate 181 banda 153 christendom 134 inca 133 connaght 119 nanquin 103 rey 97 pegu 96 florence 93 cortes 93 helena 93 tercera 91 caesar
 
 [Top 15 GPE]{.underline}:
 
-> 2242 England 1527 Spain 1435 Portugal 1143 China 1036 India 1012 portugal 660 Rome 593 Italy 569 Egypt 568 Peru 565 France 551 jerusalem 511 Mexico 499 London 472 Ireland
+> 2242 england 1527 spain 1435 portugal 1143 china 1036 india 1012 portugal 660 rome 593 italy 569 egypt 568 peru 565 france 551 jerusalem 511 mexico 499 london 472 ireland
 
 [Top 15 PERSON]{.underline}:
 
-> 552 John 507 Thomas 392 Turk 342 Bantam 301 Fez 295 Solomon 292 Chan 283 Peter 279 Henry 278 William 278 Chinois 272 Francis 267 Alexander 247 Charles 237 Guiana
+> 552 john 507 thomas 392 turk 342 bantam 301 fez 295 solomon 292 chan 283 peter 279 henry 278 william 278 chinois 272 francis 267 alexander 247 charles 237 guiana
 
 [Top 15 LOC]{.underline}:
 
-> 675 Africa 522 Europe 418 Asia 318 Sea 231 the red sea 187 the south sea 91 the ocean sea 88 the sea coast 79 Alps 72 west south-west 67 east north-east 62 the north sea 59 the Mediterran sea 49 gulf 45 Peninsula
+> 675 africa 522 europe 418 asia 318 sea 231 the red sea 187 the south sea 91 the ocean sea 88 the sea coast 79 alps 72 west south-west 67 east north-east 62 the north sea 59 the mediterran sea 49 gulf 45 peninsula
 
 [Top 15 NORP]{.underline}:
 
-> 3178 indian 2843 christian 1611 english 972 spanish 881 french 708 dutch 541 italian 528 greek 350 irish 325 german 322 latin 287 persian 283 Spaniard 274 african 252 mexican
+> 3178 indian 2843 christian 1611 english 972 spanish 881 french 708 dutch 541 italian 528 greek 350 irish 325 german 322 latin 287 persian 283 spaniard 274 african 252 mexican
 
-Well, these are mixed results, clearly. Entities like "Christendom" or "Constantinople" are [not]{.underline} ORG. Similarly, entities like "Bantam" and "Guiana" are [nor]{.underline} PERSON.
+Well, these are mixed results, clearly. Entities like "Christendom" or "Constantinople" are [not]{.underline} ORG. Similarly, entities like "Bantam" and "Guiana" are [not]{.underline} PERSON.
 
 Overall this isn't surprising: I am asking spaCy to work with Early Modern texts and this is not what it was designed to do. At the same time, spaCy should be able to recognize "Guiana" as a LOC (the term "Guianas" is still used to talk about Guyana, Suriname, and French Guiana).
 
 What can we do about this?
 
-We are going to train fine-tune spaCy to improve its ability to correctly label Early Modern text for NER.
+We are going to fine-tune spaCy to improve its ability to correctly label Early Modern text for NER.
 
-### Step 3: Fine-tuning spaCy for LOC and GPE identification
+## Step 4: Fine-tuning spaCy for LOC and GPE identification
 
 For the purposes of this tutorial, we are going to focus on two labels only. This can be extended to a full set of labels (or even create custom labels), but it will take more time to run.
 
@@ -632,9 +680,9 @@ As we did before, we want to keep the time consuming parts of the process as sel
 
 **Note I:** some of the labels in the training data might look weird to you. This is because I am including historically relevant assumptions. For example, I have "Peru" labelled as a LOC rather than a GPE because it would have been considered a geographical region and not a political entity. On the other hand, while "Judea" was not a political entity in the 17th century, it would have been used as a historical political entity and therefore it would be classified as GPE.
 
-**Note II:** this code will look more complex than you are used to. I am going to comment it extensively, but it is something that I have developed over time to work with hard to deal with texts (and with a healthy dose of help from GTP and Claude to help me tinker with the configuration given my data). What you need to get out of it is a sense of the steps and understanding of the data that informs what the code is doing. Once you know what you need to do and why, the actual code will make a lot more sense!
+**Note II:** this code will look more complex than you are used to. I am going to comment it extensively, but it is something that I have developed over time to work with hard to deal with texts (and with a healthy dose of help from GPT and Claude to help me tinker with the configuration given my data). What you need to get out of it is a sense of the steps and understanding of the data that informs what the code is doing. Once you know what you need to do and why, the actual code will make a lot more sense!
 
-``` Python
+``` python
 import json
 import random
 from pathlib import Path
@@ -684,7 +732,7 @@ nlp = spacy.load(BASE_MODEL) # SEE [3] below
 
 # The NER component already exists in en_core_web_sm.  We just need to
 # make sure it knows about the two labels we care about.  If they are
-# already present (GPE and LOC are standard labels) this is a "no-operation".It's # here for completeness sake.
+# already present (GPE and LOC are standard labels) this is a "no-operation". # It's here for completeness sake.
 
 ner = nlp.get_pipe("ner")
 ner.add_label("GPE")
@@ -763,7 +811,7 @@ More details about the code:
 
 1.  [[**Dropout**]{.underline}](https://spacy.io/usage/training) is a regularisation technique that prevents the model from becoming too dependent on any individual neuron. During each training update, a random 30% of neurons (at drop=0.3) are temporarily "switched off", that is, their outputs are set to zero. This forces the remaining neurons to learn more robust, redundant representations rather than relying on a few specific pathways. At inference time (when you actually use the model), dropout is turned off and all neurons participate. The drop rate is a number between 0.0 (no dropout) and 1.0 (drop everything — the model learns nothing). In practice, NER models almost always use something between 0.1 and 0.5. The decision comes down to how much data you have relative to model complexity. With very small datasets like yours (31 examples), the risk of overfitting is high. Higher dropout (0.3–0.5) combats this by making memorisation harder. With large datasets (thousands of examples), overfitting is less of a concern and you can use lower dropout (0.1–0.2) so the model learns faster.
 
-2.  While I stand by this set up, I do want to point out the limitations of my training data. I have 39 labelled paragraphs, so the validation set (dev set) is only 8 examples. Unfortunately, with only 8 dev examples containing 10 entities total, the evaluation is noisy. A single entity being found or missed swings F1 by about 10 points, which is why the dev scores bounced between 0.70 and 0.95 across epochs. This doesn't mean the model is unstable! It just means that the measuring instrument (8 examples) is imprecise. Ideally we would have a larger labelled data set, but this is a pretty realistic case of a first "proof of concept" approach. Building human labelled data sets for highly technical language takes a lot of time.
+2.  While I stand by this set up, I do want to point out the limitations of my training data. I have 39 total labelled paragraphs, so the validation set (dev set; 20%) is only 8 examples. Unfortunately, with only 8 dev examples containing 10 entities total, the evaluation is noisy. A single entity being found or missed swings F1 by about 10 points, which is why the dev scores bounced between 0.70 and 0.95 across epochs. This doesn't mean the model is unstable! It just means that the measuring instrument (8 examples) is imprecise. Ideally we would have a larger labelled data set, but this is a pretty realistic case of a first "proof of concept" approach. Building human labelled data sets for highly technical language takes a lot of time.
 
 3.  When we load `nlp = spacy.load(BASE_MODEL)`, we get a whole sequence of processing components that text flows through:
 
@@ -785,8 +833,318 @@ More details about the code:
 
     -   [Step b in the code]{.underline}: Four things happen for each of the 31 examples: First, `nlp.make_doc(text)` creates a blank spaCy `Doc` from the raw text (it tokenizes the words at this step). Second, `Example.from_dict(doc, annots)` pairs that blank doc with the gold-standard annotations I labelled. Third, [`nlp.update()`](https://spacy.io/api/language#update) does the actual learning. Fourth, `drop=DROP_RATE` applies dropout during this update, randomly disabling 30% of neurons so the model doesn't over-rely on any single pathway (see \[1\] above). After all 31 examples, the model's weights have been adjusted 31 times. That completes one epoch of training.
 
-### Step 4: Rerun NER with the fine-tuned model
+## Step 5: Rerun NER with the fine-tuned model
 
-Now that we have completed our fine-tuning of spaCy, we want to actually see if we can get some better results on our 23 target texts (the chunked merchant texts). Then we are going to export a locations-only dataset (mentions + counts) that you can analyze or use for further work (such as mapping of Early Modern locations mentioned in our documents).
+Now that we have completed our fine-tuning of spaCy, we want to actually see if we can get some better results on our 23 target texts (the chunked merchant texts). Then we are going to export a locations-only dataset (mentions + counts) that you can analyze or use for further work (such as mapping of Early Modern locations mentioned in our documents). What this will look like:
 
-\######################## START AT STEP 5 OF "CLASSIFIER APPLICATION".
+Input: merchant_texts_for_spacy.json — a JSON list of {"doc_id": ..., "text": ...} records
+
+```         
+    models/spacy_loc_tuned/
+    — the fine-tuned spaCy model from train_spacy_ner.py
+```
+
+Output: merchant_locations_mentions_tuned.json — every individual entity mention with doc_id, text, label, and character offsets into the full document
+
+```         
+    merchant_locations_counts_tuned.json
+    — normalised frequency counts grouped by label (GPE / LOC)
+```
+
+Let's create a new file, `week-10-step5.py`, load the merchant text, and the tuned spaCy model. We are taking a different approach to chunking (as I warned during the week 8 tutorial, you will be sick of "chunks"): unlike our earlier naive chunking, this version backs up to the nearest whitespace so we don't split tokens.
+
+This is going to take a little while to run:
+
+``` python
+import json
+import re
+from pathlib import Path
+from collections import Counter
+
+import spacy
+
+
+# CONFIGURATION
+
+MERCHANT_PATH   = Path.cwd() / "merchant_texts_for_spacy.json"
+TUNED_MODEL_DIR = Path.cwd() / "models" / "spacy_loc_tuned"
+OUT_MENTIONS    = Path.cwd() / "merchant_locations_mentions_tuned.json"
+OUT_COUNTS      = Path.cwd() / "merchant_locations_counts_tuned.json"
+
+CHUNK_SIZE  = 50_000       # max characters per chunk sent to spaCy
+KEEP_LABELS = {"GPE", "LOC"}
+
+# HELPER FUNCTIONS
+
+def normalize_ent(text: str) -> str:
+    """
+    Normalise an entity's surface text for counting and deduplication.
+    Strips whitespace, collapses internal runs of whitespace, and
+    lowercases so that 'Virginia', ' virginia', and 'VIRGINIA' all
+    map to the same key.
+    """
+    text = text.strip()
+    text = re.sub(r"\s+", " ", text)
+    return text.lower()
+
+
+def find_chunk_end(text: str, start: int, max_size: int) -> int:
+    """
+    Find a safe chunk boundary that doesn't split a word.
+
+    Starting from `start`, we look up to `max_size` characters ahead.
+    If that landing point is mid-word, we back up to the nearest
+    whitespace so no token is cut in half.  This prevents the NER
+    model from seeing partial words at chunk edges, which could cause
+    it to miss an entity or hallucinate one.
+    """
+    end = min(start + max_size, len(text))
+
+    # If we've reached the end of the text, no adjustment needed
+    if end >= len(text):
+        return end
+
+    # If we landed on whitespace, we're fine
+    if text[end].isspace():
+        return end
+
+    # Otherwise back up to the nearest space within this chunk
+    safe_end = text.rfind(" ", start, end)
+
+    # If there's no space at all in this chunk (one giant token?),
+    # fall back to the hard boundary rather than looping forever
+    if safe_end <= start:
+        return end
+
+    return safe_end
+
+
+# LOAD DATA AND MODEL
+
+with open(MERCHANT_PATH, "r", encoding="utf-8") as f:
+    merchant_records = json.load(f)
+print(f"Loaded merchant texts: {len(merchant_records)}")
+
+nlp = spacy.load(TUNED_MODEL_DIR)
+print(f"Loaded tuned spaCy model: {TUNED_MODEL_DIR.resolve()}")
+
+####
+# EXTRACT ENTITIES
+# This is where the work finally pays off:
+#    For each document we split the text into chunks (most documents
+#    will fit in a single chunk) and run the NER pipeline on each.
+#    Character offsets are recorded relative to the FULL document,
+#    not the chunk, so they can be used later to highlight entities
+#    in the original text.
+####
+
+locations = []
+
+for record in merchant_records:
+    doc_id = record["doc_id"]
+    text   = record["text"]
+
+    # Walk through the text in chunks
+    chunk_start = 0
+    while chunk_start < len(text):
+        chunk_end = find_chunk_end(text, chunk_start, CHUNK_SIZE)
+        chunk     = text[chunk_start:chunk_end]
+
+        doc = nlp(chunk)
+
+        for ent in doc.ents:
+            if ent.label_ in KEEP_LABELS:
+                locations.append({
+                    "doc_id":       doc_id,
+                    "entity_text":  ent.text,
+                    "entity_label": ent.label_,
+                    # Offsets into the full document text
+                    "start_char":   chunk_start + ent.start_char,
+                    "end_char":     chunk_start + ent.end_char,
+                })
+
+        chunk_start = chunk_end
+
+print(f"Total location mentions extracted: {len(locations)}")
+
+
+#SAVE MENTION-LEVEL OUTPUT
+#    One record per entity mention — useful for downstream analysis,
+#    joining back to document metadata, or reviewing model output.
+
+with open(OUT_MENTIONS, "w", encoding="utf-8") as f:
+    json.dump(locations, f, ensure_ascii=False, indent=2)
+print(f"Saved mentions: {OUT_MENTIONS.resolve()}")
+
+
+#AGGREGATE COUNTS
+#    Normalise each entity's text and count occurrences by label.
+#    This gives you a quick overview of what the model found and
+#    which locations appear most frequently across the corpus.
+
+counts_by_label = {label: Counter() for label in KEEP_LABELS}
+
+for m in locations:
+    norm = normalize_ent(m["entity_text"])
+    counts_by_label[m["entity_label"]][norm] += 1
+
+print("\nTop 20 GPE (tuned):")
+for name, n in counts_by_label["GPE"].most_common(20):
+    print(f"  {n:>5}  {name}")
+
+print("\nTop 20 LOC (tuned):")
+for name, n in counts_by_label["LOC"].most_common(20):
+    print(f"  {n:>5}  {name}")
+
+
+# SAVE COUNTS
+
+counts_out = {
+    label: dict(counter.most_common())
+    for label, counter in counts_by_label.items()
+}
+
+with open(OUT_COUNTS, "w", encoding="utf-8") as f:
+    json.dump(counts_out, f, ensure_ascii=False, indent=2)
+print(f"\nSaved counts: {OUT_COUNTS.resolve()}")
+```
+
+When you run this, you should get the following GPE and LOC results:
+
+> **Top 20 GPE (tuned)**: 2327 england 1531 spain 1153 china 797 fez 640 rome 581 egypt 559 france 548 jerusalem 521 london 515 italy 482 mexico 447 persia 442 germany 425 ireland 389 venice 358 cairo 353 russia 320 holland 312 bassa 273 japan
+
+> **Top 20 LOC (tuned)**: 936 india 720 africa 575 peru 539 europe 516 bantam 430 asia 397 the east 365 virginia 303 barbary 250 guiana 244 america 244 goa 194 north-east 182 sea 151 armenia 143 the south sea 133 nilus 107 jordan 107 arabia 102 italy
+
+And to compare the "base" vs. "tuned" result, we can see:
+
+TOTAL locations (base): 48952
+
+TOTAL locations (tuned): 46093
+
+**Top 15 base locations**: 2447 portugal 2243 england 1528 spain 1227 china 1036 india 694 africa 660 rome 601 jerusalem 594 italy 569 egypt 569 peru 565 france 522 europe 512 mexico 501 london
+
+**Top 15 tuned locations**: 2327 england 1531 spain 1175 china 954 india 797 fez 721 africa 666 rome 617 italy 581 egypt 575 peru 571 jerusalem 559 france 539 europe 528 bantam 522 mexico
+
+### How can we understand these changes?
+
+What we are seeing is the result of the decision boundary of the NER model changing after fine-tuning. As you can see, the tuned model is labeling fewer spans as GPE/LOC overall. That usually means one of two things: it became more conservative in its labelling (higher precision, slightly lower recall), OR it stopped labeling certain ambiguous spans as locations. Because of the dev metrics above, the tuned model likely became more precise.
+
+We can see some reassuring changes: "Fez" and "Bantam" are in the Top 15 locations in the tuned model, something that we *would* expect from trading documents. This indicates that the tuned model became better at recognizing historically specific trading locations that the base model under-recognized. The pretrained model was trained on modern English text. When applied to Early Modern material, it over- and under-predicted in different places (it misses spelling variations, for example). Fine-tuning shifts the internal statistical weights so that entity detection better reflects the historical domain. As a result, the distribution of detected locations changes.
+
+Let's take a closer look at some of these changes to see what is going on. Create a new file, `week-10-tuned-counts.py`, and run it:
+
+``` python
+import json
+from pathlib import Path
+
+BASE_COUNTS_PATH  = Path.cwd() / "merchant_locations_counts_base.json"
+TUNED_COUNTS_PATH = Path.cwd() / "merchant_locations_counts_tuned.json"
+
+with open(BASE_COUNTS_PATH, "r", encoding="utf-8") as f:
+    base_counts = json.load(f)
+
+with open(TUNED_COUNTS_PATH, "r", encoding="utf-8") as f:
+    tuned_counts_raw = json.load(f)
+
+# merge tuned GPE + LOC
+tuned_counts = {}
+for label in tuned_counts_raw:
+    for k, v in tuned_counts_raw[label].items():
+        tuned_counts[k] = tuned_counts.get(k, 0) + v
+
+
+# merge base GPE + LOC (same structure as tuned)
+base_merged = {}
+for label in base_counts:
+    for k, v in base_counts[label].items():
+        base_merged[k] = base_merged.get(k, 0) + v
+
+all_places = set(base_merged) | set(tuned_counts)
+
+diff = {
+    place: tuned_counts.get(place, 0) - base_merged.get(place, 0)
+    for place in all_places
+}
+
+print("\nBiggest increases:")
+for place, delta in sorted(diff.items(), key=lambda x: -x[1])[:15]:
+    print(f"{delta:>6}  {place}")
+
+print("\nBiggest decreases:")
+for place, delta in sorted(diff.items(), key=lambda x: x[1])[:15]:
+    print(f"{delta:>6}  {place}")
+```
+
+The results should look like (I am using "bold" on the entities I will discuss below):
+
+[Biggest increases]{.underline}:
+
+**413 fez**
+
+397 the east
+
+**359 bantam**
+
+**246 guiana**
+
+245 barbary
+
+**238 goa**
+
+191 north-east
+
+167 bassa
+
+162 banda
+
+133 connaght
+
+117 januarie
+
+113 alexandria
+
+93 the east indies
+
+**87 prete janni**
+
+86 the east india
+
+[Biggest decreases]{.underline}:
+
+**-2419 portugal**
+
+-248 the red sea
+
+-199 canton
+
+-165 thou
+
+-136 sea
+
+-120 fort
+
+-120 nilus
+
+-118 skiffe
+
+-94 the ocean sea
+
+-88 cotton
+
+-87 the sea coast
+
+-82 india
+
+-72 west south-west
+
+-67 the south sea
+
+-62 panama
+
+After fine-tuning spaCy on our 31 training examples, we are getting some interesting results (even though we need to remember that this is a pretty small training set). The baseline model overproduced certain contemporary or highly frequent place names (I suspect that it was confused by terms such as "the Portuguese" and labelled them as *Portugal*) and under-recognized Early Modern trade locations like *Fez*, *Bantam*, *Guiana*, and *Goa*. The fine-tuned model reduces some modern bias while increasing recognition of historically salient geographic terms and multi-word colonial phrases such as *the East Indies*. At the same time, we see small artifacts of overfitting (e.g., occasional misclassification of capitalized months like *Januarie* and the fact that "prete janni", aka "Prete Gianni" aka "Prester John", is considered a location rather than a mythical person!).
+
+This is not too surprising as I gave you a small training set.
+
+## Where to next?
+
+This week, I started using spaCy without much fuss. However, you might naturally want to know how spaCy identifies entities. Unlike Word2Vec, spaCy is based on contextual token embeddings. When spaCy processes a sentence, it first converts each token into a numerical vector (embedding) that captures not just the word's meaning in isolation, but its meaning in context. So "Apple" in "Apple released a new phone" gets a different representation than "Apple" in "I ate an apple." I started talking about contextual embeddings and transformer models like BERT this week. These are the foundation of spaCy: we will keep working on them for the rest of the semester!
