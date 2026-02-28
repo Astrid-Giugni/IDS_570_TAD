@@ -623,9 +623,7 @@ Top 25 tokens after cleaning:</code></pre>
 <span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>    sg<span class="op">=</span><span class="dv">1</span>                    <span class="co"># 1=skip-gram, 0=CBOW</span></span>
 <span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'
-Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'
-Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'</code></pre>
+<pre><code>Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Vocabulary size:"</span>, <span class="bu">len</span>(w2v.wv.key_to_index))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -660,64 +658,64 @@ Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Nearest neighbors for 'trade':
-    carrying  0.886
-       round  0.863
-     carried  0.835
-       carry  0.833
-advantageous  0.829
-    branches  0.814
-    shipping  0.812
-     returns  0.806
+    carrying  0.888
+       round  0.877
+     carried  0.839
+    branches  0.834
+       carry  0.834
+advantageous  0.820
+     returns  0.814
       forced  0.802
-      branch  0.796
+      branch  0.797
+      direct  0.797
 
 Nearest neighbors for 'labor':
+      motion  0.853
+        puts  0.847
+     laborer  0.841
         adds  0.839
-      motion  0.834
-     laborer  0.829
-        puts  0.823
- distributed  0.807
-      barren  0.803
- constitutes  0.801
-      powers  0.797
-      scanty  0.796
-exchangeable  0.793
+      powers  0.833
+       tools  0.827
+ constitutes  0.823
+ distributed  0.822
+       sinks  0.819
+     augment  0.810
 
 Nearest neighbors for 'price':
-       rises  0.850
-         low  0.845
-        sink  0.835
-      barley  0.831
-    somewhat  0.816
-       lower  0.815
-       raise  0.813
-      dearer  0.801
-        meat  0.801
-       bread  0.799
+       rises  0.844
+         low  0.835
+        sink  0.827
+      barley  0.820
+        rise  0.808
+       bread  0.801
+       lower  0.799
+    somewhat  0.795
+     butcher  0.793
+       falls  0.791
 
 Nearest neighbors for 'capital':
-    capitals  0.893
-    replaces  0.861
-    employed  0.848
-   withdrawn  0.840
-     employs  0.822
-       stock  0.821
-     replace  0.821
-    reserved  0.820
-   regularly  0.817
-      owners  0.815
+    capitals  0.874
+       stock  0.846
+   regularly  0.845
+    employed  0.845
+    replaces  0.845
+   withdrawn  0.844
+     employs  0.834
+    reserved  0.826
+     replace  0.826
+      unless  0.825
 
 Nearest neighbors for 'market':
-    supplied  0.798
-     brought  0.792
-   effectual  0.788
-        come  0.760
-   supplying  0.758
-     markets  0.756
-    bringing  0.753
-      import  0.750
- enhancement  0.747
-     thither  0.746</code></pre>
+    supplied  0.790
+   effectual  0.783
+     cheaper  0.764
+        come  0.759
+      demand  0.759
+     thither  0.755
+      dearer  0.752
+     brought  0.749
+     markets  0.748
+ overstocked  0.745</code></pre>
 </div>
 </div>
 <p>For <strong>trade</strong>: the terms that we are getting indicate that Smith is using structural and institutional language in conjunction with this term. We have verbs like carrying, carried, and shipping (possibly used as a noun…), as well as structural qualifiers such as branches, returns, and direct. Some words are perhaps more surprising and would require more investigation (such as round).</p>
@@ -1031,7 +1029,7 @@ manufactures  0.007</code></pre>
 <span id="cb66-18"><a href="#cb66-18" aria-hidden="true" tabindex="-1"></a>plt.bar(<span class="bu">range</span>(K), topic_share)</span>
 <span id="cb66-19"><a href="#cb66-19" aria-hidden="true" tabindex="-1"></a>plt.xticks(<span class="bu">range</span>(K), [<span class="ss">f"T</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>([&lt;matplotlib.axis.XTick object at 0x0000022296EEB090&gt;, &lt;matplotlib.axis.XTick object at 0x0000022298070510&gt;, &lt;matplotlib.axis.XTick object at 0x00000222981B4110&gt;, &lt;matplotlib.axis.XTick object at 0x00000222981B6510&gt;, &lt;matplotlib.axis.XTick object at 0x00000222981B4F50&gt;, &lt;matplotlib.axis.XTick object at 0x00000222981C2090&gt;, &lt;matplotlib.axis.XTick object at 0x00000222981AC710&gt;, &lt;matplotlib.axis.XTick object at 0x00000222981AED50&gt;], [Text(0, 0, 'T0'), Text(1, 0, 'T1'), Text(2, 0, 'T2'), Text(3, 0, 'T3'), Text(4, 0, 'T4'), Text(5, 0, 'T5'), Text(6, 0, 'T6'), Text(7, 0, 'T7')])</code></pre>
+<pre><code>([&lt;matplotlib.axis.XTick object at 0x000001EAA274B7D0&gt;, &lt;matplotlib.axis.XTick object at 0x000001EAA26D2250&gt;, &lt;matplotlib.axis.XTick object at 0x000001EAA27AB990&gt;, &lt;matplotlib.axis.XTick object at 0x000001EAA27BA190&gt;, &lt;matplotlib.axis.XTick object at 0x000001EAA27B8B50&gt;, &lt;matplotlib.axis.XTick object at 0x000001EAA27C1AD0&gt;, &lt;matplotlib.axis.XTick object at 0x000001EAA27C3DD0&gt;, &lt;matplotlib.axis.XTick object at 0x000001EAA27A6390&gt;], [Text(0, 0, 'T0'), Text(1, 0, 'T1'), Text(2, 0, 'T2'), Text(3, 0, 'T3'), Text(4, 0, 'T4'), Text(5, 0, 'T5'), Text(6, 0, 'T6'), Text(7, 0, 'T7')])</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Share of topic mass (across segments)"</span>)</span>
 <span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Topic"</span>)</span>

@@ -276,12 +276,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>This week’s plan: our goal is to use our classifier from Week 9 to learn how to do Named Entity Recognition (NER) using spaCy.</p>
-<p><strong>Named Entity Recognition:</strong> I mentioned NER earlier in the semester and it is a core task in NLP. It’s goal is to identify and classify spans of text into predefined semantic categories: people, organizations, locations, dates, and quantities (and you train it to add your own categories to fit your own questions). Formally, it can be framed as a sequence labeling problem, where each token is assigned a tag indicating whether it begins, continues, or falls outside a named entity. Modern NER systems typically rely on contextual word embeddings (e.g., from transformer models like BERT–our next topic, so stay tune for that!) to capture long-range dependencies and disambiguate surface forms such as “Washington” as a person versus a place, for instance.</p>
+<p><strong>Named Entity Recognition:</strong> I mentioned NER earlier in the semester and it is a core task in NLP. Its goal is to identify and classify spans of text into predefined semantic categories: people, organizations, locations, dates, and quantities (and you train it to add your own categories to fit your own questions). Formally, it can be framed as a sequence labeling problem, where each token is assigned a tag indicating whether it begins, continues, or falls outside a named entity. Modern NER systems typically rely on contextual word embeddings (e.g., from transformer models like BERT–our next topic, so stay tuned for that!) to capture long-range dependencies and disambiguate surface forms such as “Washington” as a person versus a place, for instance.</p>
 <p><u><strong>spaCy</strong> aka, your new best friend</u>: <a href="#0">spaCy</a> is a powerful Python library for NLP. It provides an integrated pipeline architecture (tokenization, part-of-speech tagging, dependency parsing, lemmatization, and NER) all accessible through a clean, consistent API. Its NER component is quite powerful and it has served me well with complex NER questions on Early Modern Texts (which I find impressive given the various inconsistencies and idiosyncrasies in my corpora). The other option is <a href="#0">NLTK</a>, which was built primarily as a teaching toolkit. I have successfully worked with both and we use NLTK in the tutorial for Weeks 08 and 9, but spaCy prioritizes speed and memory efficiency, making it well-suited for processing large corpora. NLTK returns results more slowly than spaCy, but spaCy does trade off higher memory usage for that speed… ymmv. I want you to be exposed to both libraries.</p>
 <p>You should feel free to experiment with both, but I will use spaCy for this tutorial as it tends to be more widely used outside of academia. I do want to emphasize that spaCy is not always superior:</p>
 <ul>
 <li><p>I tend to work with NLTK in early stages of research as it tends to be used more often in academic contexts, making it easier to compare results. If you are planning to stay in academia, do look into NLTK. But NLTK doesn’t have native word vector support at all, which is one of the meaningful gaps between it and more modern libraries.</p></li>
-<li><p>spaCy ships with pre-trained pipelines that include word vectors, so when you call <code>token.vector</code> on spaCy, you are not training your own model, but you’re getting a pre-trained word vector. Compare this with what we did with word2vec last week in order to expand on our seed term “merchant.” SpaCy loads vectors that were trained externally and baked into the pipeline. So you can’t easily swap in “custom” vectors the way <code>Gensim</code> lets you.</p></li>
+<li><p>In general spaCy ships with pre-trained pipelines that (can) include word vectors, so when you call <code>token.vector</code> on spaCy, you are not training your own model, but you’re getting a pre-trained word vector. Compare this with what we did with word2vec last week in order to expand on our seed term “merchant.” SpaCy loads vectors that were trained externally and baked into the pipeline. So you can’t easily swap in “custom” vectors the way <code>Gensim</code> lets you. <strong>Importantly for this tutorial</strong>: <code>en_core_web_sm</code> (which is what we install below) doesn’t include real word vectors. It relies on contextual representations rather than static word vectors. This distinction doesn’t matter for our NER workflow at all (NER uses the <code>tok2vec</code> representations regardless). If you want full word vectors, you can install <code>en_core_web_md</code> or <code>en_core_web_lg</code>.</p></li>
 </ul>
 <p>You need to think through your corpus and your research questions to make meaningful choices here.</p>
 <p><u><strong>Overview of this week’s tutorial</strong></u>:</p>
@@ -387,30 +387,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Loaded TF-IDF vectorizer + logistic regression classifier."</span>)</span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">### apply to JSON corpus</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>texts <span class="op">=</span> [r[<span class="st">"text"</span>] <span class="cf">for</span> r <span class="kw">in</span> records]</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>X_new <span class="op">=</span> vectorizer.transform(texts)    <span class="co"># IMPORTANT: use transform, not fit_transform</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>probs <span class="op">=</span> clf.predict_proba(X_new)[:, <span class="dv">1</span>]</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>preds <span class="op">=</span> (probs <span class="op">&gt;=</span> <span class="fl">0.50</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(Path.cwd() <span class="op">/</span> <span class="st">"new_texts.json"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    records <span class="op">=</span> json.load(f)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>texts <span class="op">=</span> [r[<span class="st">"text"</span>] <span class="cf">for</span> r <span class="kw">in</span> records]</span>
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r, p, yhat <span class="kw">in</span> <span class="bu">zip</span>(records, probs, preds):</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    r[<span class="st">"pred_prob_merchant"</span>] <span class="op">=</span> <span class="bu">float</span>(p)</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    r[<span class="st">"pred_merchant"</span>] <span class="op">=</span> <span class="bu">int</span>(yhat)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>X_new <span class="op">=</span> vectorizer.transform(texts)    <span class="co"># IMPORTANT: use transform, not fit_transform</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>probs <span class="op">=</span> clf.predict_proba(X_new)[:, <span class="dv">1</span>]</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>preds <span class="op">=</span> (probs <span class="op">&gt;=</span> <span class="fl">0.50</span>).astype(<span class="bu">int</span>)</span>
 <span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Classified:"</span>, <span class="bu">len</span>(records), <span class="st">"documents"</span>)</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Predicted merchant (threshold .50):"</span>, <span class="bu">sum</span>(preds))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r, p, yhat <span class="kw">in</span> <span class="bu">zip</span>(records, probs, preds):</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    r[<span class="st">"pred_prob_merchant"</span>] <span class="op">=</span> <span class="bu">float</span>(p)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    r[<span class="st">"pred_merchant"</span>] <span class="op">=</span> <span class="bu">int</span>(yhat)</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Classified:"</span>, <span class="bu">len</span>(records), <span class="st">"documents"</span>)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Predicted merchant (threshold .50):"</span>, <span class="bu">sum</span>(preds))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>From this process, you should be seeing that:</p>
 <ul>
 <li><p>You found and loaded <strong>147</strong> <code>.txt</code> files.</p></li>
 <li><p>The JSON serialization worked <code>new_texts.json</code></p></li>
-</ul>
-<!-- -->
-<ul>
-<li>You successfully loaded <strong>both</strong> classifier artifacts (vectorizer + logreg) from last week.</li>
+<li><p>You successfully loaded <strong>both</strong> classifier artifacts (vectorizer + logreg) from last week.</p></li>
 </ul>
 <p>In my case, I classified all documents, and at threshold <strong>0.50</strong>, I got <strong>36 “merchant”</strong> predictions. You <em>might</em>&nbsp;have something slightly different (I am genuinely curious) because I changed the training set before loading it on Canvas for Weeks 08 and 09.</p>
-<p>In any case, now we want to (1) save the classified JSON and (2) create a high-confidence “merchant” subset. That is, we set the threshold at 0.5, which is pretty forgiving. It would be good to have a subset with a stricter threshold for our analysis. For spaCy, you usually want precision over recall (fewer false positives</p>
+<p>In any case, now we want to (1) save the classified JSON and (2) create a high-confidence “merchant” subset. That is, we set the threshold at 0.5, which is pretty forgiving. It would be good to have a subset with a stricter threshold for our analysis. For spaCy, you usually want precision over recall (fewer false positives).</p>
 <p>First, we will save the classified corpus by adding the predictions into the JSON file:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
@@ -448,7 +449,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Just to be safe, we can take a quick look at a couple of the results to double check that they are indeed “merchant” texts. Text B14801 (the highest confidence score) is Edward Misselden’s <em>Free trade</em> (1622) and text A22547 (second highest confidence score) is a royal proclamation by Charles I <a href="https://quod.lib.umich.edu/e/eebo/A22547.0001.001?rgn=main;view=fulltext"><em>Concerning the trade of Ginney, Binney, in the parts of Africa</em></a> (1631) [this is a short text, if you are interested in reading it!]. Both are documents that I recognize as related, and highly so, to the topic of “merchant”–so far, so good!</p>
 <section id="what-about-the-lost-documents" class="level3">
 <h3 class="anchored" data-anchor-id="what-about-the-lost-documents">What about the “lost” documents:</h3>
-<p>Going from 0.50 threshold to 0.70 decreased out subset of text from 36 to 23, so we “lost” 13 documents. Does this matter? Maybe or maybe not! It’s hard to know at this stage. My approach to a problem like this is the following:</p>
+<p>Going from 0.50 threshold to 0.70 decreased our subset of text from 36 to 23, so we “lost” 13 documents. Does this matter? Maybe or maybe not! It’s hard to know at this stage. My approach to a problem like this is the following:</p>
 <ul>
 <li><p>work with the smaller, “high-confidence” subset</p></li>
 <li><p>look at the results of the NER task and evaluate how well the model is performing</p></li>
@@ -456,9 +457,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 </section>
 </section>
-<section id="step-2" class="level2">
-<h2 class="anchored" data-anchor-id="step-2">Step 2:</h2>
-<p>Now we are ready to move f<u>rom classification to linguistic annotation</u>: we will run spaCy on our corpus in order to perform NER and extract entities that we want to analyze. We are going to do this <em>slowly</em> so as to make our reasoning explicit.</p>
+<section id="steps-2-and-3" class="level2">
+<h2 class="anchored" data-anchor-id="steps-2-and-3">Steps 2 and 3:</h2>
+<p>Now we are ready to move <u>from classification to linguistic annotation</u>: we will run spaCy on our corpus in order to perform NER and extract entities that we want to analyze. We are going to do this <em>slowly</em> so as to make our reasoning explicit.</p>
 <ul>
 <li><p>First, we will load one document into spaCy and inspect it</p></li>
 <li><p>Then, we will extract entities from that one document</p></li>
@@ -470,9 +471,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Here’s the <a href="https://spacy.io/usage"><strong>full installation guide</strong></a> and below is a quick reference summarizing the steps (including creating and activating venv in case you need to redo this step from Weeks-08-09):</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 27%">
-<col style="width: 40%">
-<col style="width: 31%">
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -516,28 +517,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 <p><u>Note:</u> there are a number of ways in which spaCy’s installation can go wrong (you are in the wrong directory, you did other work in between and so you need to reactivate venv, you are a Mac user and my suggestions don’t match your needs, …): youtube is your friend. There are a lot of tutorials that go through all possible scenarios for installation.</p>
 <p>For future reference: you can see that there are a number of languages with trained pipelines that you can use instead of English. We will stick to English for now.</p>
-<p>Now that we have the tools that we need, we can load spaCy and our high-confidence merchant corpus. Create a new file named <code>week10-step2.py</code>, run the following code to import spaCy, the json we created, and process one file:</p>
+<p>Now that we have the tools that we need, we can load spaCy and our high-confidence merchant corpus. Create a new file named <code>week10-step2.py</code>, we will keep adding blocks to this same file as we go along <strong>until</strong> we got to step 3. I am splitting this up to explain what we are doing along the way!</p>
+<p>First, run the following code to import spaCy, the json we created, and process one file:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the English model</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"spaCy model loaded."</span>)</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>MERCHANT_PATH <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"merchant_texts_for_spacy.json"</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(MERCHANT_PATH, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    merchant_records <span class="op">=</span> json.load(f)</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of merchant texts:"</span>, <span class="bu">len</span>(merchant_records))</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>sample_text <span class="op">=</span> merchant_records[<span class="dv">0</span>][<span class="st">"text"</span>]</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>doc <span class="op">=</span> nlp(sample_text) <span class="co">## All the good stuff happens here: see note below at [1]</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Processed one document."</span>)</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of tokens:"</span>, <span class="bu">len</span>(doc))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the English model</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"spaCy model loaded."</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>MERCHANT_PATH <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"merchant_texts_for_spacy.json"</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(MERCHANT_PATH, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    merchant_records <span class="op">=</span> json.load(f)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of merchant texts:"</span>, <span class="bu">len</span>(merchant_records))</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>sample_text <span class="op">=</span> merchant_records[<span class="dv">0</span>][<span class="st">"text"</span>]</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>doc <span class="op">=</span> nlp(sample_text) <span class="co">## All the good stuff happens here: see note below at [1]</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Processed one document."</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of tokens:"</span>, <span class="bu">len</span>(doc))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>[1] The line <code>doc = nlp (sample_text)</code> passes raw text into a processing pipeline that:</p>
 <ul>
 <li><p>tokenizes the text</p></li>
@@ -546,17 +549,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p>computes syntactic dependencies</p></li>
 <li><p>identifies named entities</p></li>
 </ul>
-<p>The result of this pipeline is a structured <a href="https://spacy.io/api/doc">spaCy Doc</a>object that contains:</p>
+<p>The result of this pipeline is a structured <a href="https://spacy.io/api/doc">spaCy Doc</a> object that contains:</p>
 <ul>
 <li><p>The original text</p></li>
 <li><p>A sequence of tokens</p></li>
 <li><p>Sentence boundaries</p></li>
 <li><p>POS tags</p></li>
 <li><p>Dependency relations</p></li>
-<li><p>Named entities</p></li>
+<li><p>Named entities: see the <a href="https://spacy.io/usage/linguistic-features#named-entities"><strong>spaCy documentation</strong></a>. We are going to be interested in LOC: “location” and GPE: Geopolitical entities such as countries, cities, states, etc.</p></li>
 <li><p>Character offsets</p></li>
 </ul>
-<p>Imagine you have a small, sample sentence: “William went to London in 1603.” It’s now going to be in a data structure:</p>
+<p>Imagine you have a small, sample sentence: “John went to London in 1605.” It’s now going to be in a data structure:</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -647,6 +650,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>ValueError: [E088] Text of length 1100120 exceeds maximum of 1000000. The parser and NER models require roughly 1GB of temporary memory per 100,000 characters in the input. This means long texts may cause memory allocation errors. If you’re not using the parser or NER, it’s probably safe to increase the <code>nlp.max_length</code> limit. The limit is in number of characters, so you can check whether your inputs are too long by checking <code>len(text)</code>.</p>
 </blockquote>
 <p>The problem that we are running into is that one of our texts is very long: 1,100,120 characters. SpaCy’s default maximum length is <a href="https://spacy.io/api/language">1,000,000</a>. You <em>could</em> increase the maximum length (see the link I just gave you), but that’s probably going to be a bad idea for your machine (when you look at the error message, you can see that the “parser and NER models require roughly 1GB of temporary memory per 100,000 characters in the input”).</p>
+<section id="a-note-on-chunking-strategies" class="level3">
+<h3 class="anchored" data-anchor-id="a-note-on-chunking-strategies">A note on chunking strategies:</h3>
+<p>When we split a long text into pieces for spaCy, we have to decide where to cut. There are <u>three reasonable approaches</u> that fit our needs and you will encounter all of them in this tutorial (that way you have options to choose from in the future). Here’s what we will do:</p>
+<ul>
+<li><p>Fixed-size chunks (what we’ll use in this step): Cut every 50,000 characters, no matter what. This is simple and fast. The risk is that we might slice through the middle of a word or even a multi-word entity like “the Virginia Company of London.”</p></li>
+<li><p>Boundary-aware chunks (the “aside” code below that we won’t run): After reaching ~50,000 characters, look ahead for the next sentence-ending punctuation mark (. ! ? ;) and cut there. This is more linguistically principled, but Early Modern punctuation is so inconsistent that it can create as many problems as it solves for our texts.</p></li>
+<li><p>Whitespace-safe chunks (what we’ll use in Step 5): After reaching ~50,000 characters, back up to the nearest space so we never split a word in half. This is a pragmatic middle ground—it doesn’t guarantee we won’t split a multi-word entity, but it does guarantee every individual token is intact, which is what spaCy’s NER model cares about most.</p></li>
+</ul>
+<p>For now, approach #1 is fine for getting our baseline counts. When we run the fine-tuned model in Step 5, we’ll upgrade to approach #3.</p>
 <p>The solution is to break up our texts into smaller segments and process them in chunks. Remove the code that we just added and <u>instead</u> add the following:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>all_entities <span class="op">=</span> []</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -673,16 +685,44 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
 <span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>OUT_ENTS_RAW <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"merchant_entities_raw.json"</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
 <span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(OUT_ENTS_RAW, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
-<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>    json.dump(all_entities, f, ensure_ascii<span class="op">=</span><span class="va">False</span>, indent<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Saved raw entity mentions:"</span>, OUT_ENTS_RAW.resolve())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>OUT_ENTS_RAW <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"merchant_entities_raw.json"</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(OUT_ENTS_RAW, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>    json.dump(all_entities, f, ensure_ascii<span class="op">=</span><span class="va">False</span>, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Saved raw entity mentions:"</span>, OUT_ENTS_RAW.resolve())</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a><span class="co"># SAVE baseline location counts (GPE and LOC) for later comparison with trained  # (see Step 5 later in the tutorial)</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>KEEP_LABELS <span class="op">=</span> {<span class="st">"GPE"</span>, <span class="st">"LOC"</span>}</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> normalize_ent(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> text.strip()</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">\s</span><span class="op">+</span><span class="vs">"</span>, <span class="st">" "</span>, text)</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> text.lower()</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>counts_by_label <span class="op">=</span> {lab: Counter() <span class="cf">for</span> lab <span class="kw">in</span> KEEP_LABELS}</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> e <span class="kw">in</span> all_entities:</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>    lab <span class="op">=</span> e[<span class="st">"entity_label"</span>]</span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> lab <span class="kw">in</span> KEEP_LABELS:</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>        counts_by_label[lab][normalize_ent(e[<span class="st">"entity_text"</span>])] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>OUT_BASE_COUNTS <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"merchant_locations_counts_base.json"</span></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>counts_out <span class="op">=</span> {lab: <span class="bu">dict</span>(c.most_common()) <span class="cf">for</span> lab, c <span class="kw">in</span> counts_by_label.items()}</span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(OUT_BASE_COUNTS, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>    json.dump(counts_out, f, ensure_ascii<span class="op">=</span><span class="va">False</span>, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Saved baseline counts:"</span>, OUT_BASE_COUNTS.resolve())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Now try running it: this will take a while, but that’s ok! At the end, you should see:</p>
 <p><code>Total entities extracted: 269702</code></p>
-<p>Running spaCy is the slowest step in today’s tutorial, so we are going to do it once, save the results, and then create a new file fo the rest of our work!</p>
+<p>Running spaCy is the slowest step in today’s tutorial, so we are going to do it once, save the results, and then create a new file for the rest of our work!</p>
+</section>
 <section id="an-aside-refining-this-process" class="level3">
 <h3 class="anchored" data-anchor-id="an-aside-refining-this-process">An aside: refining this process</h3>
 <p>This isn’t without risks. There is a real possibility that an entity might split across segment boundary. For example, something like “the Virginia Company of London” might end up with “Virginia Company” in one chunk and “of London” in another.</p>
@@ -742,6 +782,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="back-to-our-task" class="level3">
 <h3 class="anchored" data-anchor-id="back-to-our-task">Back to our task:</h3>
+<p>Before we create the next file, let’s make sure that everything is in in place. At this point your project folder should contain: <code>week10_step1.py</code>, <code>classified_texts.json</code>, <code>merchant_texts_for_spacy.json</code>, <code>week10-step2.py</code>, <code>merchant_entities_raw.json</code>, <code>merchant_locations_counts_base.json</code>.</p>
 <p>Create a new file named <code>week10-step3.py</code> and run it:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Imports</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
@@ -757,11 +798,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Loaded entity mentions:"</span>, <span class="bu">len</span>(all_entities))</span>
 <span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Minimal normalization to remove unecessary whitespace</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Minimal normalization to remove unnecessary whitespace</span></span>
 <span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> normalize_ent(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
 <span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> text.strip()</span>
 <span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">\s</span><span class="op">+</span><span class="vs">"</span>, <span class="st">" "</span>, text)</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> text</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> text.lower()</span>
 <span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Count</span></span>
 <span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>entity_text_counts <span class="op">=</span> Counter(</span>
@@ -772,10 +813,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Top 20 entity strings:"</span>)</span>
 <span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ent_text, n <span class="kw">in</span> entity_text_counts.most_common(<span class="dv">20</span>):</span>
 <span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>n<span class="sc">:&gt;7}</span><span class="ss">  </span><span class="sc">{</span>ent_text<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>Regarding “normalization”:</strong> we want to be very restrained with this step. SpaCy gives us mentions as they appear in the text. Before counting them, I want to remove trivial formatting differences so that whitespace inconsistencies do not create artificial duplicates. For example: we want <code>"   London"</code> = <code>"London"</code>.</p>
-<p>I am <strong>not</strong> lowercasing, removing punctuation, striping hyphens, or modernizing spelling! This would risk collapsing <em>important</em> differences: while “company” = “companie”; a given instance of the lastname “Smith” may or <em>may not</em> equal “Smythe” even though sometimes the same person spelled his name both ways (it depends on the person and who wrote their name in that particular document).</p>
+<p><strong>Regarding “normalization”:</strong> we want to be very restrained with this step. SpaCy gives us mentions as they appear in the text. Before counting them, I want to remove trivial formatting differences so that whitespace inconsistencies do not create artificial duplicates. For example: we want <code>"   London"</code> = <code>"London"</code>. I am also lowercasing since case use in Early Modern English is not standardized.</p>
 <p>When you run this step, you should get:</p>
-<p>Loaded entity mentions: 269702 Unique entity strings: 48301 Top 20 entity strings: 8193 two 7015 one 6141 three 5782 first 4260 four 3178 indian 2843 christian 2757 five 2750 english 2308 six 2243 England 1867 second 1811 seven 1663 eight 1591 ten 1527 Spain 1473 twenty 1435 Portugal 1325 half 1175 this day</p>
+<p>Loaded entity mentions: 269702</p>
+<p>Unique entity strings: 48301</p>
+<p>Top 20 entity strings: 8193 two 7015 one 6141 three 5782 first 4260 four 3178 indian 2843 christian 2757 five 2750 english 2308 six 2243 england 1867 second 1811 seven 1663 eight 1591 ten 1527 spain 1473 twenty 1435 portugal 1325 half 1175 this day</p>
 <p>Now, some of these entities are not all that interesting to us (or maybe not to me). I really don’t care for all the numbers (“one” “first” “two”…). This is obviously dependent on the research question, but I am going to filter for the kinds of entities that I am interested in:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#### Count entity strings for desired labels ONLY</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -805,41 +847,42 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ent_text, n <span class="kw">in</span> counts_by_label[lab].most_common(<span class="dv">15</span>):</span>
 <span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>n<span class="sc">:&gt;7}</span><span class="ss">  </span><span class="sc">{</span>ent_text<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This is what we get:</p>
-<p><u>Top 20 entity strings (filtered)</u>:</p>
+<p><u>Top 15 entity strings (filtered)</u>:</p>
 <blockquote class="blockquote">
-<p>3178 indian 2843 christian 2243 England 1611 english 1527 Spain 1435 Portugal 1143 China 1036 India 1012 portugal 972 spanish 881 french 746 Fez 711 dutch 676 Africa 661 Rome 593 Italy 569 Egypt 569 Peru 565 France 552 John</p>
+<p>3178 indian 2843 christian 2243 england 1611 english 1527 spain 1435 portugal 1143 china 1036 india 1012 portugal 972 spanish 881 french 746 fez 711 dutch 676 africa 661 rome 593 italy 569 egypt 569 peru 565 france 552 john</p>
 </blockquote>
 <p><u>Top 15 ORG:</u></p>
 <blockquote class="blockquote">
-<p>371 Tyrone 271 Constantinople 209 senate 181 Banda 153 Christendom 134 Inca 133 Connaght 119 Nanquin 103 rey 97 Pegu 96 Florence 93 Cortes 93 Helena 93 Tercera 91 Caesar</p>
+<p>371 tyrone 271 constantinople 209 senate 181 banda 153 christendom 134 inca 133 connaght 119 nanquin 103 rey 97 pegu 96 florence 93 cortes 93 helena 93 tercera 91 caesar</p>
 </blockquote>
 <p><u>Top 15 GPE</u>:</p>
 <blockquote class="blockquote">
-<p>2242 England 1527 Spain 1435 Portugal 1143 China 1036 India 1012 portugal 660 Rome 593 Italy 569 Egypt 568 Peru 565 France 551 jerusalem 511 Mexico 499 London 472 Ireland</p>
+<p>2242 england 1527 spain 1435 portugal 1143 china 1036 india 1012 portugal 660 rome 593 italy 569 egypt 568 peru 565 france 551 jerusalem 511 mexico 499 london 472 ireland</p>
 </blockquote>
 <p><u>Top 15 PERSON</u>:</p>
 <blockquote class="blockquote">
-<p>552 John 507 Thomas 392 Turk 342 Bantam 301 Fez 295 Solomon 292 Chan 283 Peter 279 Henry 278 William 278 Chinois 272 Francis 267 Alexander 247 Charles 237 Guiana</p>
+<p>552 john 507 thomas 392 turk 342 bantam 301 fez 295 solomon 292 chan 283 peter 279 henry 278 william 278 chinois 272 francis 267 alexander 247 charles 237 guiana</p>
 </blockquote>
 <p><u>Top 15 LOC</u>:</p>
 <blockquote class="blockquote">
-<p>675 Africa 522 Europe 418 Asia 318 Sea 231 the red sea 187 the south sea 91 the ocean sea 88 the sea coast 79 Alps 72 west south-west 67 east north-east 62 the north sea 59 the Mediterran sea 49 gulf 45 Peninsula</p>
+<p>675 africa 522 europe 418 asia 318 sea 231 the red sea 187 the south sea 91 the ocean sea 88 the sea coast 79 alps 72 west south-west 67 east north-east 62 the north sea 59 the mediterran sea 49 gulf 45 peninsula</p>
 </blockquote>
 <p><u>Top 15 NORP</u>:</p>
 <blockquote class="blockquote">
-<p>3178 indian 2843 christian 1611 english 972 spanish 881 french 708 dutch 541 italian 528 greek 350 irish 325 german 322 latin 287 persian 283 Spaniard 274 african 252 mexican</p>
+<p>3178 indian 2843 christian 1611 english 972 spanish 881 french 708 dutch 541 italian 528 greek 350 irish 325 german 322 latin 287 persian 283 spaniard 274 african 252 mexican</p>
 </blockquote>
-<p>Well, these are mixed results, clearly. Entities like “Christendom” or “Constantinople” are <u>not</u> ORG. Similarly, entities like “Bantam” and “Guiana” are <u>nor</u> PERSON.</p>
+<p>Well, these are mixed results, clearly. Entities like “Christendom” or “Constantinople” are <u>not</u> ORG. Similarly, entities like “Bantam” and “Guiana” are <u>not</u> PERSON.</p>
 <p>Overall this isn’t surprising: I am asking spaCy to work with Early Modern texts and this is not what it was designed to do. At the same time, spaCy should be able to recognize “Guiana” as a LOC (the term “Guianas” is still used to talk about Guyana, Suriname, and French Guiana).</p>
 <p>What can we do about this?</p>
-<p>We are going to train fine-tune spaCy to improve its ability to correctly label Early Modern text for NER.</p>
+<p>We are going to fine-tune spaCy to improve its ability to correctly label Early Modern text for NER.</p>
 </section>
-<section id="step-3-fine-tuning-spacy-for-loc-and-gpe-identification" class="level3">
-<h3 class="anchored" data-anchor-id="step-3-fine-tuning-spacy-for-loc-and-gpe-identification">Step 3: Fine-tuning spaCy for LOC and GPE identification</h3>
+</section>
+<section id="step-4-fine-tuning-spacy-for-loc-and-gpe-identification" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-fine-tuning-spacy-for-loc-and-gpe-identification">Step 4: Fine-tuning spaCy for LOC and GPE identification</h2>
 <p>For the purposes of this tutorial, we are going to focus on two labels only. This can be extended to a full set of labels (or even create custom labels), but it will take more time to run.</p>
 <p>As we did before, we want to keep the time consuming parts of the process as self-contained units, so create a new file <code>week-10-step4.py</code> for the fine-tuning step. You will need the file <code>location_train_data.json</code>, which you can find on Canvas, under “Files”, in the “Week 10” folder. With the code below, we are going to use the labelled data in the file <code>location_train_data.json</code> to improve spaCy’s ability to recognize entities correctly.</p>
 <p><strong>Note I:</strong> some of the labels in the training data might look weird to you. This is because I am including historically relevant assumptions. For example, I have “Peru” labelled as a LOC rather than a GPE because it would have been considered a geographical region and not a political entity. On the other hand, while “Judea” was not a political entity in the 17th century, it would have been used as a historical political entity and therefore it would be classified as GPE.</p>
-<p><strong>Note II:</strong> this code will look more complex than you are used to. I am going to comment it extensively, but it is something that I have developed over time to work with hard to deal with texts (and with a healthy dose of help from GTP and Claude to help me tinker with the configuration given my data). What you need to get out of it is a sense of the steps and understanding of the data that informs what the code is doing. Once you know what you need to do and why, the actual code will make a lot more sense!</p>
+<p><strong>Note II:</strong> this code will look more complex than you are used to. I am going to comment it extensively, but it is something that I have developed over time to work with hard to deal with texts (and with a healthy dose of help from GPT and Claude to help me tinker with the configuration given my data). What you need to get out of it is a sense of the steps and understanding of the data that informs what the code is doing. Once you know what you need to do and why, the actual code will make a lot more sense!</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
@@ -889,7 +932,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a><span class="co"># The NER component already exists in en_core_web_sm.  We just need to</span></span>
 <span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a><span class="co"># make sure it knows about the two labels we care about.  If they are</span></span>
-<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a><span class="co"># already present (GPE and LOC are standard labels) this is a "no-operation".It's # here for completeness sake.</span></span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a><span class="co"># already present (GPE and LOC are standard labels) this is a "no-operation". # It's here for completeness sake.</span></span>
 <span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>ner <span class="op">=</span> nlp.get_pipe(<span class="st">"ner"</span>)</span>
 <span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>ner.add_label(<span class="st">"GPE"</span>)</span>
@@ -965,7 +1008,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>More details about the code:</p>
 <ol type="1">
 <li><p><a href="https://spacy.io/usage/training"><u><strong>Dropout</strong></u></a> is a regularisation technique that prevents the model from becoming too dependent on any individual neuron. During each training update, a random 30% of neurons (at drop=0.3) are temporarily “switched off”, that is, their outputs are set to zero. This forces the remaining neurons to learn more robust, redundant representations rather than relying on a few specific pathways. At inference time (when you actually use the model), dropout is turned off and all neurons participate. The drop rate is a number between 0.0 (no dropout) and 1.0 (drop everything — the model learns nothing). In practice, NER models almost always use something between 0.1 and 0.5. The decision comes down to how much data you have relative to model complexity. With very small datasets like yours (31 examples), the risk of overfitting is high. Higher dropout (0.3–0.5) combats this by making memorisation harder. With large datasets (thousands of examples), overfitting is less of a concern and you can use lower dropout (0.1–0.2) so the model learns faster.</p></li>
-<li><p>While I stand by this set up, I do want to point out the limitations of my training data. I have 39 labelled paragraphs, so the validation set (dev set) is only 8 examples. Unfortunately, with only 8 dev examples containing 10 entities total, the evaluation is noisy. A single entity being found or missed swings F1 by about 10 points, which is why the dev scores bounced between 0.70 and 0.95 across epochs. This doesn’t mean the model is unstable! It just means that the measuring instrument (8 examples) is imprecise. Ideally we would have a larger labelled data set, but this is a pretty realistic case of a first “proof of concept” approach. Building human labelled data sets for highly technical language takes a lot of time.</p></li>
+<li><p>While I stand by this set up, I do want to point out the limitations of my training data. I have 39 total labelled paragraphs, so the validation set (dev set; 20%) is only 8 examples. Unfortunately, with only 8 dev examples containing 10 entities total, the evaluation is noisy. A single entity being found or missed swings F1 by about 10 points, which is why the dev scores bounced between 0.70 and 0.95 across epochs. This doesn’t mean the model is unstable! It just means that the measuring instrument (8 examples) is imprecise. Ideally we would have a larger labelled data set, but this is a pretty realistic case of a first “proof of concept” approach. Building human labelled data sets for highly technical language takes a lot of time.</p></li>
 <li><p>When we load <code>nlp = spacy.load(BASE_MODEL)</code>, we get a whole sequence of processing components that text flows through:</p>
 <ul>
 <li><p>Tokenizer — splits raw text into individual tokens (words, punctuation)</p></li>
@@ -982,13 +1025,266 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul></li>
 </ol>
 </section>
-<section id="step-4-rerun-ner-with-the-fine-tuned-model" class="level3">
-<h3 class="anchored" data-anchor-id="step-4-rerun-ner-with-the-fine-tuned-model">Step 4: Rerun NER with the fine-tuned model</h3>
-<p>Now that we have completed our fine-tuning of spaCy, we want to actually see if we can get some better results on our 23 target texts (the chunked merchant texts). Then we are going to export a locations-only dataset (mentions + counts) that you can analyze or use for further work (such as mapping of Early Modern locations mentioned in our documents).</p>
-<p>######################## START AT STEP 5 OF “CLASSIFIER APPLICATION”.</p>
-
-
+<section id="step-5-rerun-ner-with-the-fine-tuned-model" class="level2">
+<h2 class="anchored" data-anchor-id="step-5-rerun-ner-with-the-fine-tuned-model">Step 5: Rerun NER with the fine-tuned model</h2>
+<p>Now that we have completed our fine-tuning of spaCy, we want to actually see if we can get some better results on our 23 target texts (the chunked merchant texts). Then we are going to export a locations-only dataset (mentions + counts) that you can analyze or use for further work (such as mapping of Early Modern locations mentioned in our documents). What this will look like:</p>
+<p>Input: merchant_texts_for_spacy.json — a JSON list of {“doc_id”: …, “text”: …} records</p>
+<pre><code>    models/spacy_loc_tuned/
+    — the fine-tuned spaCy model from train_spacy_ner.py</code></pre>
+<p>Output: merchant_locations_mentions_tuned.json — every individual entity mention with doc_id, text, label, and character offsets into the full document</p>
+<pre><code>    merchant_locations_counts_tuned.json
+    — normalised frequency counts grouped by label (GPE / LOC)</code></pre>
+<p>Let’s create a new file, <code>week-10-step5.py</code>, load the merchant text, and the tuned spaCy model. We are taking a different approach to chunking (as I warned during the week 8 tutorial, you will be sick of “chunks”): unlike our earlier naive chunking, this version backs up to the nearest whitespace so we don’t split tokens.</p>
+<p>This is going to take a little while to run:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co"># CONFIGURATION</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>MERCHANT_PATH   <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"merchant_texts_for_spacy.json"</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>TUNED_MODEL_DIR <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"models"</span> <span class="op">/</span> <span class="st">"spacy_loc_tuned"</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>OUT_MENTIONS    <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"merchant_locations_mentions_tuned.json"</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>OUT_COUNTS      <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"merchant_locations_counts_tuned.json"</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>CHUNK_SIZE  <span class="op">=</span> <span class="dv">50_000</span>       <span class="co"># max characters per chunk sent to spaCy</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>KEEP_LABELS <span class="op">=</span> {<span class="st">"GPE"</span>, <span class="st">"LOC"</span>}</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="co"># HELPER FUNCTIONS</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> normalize_ent(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="co">    Normalise an entity's surface text for counting and deduplication.</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="co">    Strips whitespace, collapses internal runs of whitespace, and</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="co">    lowercases so that 'Virginia', ' virginia', and 'VIRGINIA' all</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="co">    map to the same key.</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> text.strip()</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">\s</span><span class="op">+</span><span class="vs">"</span>, <span class="st">" "</span>, text)</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> text.lower()</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_chunk_end(text: <span class="bu">str</span>, start: <span class="bu">int</span>, max_size: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a><span class="co">    Find a safe chunk boundary that doesn't split a word.</span></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a><span class="co">    Starting from `start`, we look up to `max_size` characters ahead.</span></span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a><span class="co">    If that landing point is mid-word, we back up to the nearest</span></span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a><span class="co">    whitespace so no token is cut in half.  This prevents the NER</span></span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a><span class="co">    model from seeing partial words at chunk edges, which could cause</span></span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a><span class="co">    it to miss an entity or hallucinate one.</span></span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>    end <span class="op">=</span> <span class="bu">min</span>(start <span class="op">+</span> max_size, <span class="bu">len</span>(text))</span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If we've reached the end of the text, no adjustment needed</span></span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> end <span class="op">&gt;=</span> <span class="bu">len</span>(text):</span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> end</span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If we landed on whitespace, we're fine</span></span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> text[end].isspace():</span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> end</span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Otherwise back up to the nearest space within this chunk</span></span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a>    safe_end <span class="op">=</span> text.rfind(<span class="st">" "</span>, start, end)</span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If there's no space at all in this chunk (one giant token?),</span></span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a>    <span class="co"># fall back to the hard boundary rather than looping forever</span></span>
+<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> safe_end <span class="op">&lt;=</span> start:</span>
+<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> end</span>
+<span id="cb18-60"><a href="#cb18-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> safe_end</span>
+<span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-64"><a href="#cb18-64" aria-hidden="true" tabindex="-1"></a><span class="co"># LOAD DATA AND MODEL</span></span>
+<span id="cb18-65"><a href="#cb18-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-66"><a href="#cb18-66" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(MERCHANT_PATH, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb18-67"><a href="#cb18-67" aria-hidden="true" tabindex="-1"></a>    merchant_records <span class="op">=</span> json.load(f)</span>
+<span id="cb18-68"><a href="#cb18-68" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Loaded merchant texts: </span><span class="sc">{</span><span class="bu">len</span>(merchant_records)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-69"><a href="#cb18-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-70"><a href="#cb18-70" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(TUNED_MODEL_DIR)</span>
+<span id="cb18-71"><a href="#cb18-71" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Loaded tuned spaCy model: </span><span class="sc">{</span>TUNED_MODEL_DIR<span class="sc">.</span>resolve()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-72"><a href="#cb18-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-73"><a href="#cb18-73" aria-hidden="true" tabindex="-1"></a><span class="co">####</span></span>
+<span id="cb18-74"><a href="#cb18-74" aria-hidden="true" tabindex="-1"></a><span class="co"># EXTRACT ENTITIES</span></span>
+<span id="cb18-75"><a href="#cb18-75" aria-hidden="true" tabindex="-1"></a><span class="co"># This is where the work finally pays off:</span></span>
+<span id="cb18-76"><a href="#cb18-76" aria-hidden="true" tabindex="-1"></a><span class="co">#    For each document we split the text into chunks (most documents</span></span>
+<span id="cb18-77"><a href="#cb18-77" aria-hidden="true" tabindex="-1"></a><span class="co">#    will fit in a single chunk) and run the NER pipeline on each.</span></span>
+<span id="cb18-78"><a href="#cb18-78" aria-hidden="true" tabindex="-1"></a><span class="co">#    Character offsets are recorded relative to the FULL document,</span></span>
+<span id="cb18-79"><a href="#cb18-79" aria-hidden="true" tabindex="-1"></a><span class="co">#    not the chunk, so they can be used later to highlight entities</span></span>
+<span id="cb18-80"><a href="#cb18-80" aria-hidden="true" tabindex="-1"></a><span class="co">#    in the original text.</span></span>
+<span id="cb18-81"><a href="#cb18-81" aria-hidden="true" tabindex="-1"></a><span class="co">####</span></span>
+<span id="cb18-82"><a href="#cb18-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-83"><a href="#cb18-83" aria-hidden="true" tabindex="-1"></a>locations <span class="op">=</span> []</span>
+<span id="cb18-84"><a href="#cb18-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-85"><a href="#cb18-85" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> record <span class="kw">in</span> merchant_records:</span>
+<span id="cb18-86"><a href="#cb18-86" aria-hidden="true" tabindex="-1"></a>    doc_id <span class="op">=</span> record[<span class="st">"doc_id"</span>]</span>
+<span id="cb18-87"><a href="#cb18-87" aria-hidden="true" tabindex="-1"></a>    text   <span class="op">=</span> record[<span class="st">"text"</span>]</span>
+<span id="cb18-88"><a href="#cb18-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-89"><a href="#cb18-89" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Walk through the text in chunks</span></span>
+<span id="cb18-90"><a href="#cb18-90" aria-hidden="true" tabindex="-1"></a>    chunk_start <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb18-91"><a href="#cb18-91" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> chunk_start <span class="op">&lt;</span> <span class="bu">len</span>(text):</span>
+<span id="cb18-92"><a href="#cb18-92" aria-hidden="true" tabindex="-1"></a>        chunk_end <span class="op">=</span> find_chunk_end(text, chunk_start, CHUNK_SIZE)</span>
+<span id="cb18-93"><a href="#cb18-93" aria-hidden="true" tabindex="-1"></a>        chunk     <span class="op">=</span> text[chunk_start:chunk_end]</span>
+<span id="cb18-94"><a href="#cb18-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-95"><a href="#cb18-95" aria-hidden="true" tabindex="-1"></a>        doc <span class="op">=</span> nlp(chunk)</span>
+<span id="cb18-96"><a href="#cb18-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-97"><a href="#cb18-97" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> ent <span class="kw">in</span> doc.ents:</span>
+<span id="cb18-98"><a href="#cb18-98" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> ent.label_ <span class="kw">in</span> KEEP_LABELS:</span>
+<span id="cb18-99"><a href="#cb18-99" aria-hidden="true" tabindex="-1"></a>                locations.append({</span>
+<span id="cb18-100"><a href="#cb18-100" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"doc_id"</span>:       doc_id,</span>
+<span id="cb18-101"><a href="#cb18-101" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"entity_text"</span>:  ent.text,</span>
+<span id="cb18-102"><a href="#cb18-102" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"entity_label"</span>: ent.label_,</span>
+<span id="cb18-103"><a href="#cb18-103" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Offsets into the full document text</span></span>
+<span id="cb18-104"><a href="#cb18-104" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"start_char"</span>:   chunk_start <span class="op">+</span> ent.start_char,</span>
+<span id="cb18-105"><a href="#cb18-105" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"end_char"</span>:     chunk_start <span class="op">+</span> ent.end_char,</span>
+<span id="cb18-106"><a href="#cb18-106" aria-hidden="true" tabindex="-1"></a>                })</span>
+<span id="cb18-107"><a href="#cb18-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-108"><a href="#cb18-108" aria-hidden="true" tabindex="-1"></a>        chunk_start <span class="op">=</span> chunk_end</span>
+<span id="cb18-109"><a href="#cb18-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-110"><a href="#cb18-110" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total location mentions extracted: </span><span class="sc">{</span><span class="bu">len</span>(locations)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-111"><a href="#cb18-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-112"><a href="#cb18-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-113"><a href="#cb18-113" aria-hidden="true" tabindex="-1"></a><span class="co">#SAVE MENTION-LEVEL OUTPUT</span></span>
+<span id="cb18-114"><a href="#cb18-114" aria-hidden="true" tabindex="-1"></a><span class="co">#    One record per entity mention — useful for downstream analysis,</span></span>
+<span id="cb18-115"><a href="#cb18-115" aria-hidden="true" tabindex="-1"></a><span class="co">#    joining back to document metadata, or reviewing model output.</span></span>
+<span id="cb18-116"><a href="#cb18-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-117"><a href="#cb18-117" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(OUT_MENTIONS, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb18-118"><a href="#cb18-118" aria-hidden="true" tabindex="-1"></a>    json.dump(locations, f, ensure_ascii<span class="op">=</span><span class="va">False</span>, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb18-119"><a href="#cb18-119" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Saved mentions: </span><span class="sc">{</span>OUT_MENTIONS<span class="sc">.</span>resolve()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-120"><a href="#cb18-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-121"><a href="#cb18-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-122"><a href="#cb18-122" aria-hidden="true" tabindex="-1"></a><span class="co">#AGGREGATE COUNTS</span></span>
+<span id="cb18-123"><a href="#cb18-123" aria-hidden="true" tabindex="-1"></a><span class="co">#    Normalise each entity's text and count occurrences by label.</span></span>
+<span id="cb18-124"><a href="#cb18-124" aria-hidden="true" tabindex="-1"></a><span class="co">#    This gives you a quick overview of what the model found and</span></span>
+<span id="cb18-125"><a href="#cb18-125" aria-hidden="true" tabindex="-1"></a><span class="co">#    which locations appear most frequently across the corpus.</span></span>
+<span id="cb18-126"><a href="#cb18-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-127"><a href="#cb18-127" aria-hidden="true" tabindex="-1"></a>counts_by_label <span class="op">=</span> {label: Counter() <span class="cf">for</span> label <span class="kw">in</span> KEEP_LABELS}</span>
+<span id="cb18-128"><a href="#cb18-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-129"><a href="#cb18-129" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> m <span class="kw">in</span> locations:</span>
+<span id="cb18-130"><a href="#cb18-130" aria-hidden="true" tabindex="-1"></a>    norm <span class="op">=</span> normalize_ent(m[<span class="st">"entity_text"</span>])</span>
+<span id="cb18-131"><a href="#cb18-131" aria-hidden="true" tabindex="-1"></a>    counts_by_label[m[<span class="st">"entity_label"</span>]][norm] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb18-132"><a href="#cb18-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-133"><a href="#cb18-133" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Top 20 GPE (tuned):"</span>)</span>
+<span id="cb18-134"><a href="#cb18-134" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, n <span class="kw">in</span> counts_by_label[<span class="st">"GPE"</span>].most_common(<span class="dv">20</span>):</span>
+<span id="cb18-135"><a href="#cb18-135" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>n<span class="sc">:&gt;5}</span><span class="ss">  </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-136"><a href="#cb18-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-137"><a href="#cb18-137" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Top 20 LOC (tuned):"</span>)</span>
+<span id="cb18-138"><a href="#cb18-138" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, n <span class="kw">in</span> counts_by_label[<span class="st">"LOC"</span>].most_common(<span class="dv">20</span>):</span>
+<span id="cb18-139"><a href="#cb18-139" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>n<span class="sc">:&gt;5}</span><span class="ss">  </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-140"><a href="#cb18-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-141"><a href="#cb18-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-142"><a href="#cb18-142" aria-hidden="true" tabindex="-1"></a><span class="co"># SAVE COUNTS</span></span>
+<span id="cb18-143"><a href="#cb18-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-144"><a href="#cb18-144" aria-hidden="true" tabindex="-1"></a>counts_out <span class="op">=</span> {</span>
+<span id="cb18-145"><a href="#cb18-145" aria-hidden="true" tabindex="-1"></a>    label: <span class="bu">dict</span>(counter.most_common())</span>
+<span id="cb18-146"><a href="#cb18-146" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> label, counter <span class="kw">in</span> counts_by_label.items()</span>
+<span id="cb18-147"><a href="#cb18-147" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb18-148"><a href="#cb18-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-149"><a href="#cb18-149" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(OUT_COUNTS, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb18-150"><a href="#cb18-150" aria-hidden="true" tabindex="-1"></a>    json.dump(counts_out, f, ensure_ascii<span class="op">=</span><span class="va">False</span>, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb18-151"><a href="#cb18-151" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Saved counts: </span><span class="sc">{</span>OUT_COUNTS<span class="sc">.</span>resolve()<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>When you run this, you should get the following GPE and LOC results:</p>
+<blockquote class="blockquote">
+<p><strong>Top 20 GPE (tuned)</strong>: 2327 england 1531 spain 1153 china 797 fez 640 rome 581 egypt 559 france 548 jerusalem 521 london 515 italy 482 mexico 447 persia 442 germany 425 ireland 389 venice 358 cairo 353 russia 320 holland 312 bassa 273 japan</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>Top 20 LOC (tuned)</strong>: 936 india 720 africa 575 peru 539 europe 516 bantam 430 asia 397 the east 365 virginia 303 barbary 250 guiana 244 america 244 goa 194 north-east 182 sea 151 armenia 143 the south sea 133 nilus 107 jordan 107 arabia 102 italy</p>
+</blockquote>
+<p>And to compare the “base” vs.&nbsp;“tuned” result, we can see:</p>
+<p>TOTAL locations (base): 48952</p>
+<p>TOTAL locations (tuned): 46093</p>
+<p><strong>Top 15 base locations</strong>: 2447 portugal 2243 england 1528 spain 1227 china 1036 india 694 africa 660 rome 601 jerusalem 594 italy 569 egypt 569 peru 565 france 522 europe 512 mexico 501 london</p>
+<p><strong>Top 15 tuned locations</strong>: 2327 england 1531 spain 1175 china 954 india 797 fez 721 africa 666 rome 617 italy 581 egypt 575 peru 571 jerusalem 559 france 539 europe 528 bantam 522 mexico</p>
+<section id="how-can-we-understand-these-changes" class="level3">
+<h3 class="anchored" data-anchor-id="how-can-we-understand-these-changes">How can we understand these changes?</h3>
+<p>What we are seeing is the result of the decision boundary of the NER model changing after fine-tuning. As you can see, the tuned model is labeling fewer spans as GPE/LOC overall. That usually means one of two things: it became more conservative in its labelling (higher precision, slightly lower recall), OR it stopped labeling certain ambiguous spans as locations. Because of the dev metrics above, the tuned model likely became more precise.</p>
+<p>We can see some reassuring changes: “Fez” and “Bantam” are in the Top 15 locations in the tuned model, something that we <em>would</em>&nbsp;expect from trading documents. This indicates that the tuned model became better at recognizing historically specific trading locations that the base model under-recognized. The pretrained model was trained on modern English text. When applied to Early Modern material, it over- and under-predicted in different places (it misses spelling variations, for example). Fine-tuning shifts the internal statistical weights so that entity detection better reflects the historical domain. As a result, the distribution of detected locations changes.</p>
+<p>Let’s take a closer look at some of these changes to see what is going on. Create a new file, <code>week-10-tuned-counts.py</code>, and run it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>BASE_COUNTS_PATH  <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"merchant_locations_counts_base.json"</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>TUNED_COUNTS_PATH <span class="op">=</span> Path.cwd() <span class="op">/</span> <span class="st">"merchant_locations_counts_tuned.json"</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(BASE_COUNTS_PATH, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    base_counts <span class="op">=</span> json.load(f)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(TUNED_COUNTS_PATH, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    tuned_counts_raw <span class="op">=</span> json.load(f)</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="co"># merge tuned GPE + LOC</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>tuned_counts <span class="op">=</span> {}</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label <span class="kw">in</span> tuned_counts_raw:</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k, v <span class="kw">in</span> tuned_counts_raw[label].items():</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>        tuned_counts[k] <span class="op">=</span> tuned_counts.get(k, <span class="dv">0</span>) <span class="op">+</span> v</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a><span class="co"># merge base GPE + LOC (same structure as tuned)</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>base_merged <span class="op">=</span> {}</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label <span class="kw">in</span> base_counts:</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k, v <span class="kw">in</span> base_counts[label].items():</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>        base_merged[k] <span class="op">=</span> base_merged.get(k, <span class="dv">0</span>) <span class="op">+</span> v</span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>all_places <span class="op">=</span> <span class="bu">set</span>(base_merged) <span class="op">|</span> <span class="bu">set</span>(tuned_counts)</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>diff <span class="op">=</span> {</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>    place: tuned_counts.get(place, <span class="dv">0</span>) <span class="op">-</span> base_merged.get(place, <span class="dv">0</span>)</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> place <span class="kw">in</span> all_places</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Biggest increases:"</span>)</span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> place, delta <span class="kw">in</span> <span class="bu">sorted</span>(diff.items(), key<span class="op">=</span><span class="kw">lambda</span> x: <span class="op">-</span>x[<span class="dv">1</span>])[:<span class="dv">15</span>]:</span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>delta<span class="sc">:&gt;6}</span><span class="ss">  </span><span class="sc">{</span>place<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Biggest decreases:"</span>)</span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> place, delta <span class="kw">in</span> <span class="bu">sorted</span>(diff.items(), key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="dv">1</span>])[:<span class="dv">15</span>]:</span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>delta<span class="sc">:&gt;6}</span><span class="ss">  </span><span class="sc">{</span>place<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The results should look like (I am using “bold” on the entities I will discuss below):</p>
+<p><u>Biggest increases</u>:</p>
+<p><strong>413 fez</strong></p>
+<p>397 the east</p>
+<p><strong>359 bantam</strong></p>
+<p><strong>246 guiana</strong></p>
+<p>245 barbary</p>
+<p><strong>238 goa</strong></p>
+<p>191 north-east</p>
+<p>167 bassa</p>
+<p>162 banda</p>
+<p>133 connaght</p>
+<p>117 januarie</p>
+<p>113 alexandria</p>
+<p>93 the east indies</p>
+<p><strong>87 prete janni</strong></p>
+<p>86 the east india</p>
+<p><u>Biggest decreases</u>:</p>
+<p><strong>-2419 portugal</strong></p>
+<p>-248 the red sea</p>
+<p>-199 canton</p>
+<p>-165 thou</p>
+<p>-136 sea</p>
+<p>-120 fort</p>
+<p>-120 nilus</p>
+<p>-118 skiffe</p>
+<p>-94 the ocean sea</p>
+<p>-88 cotton</p>
+<p>-87 the sea coast</p>
+<p>-82 india</p>
+<p>-72 west south-west</p>
+<p>-67 the south sea</p>
+<p>-62 panama</p>
+<p>After fine-tuning spaCy on our 31 training examples, we are getting some interesting results (even though we need to remember that this is a pretty small training set). The baseline model overproduced certain contemporary or highly frequent place names (I suspect that it was confused by terms such as “the Portuguese” and labelled them as <em>Portugal</em>) and under-recognized Early Modern trade locations like <em>Fez</em>, <em>Bantam</em>, <em>Guiana</em>, and <em>Goa</em>. The fine-tuned model reduces some modern bias while increasing recognition of historically salient geographic terms and multi-word colonial phrases such as <em>the East Indies</em>. At the same time, we see small artifacts of overfitting (e.g., occasional misclassification of capitalized months like <em>Januarie</em> and the fact that “prete janni”, aka “Prete Gianni” aka “Prester John”, is considered a location rather than a mythical person!).</p>
+<p>This is not too surprising as I gave you a small training set.</p>
 </section>
+</section>
+<section id="where-to-next" class="level2">
+<h2 class="anchored" data-anchor-id="where-to-next">Where to next?</h2>
+<p>This week, I started using spaCy without much fuss. However, you might naturally want to know how spaCy identifies entities. Unlike Word2Vec, spaCy is based on contextual token embeddings. When spaCy processes a sentence, it first converts each token into a numerical vector (embedding) that captures not just the word’s meaning in isolation, but its meaning in context. So “Apple” in “Apple released a new phone” gets a different representation than “Apple” in “I ate an apple.” I started talking about contextual embeddings and transformer models like BERT this week. These are the foundation of spaCy: we will keep working on them for the rest of the semester!</p>
+
+
 </section>
 
 </main> <!-- /main -->
