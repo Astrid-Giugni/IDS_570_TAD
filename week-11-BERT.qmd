@@ -1,0 +1,214 @@
+---
+title: "Weeks 11: BERT and Historical Language Change"
+editor: visual
+format: html
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| include: false
+
+library(reticulate)
+
+use_python("C:/Users/astri/miniconda3/envs/tad/python.exe", required = TRUE)
+py_config()
+```
+
+# Weeks 11-13 goals:
+
+With this tutorial, we are starting a three weeks unit on **BERT**. This is how the three weeks will work together:
+
+**Week 11:** this tutorial uses a toy paraphrase corpus to practice tokenization; compare TF-IDF vs. BERT similarity; work with PCA visualization, compare `[CLS]` vs. mean pooling, and understand masked language modeling. We will end with a preview of how base BERT handles Early Modern English (poorly). This will set us up for...
+
+**Week 12:** this is where we learn how to fine-tune the model. We will work with the Geneva Bible (you can find a .xlsx file on [Canvas]{.underline} under "[Weeks 11-13]{.underline}", titled "genevaBible.xlsx" alongside the corpus that we will work with in Week 13) and the tutorail will walk you through the full training loop using HuggingFace's `Trainer`. We will then compare before/after predictions side by side. At the end, we save fine-tuned model for Week 13.
+
+**Week 13:** this is where our hard work pays off. We will work with 626 mercantile `.txt` files, embed them using the fine-tuned model, cluster them with K-Means (with elbow/silhouette analysis for choosing k), and characterizes each cluster with TF-IDF top terms. We will end the tutorial by analyzing the possible meanings of the term "credit" in our corpus. In the 16th and 17th century, the meaning of the term "credit" spanned a wide spectrum, from social values that hinted at honor and trustworthiness to a judgment of economic ability (see the fantastic article by Alexandra Shepard, "Manhood, Credit and Patriarchy in Early Modern England c. 1580-1640" in *Past & Present* (May, 2000), pp. 75-106). In this tutorial, we will work on analyzing these shades of meaning by finding every occurrence, extracting word-level contextual embeddings, clustering them into semantic senses, identifying the most ambiguous borderline cases, and cross-tabulating credit senses against document clusters. We will end with a base-vs-fine-tuned comparison of how the model performs!
+
+Let's get started!
+
+## Week 11: How BERT Reads — From Tokens to Embeddings
+
+At the end of Week 10, I pointed out that [spaCy](https://spacy.io/usage/spacy-101)'s NER model works by building **contextual token embeddings**: numerical representations that capture not just a word's meaning in isolation, but its meaning *in context*. The example we used was "Apple": the word gets a different embedding in "Apple released a new phone" versus "I ate an apple."
+
+Over these two weeks, we are going to build on this idea and we are going to consider how we can leverage this type of representation to compare meaning over time. That is, how can we use contextual embedding when the context is not just a different sentence, but a different century.
+
+We will work with BERT ([[**Bidirectional Encoder Representations from Transformers**]{.underline}](https://arxiv.org/abs/1810.04805)), a model that builds contextual embeddings using a transformer architecture. The key difference from spaCy's default CNN-based embeddings is that BERT uses [**self-attention**](https://arxiv.org/abs/1706.03762): every token's representation is informed by *every other token* in the sentence simultaneously, not just a local window.
+
+Our plan is to:
+
+1.  Understand how BERT tokenizes text (and why it matters)
+2.  Extract sentence-level embeddings using BERT
+3.  Compare sentence similarity using both TF-IDF and BERT
+4.  Visualize embedding spaces with PCA
+5.  See what BERT "knows" through masked language modeling
+
+We will work with a small, hand-built toy corpus so that every result is interpretable. Next week, we scale up.
+
+## Part I — From Word2Vec to BERT: The Conceptual Shift
+
+### Static Embeddings vs. Contextual Embeddings
+
+Word2Vec assigns one vector per word type. The word "company" gets a single representation regardless of whether it appears in "the East India Company" or "I enjoy her company." This is a real limitation when words have multiple senses.
+
+BERT assigns **one vector per token occurrence**. The embedding for "company" depends on the surrounding words in that specific sentence. "The East India Company traded spices" and "She was pleasant company at dinner" will produce *different* vectors for the same word.
+
+### How does BERT learn this?
+
+BERT was pre-trained on a massive corpus (Wikipedia + BookCorpus) using two tasks:
+
+1.  Masked Language Modeling (MLM): randomly mask 15% of tokens in a sentence, then predict what the masked tokens were. This forces BERT to build representations that encode the full context of each token.
+
+2.  Next Sentence Prediction: given two sentences, predict whether the second follows the first in the original text.
+
+The result of this training is a model that encodes deep "knowledge" about how English works (I won't always use scare quotes, but obviously a model doesn't "know" anything). We can then extract and use those representations for our own purposes.
+
+### BERT's Architecture (Conceptual)
+
+At a high level, BERT processes text in three stages:
+
+1.  Tokenization → the input sentence is broken into subword tokens using [WordPiece tokenization](https://huggingface.co/learn/llm-course/en/chapter6/6).
+2.  Transformer layers → each token passes through a stack of self-attention layers (12 layers in `bert-base`), where each token’s representation is updated based on all other tokens in the sentence.
+3.  Output → the final layer produces a 768-dimensional vector for each token, encoding its meaning in context.
+
+These output vectors are the contextual embeddings we will work with.
+
+#### A quick aside:
+
+When a sentence is processed by BERT, the model does not receive the raw sentence directly. Instead, the input sequence is structured like this:
+
+`[CLS] The king ruled England . [SEP]`
+
+Where:
+
+-    **`[CLS]`** → special token marking the start of the sequence
+
+-   **`[SEP]`** → separator token marking the end of the sequence (or separating two sentences)
+
+After tokenization, BERT produces an embedding for every token, including `[CLS]` and `[SEP]`.
+
+#### [BERT-base](https://huggingface.co/papers/1810.04805), [BERT-Large](https://huggingface.co/google-bert/bert-large-cased), [RoBERTa](https://huggingface.co/docs/transformers/en/model_doc/roberta), [ModernBERT](https://huggingface.co/blog/modernbert), [DistilBERT](https://huggingface.co/docs/transformers/en/model_doc/distilbert), [MacBERTh and GysBERT](https://macberth.netlify.app/),.. Oh my! 
+
+There are a lot of BERT's and we will talk more about this in our reading for Friday! For this tutorial, we will work with the base model.
+
+## Part II — Setup
+
+**Install Packages:**
+
+You should already have `scikit-learn` and `matplotlib` from previous weeks. We need to add a few new packages:
+
+``` Python
+#| eval: false
+
+# Run these in your terminal:
+# pip install transformers torch sentence-transformers
+```
+
+This will take a few minutes: `torch` in particular is a large download. Once this is done, you can verify the installation. Now, create a new file `step0_setup.py`:
+
+``` Python
+import torch
+from transformers import BertTokenizer, BertModel
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import PCA
+import numpy as np
+import matplotlib.pyplot as plt
+
+print("PyTorch version:", torch.__version__)
+print("All imports successful.")
+```
+
+## Part III — Our Toy Corpus
+
+Now that we are set up, we can start working with BERT. We will build a small corpus by hand. The sentences are designed to test specific things: paraphrase detection, spelling variation, and semantic similarity across different phrasings.
+
+Create a new file, `step1_tfidf_baseline.py`, we will use this file for the creation of the toy corpus and for Part IV as well, so you will keep adding to it until we finish TF-IDF similarity. Start by creating two lists which we will name `sentences` and `labels`:
+
+``` Python
+sentences = [
+    # Group 1: Virginia Company — same content, different phrasing/spelling
+    "The Virginia Companie did advance traffique beyond the seas.",
+    "The Virginia Company did advance traffic beyond the seas.",
+    "The Virginia Company promoted overseas trade.",
+    
+    # Group 2: Merchant activity
+    "The merchants of London traded in silks and spices.",
+    "London merchants engaged in the silk and spice trade.",
+    
+    # Group 3: Unrelated (control)
+    "The harvest was plentiful this year.",
+    "Parliament assembled to debate the new taxation.",
+]
+
+# Labels for reference
+labels = [
+    "VA Co. (archaic spelling)",
+    "VA Co. (modern spelling)",
+    "VA Co. (paraphrase)",
+    "Merchants (version A)",
+    "Merchants (version B)",
+    "Harvest (unrelated)",
+    "Parliament (unrelated)",
+]
+```
+
+Take a moment to think about what you *expect* given your experience in this class so far:
+
+-   Sentences 0, 1, and 2 say the same thing. Should their similarity be high?
+-   Sentences 3 and 4 are paraphrases of each other.
+-   Sentences 5 and 6 are about completely different topics.
+
+## Part IV — Baseline: TF-IDF Similarity
+
+Before we use BERT, let's establish a baseline with TF-IDF. This represents each sentence as a sparse vector of word frequencies, weighted by how distinctive each word is. The next block of code will do the following four things:
+
+1.  Turn the sentences into TF-IDF vectors
+
+2.  Compute cosine similarity between every pair of sentences
+
+3.  Create a similarity matrix
+
+4.  Print the matrix in a human-readable labeled table
+
+``` Python
+vectorizer = TfidfVectorizer()
+tfidf_matrix = vectorizer.fit_transform(sentences)
+
+tfidf_sim = cosine_similarity(tfidf_matrix)
+
+# Display as a formatted table
+print("TF-IDF Cosine Similarity Matrix:\n")
+print(f"{'':>30s}", end="")
+for i in range(len(sentences)):
+    print(f"  [{i}]", end="")
+print()
+
+for i in range(len(sentences)):
+    print(f"{labels[i]:>30s}", end="")
+    for j in range(len(sentences)):
+        print(f" {tfidf_sim[i][j]:5.2f}", end="")
+    print()
+```
+
+Your output should look like:
+
+`TF-IDF Cosine Similarity Matrix:`
+
+```         
+                            [0]   [1]   [2]   [3]   [4]   [5]   [6]
+ VA Co. (archaic spelling)  1.00  0.68  0.17  0.05  0.06  0.06  0.06
+  VA Co. (modern spelling)  0.68  1.00  0.32  0.06  0.06  0.06  0.06
+       VA Co. (paraphrase)  0.17  0.32  1.00  0.03  0.17  0.04  0.04
+     Merchants (version A)  0.05  0.06  0.03  1.00  0.43  0.03  0.03
+     Merchants (version B)  0.06  0.06  0.17  0.43  1.00  0.03  0.03
+       Harvest (unrelated)  0.06  0.06  0.04  0.03  0.03  1.00  0.03
+    Parliament (unrelated)  0.06  0.06  0.04  0.03  0.03  0.03  1.00
+```
+
+Look at the TF-IDF similarity between sentences 0 and 2 ("The Virginia Companie did advance traffique beyond the seas" vs. "The Virginia Company promoted overseas trade"). These sentences mean the same thing, but because they use mostly different words, TF-IDF gives them a relatively low similarity score.
+
+Also look at sentences 0 and 1: the only difference is spelling ("Companie" → "Company", "traffique" → "traffic"), but TF-IDF treats these as completely different tokens. This is a fundamental limitation of bag-of-words methods for historical text.
