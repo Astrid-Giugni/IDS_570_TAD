@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://Astrid-Giugni.github.io/IDS_570_TAD/week_11_python_files/week-11-AA-bert-Claude_Version.html</loc>
+    <lastmod>2026-03-01T00:33:01.470Z</lastmod>
+  </url>
+  <url>
     <loc>https://Astrid-Giugni.github.io/IDS_570_TAD/week-10-spaCy.html</loc>
     <lastmod>2026-02-28T19:32:03.818Z</lastmod>
   </url>
@@ -25,6 +29,22 @@
     <lastmod>2025-12-25T23:30:44.000Z</lastmod>
   </url>
   <url>
+    <loc>https://Astrid-Giugni.github.io/IDS_570_TAD/CLAUDE_2_BERT_finetuning_geneva_bible.html</loc>
+    <lastmod>2026-03-12T17:27:07.490Z</lastmod>
+  </url>
+  <url>
+    <loc>https://Astrid-Giugni.github.io/IDS_570_TAD/CLAUDE_1_intro_to_bert.html</loc>
+    <lastmod>2026-03-13T18:01:22.795Z</lastmod>
+  </url>
+  <url>
+    <loc>https://Astrid-Giugni.github.io/IDS_570_TAD/CLAUDE_3_BERT_clustering_and_credit.html</loc>
+    <lastmod>2026-03-07T22:43:33.385Z</lastmod>
+  </url>
+  <url>
+    <loc>https://Astrid-Giugni.github.io/IDS_570_TAD/Paraphrase_toy.html</loc>
+    <lastmod>2026-03-07T20:55:41.743Z</lastmod>
+  </url>
+  <url>
     <loc>https://Astrid-Giugni.github.io/IDS_570_TAD/week-02-basics.html</loc>
     <lastmod>2026-01-13T00:25:06.174Z</lastmod>
   </url>
@@ -39,5 +59,9 @@
   <url>
     <loc>https://Astrid-Giugni.github.io/IDS_570_TAD/week-08-09-word2vec.html</loc>
     <lastmod>2026-02-23T20:56:01.173Z</lastmod>
+  </url>
+  <url>
+    <loc>https://Astrid-Giugni.github.io/IDS_570_TAD/week-11-BERT.html</loc>
+    <lastmod>2026-03-13T19:21:02.207Z</lastmod>
   </url>
 </urlset>

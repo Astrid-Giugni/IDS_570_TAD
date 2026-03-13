@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Week 12: What Does BERT ‘Know’ About Mercantilism? Probing Embeddings Across Centuries – Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b57d1312aa7c10f38068bb8d7c282b76.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Text as Data</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Week 12: What Does BERT ‘Know’ About Mercantilism? Probing Embeddings Across Centuries</li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+      <a href="../index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Course</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">IDS 570: “Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts”</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Weeks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../week-01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 01: Introduction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../week-02-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 02: Basics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../week-03-dictionaries.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 03: Dictionaries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../week-04-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 04: Text Representation (1)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../week-05-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 05: Text Representation (2)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../week-06-cooccurrence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 06: Co-occurrence &amp; PMI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../week-07-word2vec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 07: Word2Vec and LDA introduction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../week-08-09-word2vec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 08 and 09:Weak Supervision &amp; Supervised Text Classification in Python</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../week-10-spaCy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 10: Classifying New Text &amp; spaCy</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../week-11-BERT.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week 11: Introduction to BERT</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Week 12: What Does BERT ‘Know’ About Mercantilism? Probing Embeddings Across Centuries</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="week-12-goals" class="level1">
+<h1>Week 12 goals:</h1>
+<p>In Week 10, we ended with an important insight: spaCy’s NER model works by building <strong>contextual token embeddings</strong>—numerical representations that capture not just a word’s meaning in isolation, but its meaning <em>in context</em>. The example we used was “Apple”: the word gets a different embedding in “Apple released a new phone” versus “I ate an apple.”</p>
+<p>This week, we are going to take that insight further and ask a harder question: <strong>what happens when the context is not just a different sentence, but a different century?</strong></p>
+<p>We will work with BERT (Bidirectional Encoder Representations from Transformers), a model that builds contextual embeddings using a transformer architecture. If you have used spaCy’s transformer-based pipelines (<code>en_core_web_trf</code>), you have already used something similar under the hood. The key difference from spaCy’s default CNN-based embeddings is that BERT uses <strong>self-attention</strong>: every token’s representation is informed by <em>every other token</em> in the sentence simultaneously, not just a local window.</p>
+<p>Our plan is to:</p>
+<ol type="1">
+<li>Extract BERT embeddings for key mercantilist terms from our Early Modern texts</li>
+<li>Extract BERT embeddings for the <em>same words</em> from modern economics texts</li>
+<li>Visualize the embedding space using dimensionality reduction (PCA and t-SNE)</li>
+<li>Interpret what we find, and discuss the implications for NER on historical corpora</li>
+</ol>
+<p><u><strong>Why this matters for NER</strong></u>: if BERT was pre-trained on modern internet text (Wikipedia, BooksCorpus), then its contextual representations of words in 17th-century prose may be systematically different from what it “expects.” This has direct consequences for how well NER models built on BERT will perform on historical documents—which is exactly what the Ehrmann et al.&nbsp;survey we discussed warns about.</p>
+<section id="big-picture-workflow" class="level2">
+<h2 class="anchored" data-anchor-id="big-picture-workflow">Big picture workflow</h2>
+<ol type="1">
+<li>Load historical texts from the <code>week_12_texts/</code> folder</li>
+<li>Extract sentences containing our target words</li>
+<li>Build a small comparison corpus of modern economics sentences</li>
+<li>Load a pre-trained BERT model (from Hugging Face)</li>
+<li>Extract contextual embeddings for each target word in each sentence</li>
+<li>Reduce dimensionality with PCA and t-SNE</li>
+<li>Visualize and interpret the embedding space</li>
+<li>Discuss what this means for NER on historical documents</li>
+</ol>
+</section>
+<section id="what-you-need-before-starting" class="level2">
+<h2 class="anchored" data-anchor-id="what-you-need-before-starting">What you need before starting</h2>
+<ul>
+<li>VSCode installed and your project folder ready (e.g., <code>IDS_570_TAD/</code>)</li>
+<li>A subfolder: <code>week_12_texts/</code> containing the 49 <code>.txt</code> files I uploaded on Canvas</li>
+<li>Your Python virtual environment (<code>.venv</code>) activated</li>
+<li>Packages we will use:
+<ul>
+<li><code>transformers</code> → the Hugging Face library for loading BERT</li>
+<li><code>torch</code> → PyTorch, the deep learning backend that BERT runs on</li>
+<li><code>scikit-learn</code> → for PCA and t-SNE</li>
+<li><code>matplotlib</code> → for visualization</li>
+<li><code>nltk</code> → for sentence tokenization (you should already have this from earlier weeks)</li>
+</ul></li>
+</ul>
+<p>(We will install the new ones together below.)</p>
+</section>
+<section id="step-0-install-new-packages" class="level2">
+<h2 class="anchored" data-anchor-id="step-0-install-new-packages">Step 0: Install new packages</h2>
+<p>You should already have <code>nltk</code>, <code>scikit-learn</code>, and <code>matplotlib</code> from previous weeks. We need to add <code>transformers</code> and <code>torch</code>:</p>
+<p><code>pip install transformers torch</code></p>
+<p><strong>Note:</strong> <code>torch</code> (PyTorch) is a large package. The download may take a few minutes depending on your connection. If you have a GPU and want to use it, see the <a href="https://pytorch.org/get-started/locally/">PyTorch installation page</a> for platform-specific instructions. For this tutorial, CPU is perfectly fine—we are processing individual sentences, not training a model.</p>
+<section id="a-quick-check" class="level3">
+<h3 class="anchored" data-anchor-id="a-quick-check">A quick check</h3>
+<p>Create a file <code>step0_check_setup.py</code> and run it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> BertTokenizer, BertModel</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> nltk</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"PyTorch version:"</span>, torch.__version__)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"CUDA available:"</span>, torch.cuda.is_available())</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># This will download the model the first time (~440 MB)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Loading BERT tokenizer and model (first run will download)..."</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> BertTokenizer.from_pretrained(<span class="st">"bert-base-uncased"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> BertModel.from_pretrained(<span class="st">"bert-base-uncased"</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"BERT loaded successfully."</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Model hidden size:"</span>, model.config.hidden_size)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>You should see:</p>
+<ul>
+<li>PyTorch version (something like <code>2.x.x</code>)</li>
+<li>CUDA available: <code>True</code> or <code>False</code> (either is fine)</li>
+<li>The model downloading on first run (be patient)</li>
+<li><code>Model hidden size: 768</code></li>
+</ul>
+<p>That <code>768</code> is important: it tells us that every token in every sentence will be represented as a vector of 768 numbers. This is the embedding space we are going to explore.</p>
+</section>
+</section>
+<section id="step-1-load-historical-texts-and-extract-sentences" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-load-historical-texts-and-extract-sentences">Step 1: Load Historical Texts and Extract Sentences</h2>
+<p>We need to pull out sentences from our Early Modern corpus that contain specific target words. These are the words whose contextual embeddings we want to compare across centuries.</p>
+<section id="choosing-target-words" class="level3">
+<h3 class="anchored" data-anchor-id="choosing-target-words">Choosing target words</h3>
+<p>Our target words are terms that appear in mercantilist texts <em>and</em> in modern economics, but whose meanings have shifted over time. Here is our list, with brief notes on why each is interesting:</p>
+<ul>
+<li><strong>“trade”</strong> — core concept in both periods; likely to show <em>some</em> overlap but different connotations (bilateral exchange vs.&nbsp;abstract economic policy)</li>
+<li><strong>“balance”</strong> — in mercantilist texts, almost always “balance of trade” (a specific doctrine about gold flows); in modern economics, broader usage</li>
+<li><strong>“manufacture”</strong> — etymologically “making by hand” (Latin <em>manu factus</em>); in Early Modern texts, closer to this artisanal meaning; in modern usage, industrial mass production</li>
+<li><strong>“stock”</strong> — in mercantilist texts, often means goods, inventory, or even livestock; in modern texts, usually financial shares or capital stock</li>
+<li><strong>“interest”</strong> — mercantilist usage often means political advantage or national concern; modern usage skews toward financial interest rates</li>
+<li><strong>“commerce”</strong> — used in both periods, but with different institutional assumptions</li>
+<li><strong>“plantation”</strong> — in Early Modern texts, often means a colonial settlement or the act of planting/establishing; modern usage is narrower</li>
+</ul>
+<p>Create a file <code>step1_extract_historical_sentences.py</code> and run it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> nltk</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>nltk.download(<span class="st">"punkt"</span>, quiet<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>nltk.download(<span class="st">"punkt_tab"</span>, quiet<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>TEXT_DIR <span class="op">=</span> Path(<span class="st">"week_12_texts"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>txt_paths <span class="op">=</span> <span class="bu">sorted</span>(TEXT_DIR.glob(<span class="st">"*.txt"</span>))</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Found </span><span class="sc">{</span><span class="bu">len</span>(txt_paths)<span class="sc">}</span><span class="ss"> text files."</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Our target words</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>TARGET_WORDS <span class="op">=</span> [<span class="st">"trade"</span>, <span class="st">"balance"</span>, <span class="st">"manufacture"</span>, <span class="st">"stock"</span>, <span class="st">"interest"</span>, <span class="st">"commerce"</span>, <span class="st">"plantation"</span>]</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># We will store results as a list of dictionaries</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> []</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> path <span class="kw">in</span> txt_paths:</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(path, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>, errors<span class="op">=</span><span class="st">"ignore"</span>) <span class="im">as</span> f:</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        text <span class="op">=</span> f.read()</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    sentences <span class="op">=</span> nltk.sent_tokenize(text)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> sent <span class="kw">in</span> sentences:</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Clean up whitespace (Early Modern texts can have odd formatting)</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        sent_clean <span class="op">=</span> re.sub(<span class="vs">r'</span><span class="dv">\s</span><span class="op">+</span><span class="vs">'</span>, <span class="st">' '</span>, sent).strip()</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Skip very short or very long sentences</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        word_count <span class="op">=</span> <span class="bu">len</span>(sent_clean.split())</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> word_count <span class="op">&lt;</span> <span class="dv">5</span> <span class="kw">or</span> word_count <span class="op">&gt;</span> <span class="dv">80</span>:</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        sent_lower <span class="op">=</span> sent_clean.lower()</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> target <span class="kw">in</span> TARGET_WORDS:</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Match whole words only</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> re.search(<span class="vs">r'</span><span class="dv">\b</span><span class="vs">'</span> <span class="op">+</span> target <span class="op">+</span> <span class="vs">r'</span><span class="dv">\b</span><span class="vs">'</span>, sent_lower):</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>                results.append({</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"sentence"</span>: sent_clean,</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"target_word"</span>: target,</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"source"</span>: <span class="st">"historical"</span>,</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"file"</span>: path.name</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>                })</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Total sentence-word pairs extracted: </span><span class="sc">{</span><span class="bu">len</span>(results)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Breakdown by target word:"</span>)</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> word <span class="kw">in</span> TARGET_WORDS:</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> <span class="bu">sum</span>(<span class="dv">1</span> <span class="cf">for</span> r <span class="kw">in</span> results <span class="cf">if</span> r[<span class="st">"target_word"</span>] <span class="op">==</span> word)</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>word<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>count<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Save</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>Path(<span class="st">"data"</span>).mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(Path(<span class="st">"data"</span>) <span class="op">/</span> <span class="st">"historical_sentences.json"</span>, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    json.dump(results, f, ensure_ascii<span class="op">=</span><span class="va">False</span>, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Saved to data/historical_sentences.json"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>You will likely see that some words (like “trade”) appear in thousands of sentences, while others (like “plantation”) may appear in far fewer. That is fine—we will sample down later. For now, we want to capture everything.</p>
+</section>
+<section id="quick-inspection" class="level3">
+<h3 class="anchored" data-anchor-id="quick-inspection">Quick inspection</h3>
+<p>At the bottom of the same file, add:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Show one example for each target word</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">--- Example sentences ---"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> word <span class="kw">in</span> TARGET_WORDS:</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    example <span class="op">=</span> <span class="bu">next</span>((r <span class="cf">for</span> r <span class="kw">in</span> results <span class="cf">if</span> r[<span class="st">"target_word"</span>] <span class="op">==</span> word), <span class="va">None</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> example:</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">[</span><span class="sc">{</span>word<span class="sc">}</span><span class="ss">] (</span><span class="sc">{</span>example[<span class="st">'file'</span>]<span class="sc">}</span><span class="ss">):"</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>example[<span class="st">'sentence'</span>][:<span class="dv">200</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Read through these examples. Do you see Early Modern spellings or usage that looks different from how we would use these words today? This is already a hint at what we will find in the embedding space.</p>
+</section>
+</section>
+<section id="step-2-build-a-modern-comparison-corpus" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-build-a-modern-comparison-corpus">Step 2: Build a Modern Comparison Corpus</h2>
+<p>We need modern sentences using the same target words. We will create these by hand—this is intentional. I want you to see <em>exactly</em> what the modern contexts look like so that when we visualize the results, you can interpret them.</p>
+<p>Create a file <code>step2_modern_sentences.py</code> and run it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Modern economics sentences using our target words.</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># These are written to reflect contemporary usage.</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># You could also pull these from Wikipedia, textbook excerpts, or news articles,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># but hand-crafting them gives us full control over what we are comparing.</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>modern_sentences <span class="op">=</span> [</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># trade</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"International trade agreements have reduced tariffs on imported goods across the European Union."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The trade deficit widened as consumer spending on foreign electronics increased."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Free trade policies have been credited with lifting millions out of poverty in developing nations."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Bilateral trade between the two countries reached a record high last quarter."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Trade negotiations broke down over disagreements about agricultural subsidies."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The World Trade Organization issued a ruling against the proposed import restrictions."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Economists argue that trade liberalization increases overall welfare despite displacing some workers."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Global trade volumes contracted sharply during the pandemic lockdowns."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The trade war between the two largest economies disrupted supply chains worldwide."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Regional trade blocs have become increasingly important in shaping economic policy."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Trade in services now accounts for a growing share of cross-border economic activity."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The government imposed trade sanctions in response to the diplomatic crisis."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Digital trade in software and data services has grown exponentially over the past decade."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Economists study trade patterns to understand comparative advantage between nations."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The trade surplus reflected strong demand for the country's manufactured exports."</span>, <span class="st">"target_word"</span>: <span class="st">"trade"</span>},</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># balance</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The balance of payments deficit led the central bank to intervene in currency markets."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Fiscal balance requires that government revenues match or exceed expenditures over the business cycle."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The trade balance improved after the currency depreciation made exports more competitive."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Achieving a balance between economic growth and environmental sustainability remains a key challenge."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The current account balance reflects the net flow of goods, services, and investment income."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Portfolio managers seek to balance risk and return across different asset classes."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The balance of economic power has shifted toward emerging markets in recent decades."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Central banks aim to balance inflation control with full employment objectives."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The company reported a healthy cash balance despite declining quarterly revenues."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Policymakers must balance short-term stimulus with long-term debt sustainability."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The balance sheet showed total assets exceeding liabilities by a comfortable margin."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Economists use balance of trade data to assess a country's international competitiveness."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The structural budget balance adjusts for the effects of the business cycle on tax revenues."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The balance of supply and demand determines the equilibrium price in competitive markets."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"A negative balance on the capital account indicates net capital outflows from the country."</span>, <span class="st">"target_word"</span>: <span class="st">"balance"</span>},</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    <span class="co"># manufacture</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"China has become the world's largest manufacture hub for consumer electronics."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The cost to manufacture semiconductors has fallen dramatically due to advances in lithography."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Automated robots now manufacture automobile components with minimal human oversight."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The company plans to manufacture its new vaccine at three facilities across Europe."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Rising energy costs have made it more expensive to manufacture steel domestically."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Additive manufacture techniques like 3D printing are transforming aerospace production."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The decision to manufacture locally rather than offshore reduced supply chain risks."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Countries that manufacture high-value goods tend to have higher per capita incomes."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The factory can manufacture up to ten thousand units per day at full capacity."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Environmental regulations have increased the cost to manufacture chemicals in the European Union."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Contract firms manufacture generic pharmaceuticals for distribution in developing countries."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The shift from agriculture to manufacture drove urbanization in nineteenth-century England."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"New policies incentivize companies to manufacture renewable energy equipment domestically."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"It takes approximately six weeks to manufacture a commercial aircraft engine."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The government offered tax breaks to firms that manufacture goods in designated enterprise zones."</span>, <span class="st">"target_word"</span>: <span class="st">"manufacture"</span>},</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    <span class="co"># stock</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The stock market reached an all-time high driven by strong corporate earnings."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Investors diversify their portfolios by holding stock in companies across different sectors."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The company issued new stock to raise capital for its expansion into Asian markets."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Stock prices fell sharply after the central bank announced an unexpected rate hike."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Preferred stock holders receive dividends before common shareholders in the distribution hierarchy."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The stock of available housing has declined in major metropolitan areas."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Capital stock accumulation is a key driver of long-run economic growth in neoclassical models."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The retailer struggled to maintain adequate stock levels during the holiday shopping season."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Stock options are a common form of executive compensation in technology companies."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The central bank monitors the stock of money in circulation to guide monetary policy."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"A stock split doubles the number of shares while halving the price per share."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Foreign investors purchased a significant amount of government stock in the latest bond auction."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The knowledge stock of an economy grows through investment in education and research."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Stock buyback programs have been criticized for enriching shareholders at the expense of workers."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The stock exchange suspended trading after a sudden flash crash triggered circuit breakers."</span>, <span class="st">"target_word"</span>: <span class="st">"stock"</span>},</span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>    <span class="co"># interest</span></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The Federal Reserve raised interest rates to combat persistent inflation."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Low interest rates encouraged households to take on mortgage debt for home purchases."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The real interest rate equals the nominal rate minus the expected inflation rate."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Corporate bond interest payments are tax deductible for the issuing company."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Negative interest rates were implemented by several European central banks after the financial crisis."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The interest rate differential between countries drives capital flows in the foreign exchange market."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Student loan interest continues to accrue during the grace period after graduation."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The compound interest formula shows how investments grow exponentially over long time horizons."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Special interest groups lobbied Congress to maintain subsidies for the agricultural sector."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The public interest requires that regulators prevent monopolistic behavior in essential industries."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Banks earn revenue primarily from the interest charged on loans to borrowers."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The central bank sets the benchmark interest rate to influence borrowing and spending."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Zero interest rate policy was a controversial tool used during the prolonged economic recovery."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Interest rate swaps allow companies to exchange fixed payments for floating rate obligations."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The national interest demands a careful balance between free trade and strategic industry protection."</span>, <span class="st">"target_word"</span>: <span class="st">"interest"</span>},</span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>    <span class="co"># commerce</span></span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Electronic commerce has transformed retail by enabling consumers to shop from anywhere in the world."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The Department of Commerce released new data showing a slowdown in business investment."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Interstate commerce regulations were established to prevent trade barriers between states."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The Chamber of Commerce advocated for lower corporate tax rates to stimulate growth."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Digital commerce platforms have disrupted traditional brick-and-mortar retail business models."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"International commerce depends on reliable shipping routes and port infrastructure."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The commerce clause of the Constitution grants Congress power to regulate trade between states."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Mobile commerce now accounts for over half of all online retail transactions."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Commerce between developing nations has grown faster than trade with wealthy countries."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The regulation of commerce in financial services aims to protect consumers from predatory practices."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Cross-border commerce requires compliance with customs regulations and trade documentation."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The growth of commerce in the service sector has outpaced manufacturing in advanced economies."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Social commerce integrates shopping experiences directly into social media platforms."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Commerce policy is increasingly shaped by concerns about data privacy and digital sovereignty."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The expansion of commerce in the Pacific Rim has created new geopolitical dynamics."</span>, <span class="st">"target_word"</span>: <span class="st">"commerce"</span>},</span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a>    <span class="co"># plantation</span></span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The plantation economy of the antebellum South relied heavily on enslaved labor for cotton production."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Large-scale plantation agriculture continues to drive deforestation in tropical regions."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The sugar plantation system in the Caribbean shaped colonial trade patterns for centuries."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Coffee plantation workers organized for better wages and working conditions."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Palm oil plantation expansion has become a major environmental concern in Southeast Asia."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Rubber plantation output declined after a fungal blight spread through the region."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The plantation model of agriculture concentrates land ownership among a small elite."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Historians have documented the brutal conditions on plantation estates across the Americas."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Tea plantation laborers in South Asia face persistent issues of low pay and poor housing."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The transition from plantation to smallholder farming improved food security in several African nations."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Banana plantation companies wielded enormous political influence in Central American countries."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Sustainable plantation management certifications aim to reduce the environmental impact of monoculture farming."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The colonial plantation system created economic structures that persist in many developing countries today."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"Reforestation through timber plantation projects has been proposed as a carbon offset strategy."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"sentence"</span>: <span class="st">"The economic legacy of plantation slavery continues to shape wealth inequality in the United States."</span>, <span class="st">"target_word"</span>: <span class="st">"plantation"</span>},</span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a><span class="co"># Add source label</span></span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> item <span class="kw">in</span> modern_sentences:</span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>    item[<span class="st">"source"</span>] <span class="op">=</span> <span class="st">"modern"</span></span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>    item[<span class="st">"file"</span>] <span class="op">=</span> <span class="st">"modern_economics_corpus"</span></span>
+<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Modern sentences created: </span><span class="sc">{</span><span class="bu">len</span>(modern_sentences)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Breakdown by target word:"</span>)</span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>target_words <span class="op">=</span> [<span class="st">"trade"</span>, <span class="st">"balance"</span>, <span class="st">"manufacture"</span>, <span class="st">"stock"</span>, <span class="st">"interest"</span>, <span class="st">"commerce"</span>, <span class="st">"plantation"</span>]</span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> word <span class="kw">in</span> target_words:</span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> <span class="bu">sum</span>(<span class="dv">1</span> <span class="cf">for</span> s <span class="kw">in</span> modern_sentences <span class="cf">if</span> s[<span class="st">"target_word"</span>] <span class="op">==</span> word)</span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>word<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>count<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a><span class="co"># Save</span></span>
+<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>Path(<span class="st">"data"</span>).mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(Path(<span class="st">"data"</span>) <span class="op">/</span> <span class="st">"modern_sentences.json"</span>, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a>    json.dump(modern_sentences, f, ensure_ascii<span class="op">=</span><span class="va">False</span>, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Saved to data/modern_sentences.json"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Take a moment to read through some of these sentences. Notice how “stock” almost always refers to financial instruments or capital, how “interest” overwhelmingly means interest rates, how “manufacture” implies industrial production. These are the <em>modern</em> default meanings that BERT learned during pre-training.</p>
+</section>
+<section id="step-3-combine-and-sample" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-combine-and-sample">Step 3: Combine and Sample</h2>
+<p>We likely have far more historical sentences than modern ones for some words. To make a fair comparison, we will sample an equal number from each source for each target word. This is important: otherwise the visualization would be dominated by the more abundant class.</p>
+<p>Create a file <code>step3_combine_and_sample.py</code> and run it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>random.seed(<span class="dv">42</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>DATA_DIR <span class="op">=</span> Path(<span class="st">"data"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DATA_DIR <span class="op">/</span> <span class="st">"historical_sentences.json"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    historical <span class="op">=</span> json.load(f)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DATA_DIR <span class="op">/</span> <span class="st">"modern_sentences.json"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    modern <span class="op">=</span> json.load(f)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>TARGET_WORDS <span class="op">=</span> [<span class="st">"trade"</span>, <span class="st">"balance"</span>, <span class="st">"manufacture"</span>, <span class="st">"stock"</span>, <span class="st">"interest"</span>, <span class="st">"commerce"</span>, <span class="st">"plantation"</span>]</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>MAX_PER_GROUP <span class="op">=</span> <span class="dv">15</span>  <span class="co"># At most 15 sentences per word per source</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>sampled <span class="op">=</span> []</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> word <span class="kw">in</span> TARGET_WORDS:</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    hist_for_word <span class="op">=</span> [r <span class="cf">for</span> r <span class="kw">in</span> historical <span class="cf">if</span> r[<span class="st">"target_word"</span>] <span class="op">==</span> word]</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    mod_for_word <span class="op">=</span> [r <span class="cf">for</span> r <span class="kw">in</span> modern <span class="cf">if</span> r[<span class="st">"target_word"</span>] <span class="op">==</span> word]</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sample (or take all if fewer than MAX_PER_GROUP)</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    hist_sample <span class="op">=</span> random.sample(hist_for_word, <span class="bu">min</span>(MAX_PER_GROUP, <span class="bu">len</span>(hist_for_word)))</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    mod_sample <span class="op">=</span> random.sample(mod_for_word, <span class="bu">min</span>(MAX_PER_GROUP, <span class="bu">len</span>(mod_for_word)))</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    sampled.extend(hist_sample)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    sampled.extend(mod_sample)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>word<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="bu">len</span>(hist_sample)<span class="sc">}</span><span class="ss"> historical, </span><span class="sc">{</span><span class="bu">len</span>(mod_sample)<span class="sc">}</span><span class="ss"> modern"</span>)</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Total sampled sentences: </span><span class="sc">{</span><span class="bu">len</span>(sampled)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DATA_DIR <span class="op">/</span> <span class="st">"sampled_sentences.json"</span>, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    json.dump(sampled, f, ensure_ascii<span class="op">=</span><span class="va">False</span>, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Saved to data/sampled_sentences.json"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>You should see roughly 15 sentences per word per source (some historical words may have fewer if they are rare in the 49 texts). The total should be somewhere around 200 sentences—a manageable size for BERT processing on a CPU.</p>
+</section>
+<section id="step-4-extract-bert-embeddings" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-extract-bert-embeddings">Step 4: Extract BERT Embeddings</h2>
+<p>This is the conceptual core of the tutorial. We are going to take each sentence, pass it through BERT, and extract the embedding vector for our target word <em>in that specific sentence context</em>. This is the same principle from Week 10—contextual embeddings—but now we are using a much more powerful model.</p>
+<section id="what-bert-does" class="level3">
+<h3 class="anchored" data-anchor-id="what-bert-does">What BERT does</h3>
+<p>When you pass a sentence through BERT:</p>
+<ol type="1">
+<li><p>The <strong>tokenizer</strong> breaks the sentence into subword tokens. BERT uses WordPiece tokenization, so a word like “manufacture” might stay as one token, but “merchandizing” could become <code>["merchant", "##izing"]</code>. This is different from spaCy’s tokenization and you should be aware of it.</p></li>
+<li><p>The tokens pass through 12 <strong>transformer layers</strong> (in <code>bert-base</code>). Each layer applies self-attention: every token “looks at” every other token to build up its representation.</p></li>
+<li><p>The output is a tensor of shape <code>(1, sequence_length, 768)</code>—one 768-dimensional vector for each token in the sentence.</p></li>
+<li><p>We extract the vector(s) corresponding to our target word. If the word was split into multiple subword tokens, we average their vectors.</p></li>
+</ol>
+<p>The result: a 768-dimensional vector that represents what “stock” means <em>in this particular sentence</em>. A different sentence will give a different vector for the same word.</p>
+<p>Create a file <code>step4_extract_embeddings.py</code>. <strong>Read the code and the explanations before running it</strong>—this step will take a few minutes.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> BertTokenizer, BertModel</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>DATA_DIR <span class="op">=</span> Path(<span class="st">"data"</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DATA_DIR <span class="op">/</span> <span class="st">"sampled_sentences.json"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    sampled <span class="op">=</span> json.load(f)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Loaded </span><span class="sc">{</span><span class="bu">len</span>(sampled)<span class="sc">}</span><span class="ss"> sentence-word pairs."</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Load BERT</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Loading BERT model..."</span>)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> BertTokenizer.from_pretrained(<span class="st">"bert-base-uncased"</span>)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> BertModel.from_pretrained(<span class="st">"bert-base-uncased"</span>)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()  <span class="co"># Set to evaluation mode (no dropout)</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_word_embedding(sentence, target_word, tokenizer, model):</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">    Extract the contextual embedding for a target word in a sentence.</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co">    Steps:</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co">    1. Tokenize the sentence with BERT's tokenizer</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co">    2. Find which token(s) correspond to our target word</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co">    3. Run the sentence through BERT</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co">    4. Extract and average the hidden states for those tokens</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns a 768-dimensional vector, or None if the word isn't found.</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Tokenize</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> tokenizer(sentence, return_tensors<span class="op">=</span><span class="st">"pt"</span>, truncation<span class="op">=</span><span class="va">True</span>, max_length<span class="op">=</span><span class="dv">512</span>)</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get token-to-word mapping</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># BERT adds [CLS] at the start and [SEP] at the end</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    tokens <span class="op">=</span> tokenizer.convert_ids_to_tokens(inputs[<span class="st">"input_ids"</span>][<span class="dv">0</span>])</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Find the target word's token positions</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># We need to handle subword tokenization: "manufacture" might be</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ["man", "##uf", "##act", "##ure"] in BERT's vocabulary</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    target_lower <span class="op">=</span> target_word.lower()</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Strategy: reconstruct words from subword tokens and find the match</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    target_indices <span class="op">=</span> []</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>    current_word <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    current_indices <span class="op">=</span> []</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, token <span class="kw">in</span> <span class="bu">enumerate</span>(tokens):</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> token <span class="kw">in</span> [<span class="st">"[CLS]"</span>, <span class="st">"[SEP]"</span>, <span class="st">"[PAD]"</span>]:</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Check if the word we just finished is our target</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> current_word <span class="op">==</span> target_lower <span class="kw">and</span> current_indices:</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>                target_indices <span class="op">=</span> current_indices</span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>            current_word <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>            current_indices <span class="op">=</span> []</span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> token.startswith(<span class="st">"##"</span>):</span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Continuation of previous word</span></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>            current_word <span class="op">+=</span> token[<span class="dv">2</span>:]</span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>            current_indices.append(i)</span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Check previous word before starting new one</span></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> current_word <span class="op">==</span> target_lower <span class="kw">and</span> current_indices:</span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>                target_indices <span class="op">=</span> current_indices</span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Start new word</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>            current_word <span class="op">=</span> token</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>            current_indices <span class="op">=</span> [i]</span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check the last word</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> target_indices <span class="kw">and</span> current_word <span class="op">==</span> target_lower <span class="kw">and</span> current_indices:</span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>        target_indices <span class="op">=</span> current_indices</span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> target_indices:</span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Run through BERT</span></span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>        outputs <span class="op">=</span> model(<span class="op">**</span>inputs)</span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>    <span class="co"># outputs.last_hidden_state has shape (1, seq_len, 768)</span></span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>    hidden_states <span class="op">=</span> outputs.last_hidden_state[<span class="dv">0</span>]  <span class="co"># Remove batch dimension</span></span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Average the hidden states for the target word's tokens</span></span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>    word_embedding <span class="op">=</span> hidden_states[target_indices].mean(dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> word_embedding.numpy()</span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract embeddings for all sentences</span></span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Extracting embeddings (this may take a few minutes on CPU)..."</span>)</span>
+<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a>embeddings_data <span class="op">=</span> []</span>
+<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>skipped <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, item <span class="kw">in</span> <span class="bu">enumerate</span>(sampled):</span>
+<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>    emb <span class="op">=</span> get_word_embedding(item[<span class="st">"sentence"</span>], item[<span class="st">"target_word"</span>], tokenizer, model)</span>
+<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> emb <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>        embeddings_data.append({</span>
+<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>            <span class="st">"embedding"</span>: emb.tolist(),</span>
+<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a>            <span class="st">"target_word"</span>: item[<span class="st">"target_word"</span>],</span>
+<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a>            <span class="st">"source"</span>: item[<span class="st">"source"</span>],</span>
+<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>            <span class="st">"sentence"</span>: item[<span class="st">"sentence"</span>]</span>
+<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a>        skipped <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Progress indicator</span></span>
+<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (i <span class="op">+</span> <span class="dv">1</span>) <span class="op">%</span> <span class="dv">25</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  Processed </span><span class="sc">{</span>i <span class="op">+</span> <span class="dv">1</span><span class="sc">}</span><span class="ss">/</span><span class="sc">{</span><span class="bu">len</span>(sampled)<span class="sc">}</span><span class="ss"> sentences..."</span>)</span>
+<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Done. Extracted </span><span class="sc">{</span><span class="bu">len</span>(embeddings_data)<span class="sc">}</span><span class="ss"> embeddings, skipped </span><span class="sc">{</span>skipped<span class="sc">}</span><span class="ss">."</span>)</span>
+<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a><span class="co"># Save</span></span>
+<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DATA_DIR <span class="op">/</span> <span class="st">"bert_embeddings.json"</span>, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a>    json.dump(embeddings_data, f)</span>
+<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-122"><a href="#cb6-122" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Saved to data/bert_embeddings.json"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A few things to note as you watch this run:</p>
+<ul>
+<li><p><strong><code>model.eval()</code></strong>: we set BERT to evaluation mode. This turns off dropout (random neuron deactivation), which is only needed during training. Without this, you would get slightly different embeddings each time you run the same sentence.</p></li>
+<li><p><strong><code>torch.no_grad()</code></strong>: this tells PyTorch not to track gradients, which saves memory and speeds things up. We are not training anything—just extracting representations.</p></li>
+<li><p><strong>Subword handling</strong>: the <code>get_word_embedding</code> function carefully reconstructs words from BERT’s subword tokens. This is important because if “manufacture” is split into <code>["man", "##uf", "##act", "##ure"]</code>, we need to average across all four token vectors to get a single word-level embedding.</p></li>
+<li><p><strong>Skipped sentences</strong>: some sentences may be skipped if the target word is not found after tokenization (this can happen with very unusual Early Modern spellings). A few skips are normal.</p></li>
+</ul>
+</section>
+</section>
+<section id="step-5-visualize-with-pca" class="level2">
+<h2 class="anchored" data-anchor-id="step-5-visualize-with-pca">Step 5: Visualize with PCA</h2>
+<p>We now have a collection of 768-dimensional vectors. Each one represents a word-in-context. We cannot visualize 768 dimensions directly, so we use <strong>dimensionality reduction</strong> to project them down to 2D.</p>
+<p>We will start with <strong>PCA</strong> (Principal Component Analysis), which finds the directions of maximum variance in the data and projects onto them. PCA is linear and deterministic—you will get the same result every time.</p>
+<p>Create a file <code>step5_visualize_pca.py</code> and run it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>matplotlib.rcParams[<span class="st">'figure.dpi'</span>] <span class="op">=</span> <span class="dv">150</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>DATA_DIR <span class="op">=</span> Path(<span class="st">"data"</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DATA_DIR <span class="op">/</span> <span class="st">"bert_embeddings.json"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> json.load(f)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Loaded </span><span class="sc">{</span><span class="bu">len</span>(data)<span class="sc">}</span><span class="ss"> embeddings."</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the embedding matrix and metadata</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> np.array([d[<span class="st">"embedding"</span>] <span class="cf">for</span> d <span class="kw">in</span> data])</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>words <span class="op">=</span> [d[<span class="st">"target_word"</span>] <span class="cf">for</span> d <span class="kw">in</span> data]</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>sources <span class="op">=</span> [d[<span class="st">"source"</span>] <span class="cf">for</span> d <span class="kw">in</span> data]</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Embedding matrix shape: </span><span class="sc">{</span>embeddings<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit PCA</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>reduced <span class="op">=</span> pca.fit_transform(embeddings)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Explained variance: PC1=</span><span class="sc">{</span>pca<span class="sc">.</span>explained_variance_ratio_[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">, PC2=</span><span class="sc">{</span>pca<span class="sc">.</span>explained_variance_ratio_[<span class="dv">1</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total explained: </span><span class="sc">{</span><span class="bu">sum</span>(pca.explained_variance_ratio_)<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>TARGET_WORDS <span class="op">=</span> [<span class="st">"trade"</span>, <span class="st">"balance"</span>, <span class="st">"manufacture"</span>, <span class="st">"stock"</span>, <span class="st">"interest"</span>, <span class="st">"commerce"</span>, <span class="st">"plantation"</span>]</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Color map: one color per word</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> plt.cm.tab10(np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="bu">len</span>(TARGET_WORDS)))</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>word_to_color <span class="op">=</span> {w: colors[i] <span class="cf">for</span> i, w <span class="kw">in</span> <span class="bu">enumerate</span>(TARGET_WORDS)}</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">9</span>))</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(reduced)):</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> word_to_color[words[i]]</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    marker <span class="op">=</span> <span class="st">"o"</span> <span class="cf">if</span> sources[i] <span class="op">==</span> <span class="st">"historical"</span> <span class="cf">else</span> <span class="st">"^"</span>  <span class="co"># circle vs triangle</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="fl">0.6</span> <span class="cf">if</span> sources[i] <span class="op">==</span> <span class="st">"historical"</span> <span class="cf">else</span> <span class="fl">0.9</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    edgecolor <span class="op">=</span> <span class="st">"black"</span> <span class="cf">if</span> sources[i] <span class="op">==</span> <span class="st">"modern"</span> <span class="cf">else</span> <span class="st">"none"</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    ax.scatter(reduced[i, <span class="dv">0</span>], reduced[i, <span class="dv">1</span>],</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>               c<span class="op">=</span>[color], marker<span class="op">=</span>marker, s<span class="op">=</span><span class="dv">60</span>,</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>               alpha<span class="op">=</span>alpha, edgecolors<span class="op">=</span>edgecolor, linewidths<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a><span class="co"># Legend for words</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> word <span class="kw">in</span> TARGET_WORDS:</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>    ax.scatter([], [], c<span class="op">=</span>[word_to_color[word]], label<span class="op">=</span>word, s<span class="op">=</span><span class="dv">60</span>)</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="co"># Legend for sources</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>ax.scatter([], [], c<span class="op">=</span><span class="st">"gray"</span>, marker<span class="op">=</span><span class="st">"o"</span>, label<span class="op">=</span><span class="st">"Historical"</span>, s<span class="op">=</span><span class="dv">60</span>)</span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>ax.scatter([], [], c<span class="op">=</span><span class="st">"gray"</span>, marker<span class="op">=</span><span class="st">"^"</span>, label<span class="op">=</span><span class="st">"Modern"</span>, s<span class="op">=</span><span class="dv">60</span>, edgecolors<span class="op">=</span><span class="st">"black"</span>, linewidths<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">"upper right"</span>, fontsize<span class="op">=</span><span class="dv">8</span>, ncol<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="ss">f"PC1 (</span><span class="sc">{</span>pca<span class="sc">.</span>explained_variance_ratio_[<span class="dv">0</span>]<span class="sc">:.1%}</span><span class="ss"> variance)"</span>)</span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="ss">f"PC2 (</span><span class="sc">{</span>pca<span class="sc">.</span>explained_variance_ratio_[<span class="dv">1</span>]<span class="sc">:.1%}</span><span class="ss"> variance)"</span>)</span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"BERT Contextual Embeddings: Historical vs. Modern Usage</span><span class="ch">\n</span><span class="st">(PCA Projection)"</span>)</span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"pca_embeddings.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Saved plot to pca_embeddings.png"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="reading-the-pca-plot" class="level3">
+<h3 class="anchored" data-anchor-id="reading-the-pca-plot">Reading the PCA plot</h3>
+<p>What you are looking for:</p>
+<ul>
+<li><strong>Circles</strong> (○) are historical uses; <strong>triangles</strong> (△) are modern uses.</li>
+<li>Each color is a different target word.</li>
+<li>If historical and modern uses of the same word <strong>cluster together</strong>, it means BERT represents them similarly despite the centuries between them. The word’s meaning (in BERT’s view) has not shifted much.</li>
+<li>If they <strong>separate</strong>, it means BERT is picking up on contextual differences—the surrounding words in historical vs.&nbsp;modern sentences are pushing the embeddings apart.</li>
+<li>Words like “manufacture” and “stock” should show noticeable separation. “Trade” may cluster more tightly.</li>
+</ul>
+<p><strong>Important caveat</strong>: PCA captures the directions of <em>maximum variance</em>, which may or may not align with the historical-vs-modern distinction. If the biggest source of variance is word identity (which it likely is—“trade” embeddings are far from “stock” embeddings), PCA will show that first. The historical/modern differences may be subtler and appear within word clusters.</p>
+</section>
+</section>
+<section id="step-6-visualize-with-t-sne" class="level2">
+<h2 class="anchored" data-anchor-id="step-6-visualize-with-t-sne">Step 6: Visualize with t-SNE</h2>
+<p>t-SNE is a nonlinear method that is better at preserving <em>local</em> structure. It often produces more visually interpretable clusters than PCA, but it is stochastic (results vary across runs) and the axes are not directly interpretable.</p>
+<p>Create a file <code>step6_visualize_tsne.py</code> and run it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> TSNE</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>matplotlib.rcParams[<span class="st">'figure.dpi'</span>] <span class="op">=</span> <span class="dv">150</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>DATA_DIR <span class="op">=</span> Path(<span class="st">"data"</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DATA_DIR <span class="op">/</span> <span class="st">"bert_embeddings.json"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> json.load(f)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> np.array([d[<span class="st">"embedding"</span>] <span class="cf">for</span> d <span class="kw">in</span> data])</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>words <span class="op">=</span> [d[<span class="st">"target_word"</span>] <span class="cf">for</span> d <span class="kw">in</span> data]</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>sources <span class="op">=</span> [d[<span class="st">"source"</span>] <span class="cf">for</span> d <span class="kw">in</span> data]</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Running t-SNE on </span><span class="sc">{</span><span class="bu">len</span>(embeddings)<span class="sc">}</span><span class="ss"> embeddings..."</span>)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Note: perplexity should be less than the number of samples</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co"># A common rule of thumb is between 5 and 50</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>perplexity_val <span class="op">=</span> <span class="bu">min</span>(<span class="dv">30</span>, <span class="bu">len</span>(embeddings) <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>tsne <span class="op">=</span> TSNE(</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    n_components<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    perplexity<span class="op">=</span>perplexity_val,</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">42</span>,</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    n_iter<span class="op">=</span><span class="dv">1000</span>,</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    learning_rate<span class="op">=</span><span class="st">"auto"</span>,</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    init<span class="op">=</span><span class="st">"pca"</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>reduced <span class="op">=</span> tsne.fit_transform(embeddings)</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>TARGET_WORDS <span class="op">=</span> [<span class="st">"trade"</span>, <span class="st">"balance"</span>, <span class="st">"manufacture"</span>, <span class="st">"stock"</span>, <span class="st">"interest"</span>, <span class="st">"commerce"</span>, <span class="st">"plantation"</span>]</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> plt.cm.tab10(np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="bu">len</span>(TARGET_WORDS)))</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>word_to_color <span class="op">=</span> {w: colors[i] <span class="cf">for</span> i, w <span class="kw">in</span> <span class="bu">enumerate</span>(TARGET_WORDS)}</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">9</span>))</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(reduced)):</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> word_to_color[words[i]]</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    marker <span class="op">=</span> <span class="st">"o"</span> <span class="cf">if</span> sources[i] <span class="op">==</span> <span class="st">"historical"</span> <span class="cf">else</span> <span class="st">"^"</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="fl">0.6</span> <span class="cf">if</span> sources[i] <span class="op">==</span> <span class="st">"historical"</span> <span class="cf">else</span> <span class="fl">0.9</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    edgecolor <span class="op">=</span> <span class="st">"black"</span> <span class="cf">if</span> sources[i] <span class="op">==</span> <span class="st">"modern"</span> <span class="cf">else</span> <span class="st">"none"</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    ax.scatter(reduced[i, <span class="dv">0</span>], reduced[i, <span class="dv">1</span>],</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>               c<span class="op">=</span>[color], marker<span class="op">=</span>marker, s<span class="op">=</span><span class="dv">60</span>,</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>               alpha<span class="op">=</span>alpha, edgecolors<span class="op">=</span>edgecolor, linewidths<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> word <span class="kw">in</span> TARGET_WORDS:</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    ax.scatter([], [], c<span class="op">=</span>[word_to_color[word]], label<span class="op">=</span>word, s<span class="op">=</span><span class="dv">60</span>)</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>ax.scatter([], [], c<span class="op">=</span><span class="st">"gray"</span>, marker<span class="op">=</span><span class="st">"o"</span>, label<span class="op">=</span><span class="st">"Historical"</span>, s<span class="op">=</span><span class="dv">60</span>)</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>ax.scatter([], [], c<span class="op">=</span><span class="st">"gray"</span>, marker<span class="op">=</span><span class="st">"^"</span>, label<span class="op">=</span><span class="st">"Modern"</span>, s<span class="op">=</span><span class="dv">60</span>, edgecolors<span class="op">=</span><span class="st">"black"</span>, linewidths<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">"upper right"</span>, fontsize<span class="op">=</span><span class="dv">8</span>, ncol<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t-SNE 1"</span>)</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"t-SNE 2"</span>)</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"BERT Contextual Embeddings: Historical vs. Modern Usage</span><span class="ch">\n</span><span class="st">(t-SNE Projection)"</span>)</span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"tsne_embeddings.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Saved plot to tsne_embeddings.png"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="reading-the-t-sne-plot" class="level3">
+<h3 class="anchored" data-anchor-id="reading-the-t-sne-plot">Reading the t-SNE plot</h3>
+<p>t-SNE tends to produce more distinct clusters. Look for:</p>
+<ul>
+<li>Do historical and modern uses of the same word form <strong>sub-clusters</strong> within the word’s region?</li>
+<li>Which words show the most internal separation between historical and modern points?</li>
+<li>Are there any historical uses of one word that end up <em>near the cluster of a different word</em>? (For example, historical uses of “interest” meaning “political concern” might drift toward the “commerce” cluster.)</li>
+</ul>
+<p>Remember: t-SNE distances between far-apart clusters are <strong>not</strong> meaningful. Only the <em>local</em> groupings (nearby points) are interpretable.</p>
+</section>
+</section>
+<section id="step-7-per-word-focused-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="step-7-per-word-focused-analysis">Step 7: Per-Word Focused Analysis</h2>
+<p>The global plots give us an overview, but to really see the historical/modern divergence, it helps to look at individual words. Let’s make a plot that shows, for each target word separately, how far apart its historical and modern embeddings are.</p>
+<p>Create a file <code>step7_per_word_analysis.py</code> and run it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics.pairwise <span class="im">import</span> cosine_similarity</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>matplotlib.rcParams[<span class="st">'figure.dpi'</span>] <span class="op">=</span> <span class="dv">150</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>DATA_DIR <span class="op">=</span> Path(<span class="st">"data"</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DATA_DIR <span class="op">/</span> <span class="st">"bert_embeddings.json"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> json.load(f)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>TARGET_WORDS <span class="op">=</span> [<span class="st">"trade"</span>, <span class="st">"balance"</span>, <span class="st">"manufacture"</span>, <span class="st">"stock"</span>, <span class="st">"interest"</span>, <span class="st">"commerce"</span>, <span class="st">"plantation"</span>]</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Average cosine similarity between historical and modern embeddings:</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> []</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> word <span class="kw">in</span> TARGET_WORDS:</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    hist_embs <span class="op">=</span> [d[<span class="st">"embedding"</span>] <span class="cf">for</span> d <span class="kw">in</span> data <span class="cf">if</span> d[<span class="st">"target_word"</span>] <span class="op">==</span> word <span class="kw">and</span> d[<span class="st">"source"</span>] <span class="op">==</span> <span class="st">"historical"</span>]</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    mod_embs <span class="op">=</span> [d[<span class="st">"embedding"</span>] <span class="cf">for</span> d <span class="kw">in</span> data <span class="cf">if</span> d[<span class="st">"target_word"</span>] <span class="op">==</span> word <span class="kw">and</span> d[<span class="st">"source"</span>] <span class="op">==</span> <span class="st">"modern"</span>]</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> hist_embs <span class="kw">or</span> <span class="kw">not</span> mod_embs:</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>word<span class="sc">}</span><span class="ss">: insufficient data (hist=</span><span class="sc">{</span><span class="bu">len</span>(hist_embs)<span class="sc">}</span><span class="ss">, mod=</span><span class="sc">{</span><span class="bu">len</span>(mod_embs)<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    hist_embs <span class="op">=</span> np.array(hist_embs)</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    mod_embs <span class="op">=</span> np.array(mod_embs)</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Average embedding for each group</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    hist_centroid <span class="op">=</span> hist_embs.mean(axis<span class="op">=</span><span class="dv">0</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    mod_centroid <span class="op">=</span> mod_embs.mean(axis<span class="op">=</span><span class="dv">0</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Cosine similarity between centroids</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>    sim <span class="op">=</span> cosine_similarity(hist_centroid, mod_centroid)[<span class="dv">0</span>][<span class="dv">0</span>]</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Also compute within-group similarity for reference</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(hist_embs) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>        hist_internal <span class="op">=</span> cosine_similarity(hist_embs).mean()</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>        hist_internal <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(mod_embs) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>        mod_internal <span class="op">=</span> cosine_similarity(mod_embs).mean()</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>        mod_internal <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>    results.append({</span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>        <span class="st">"word"</span>: word,</span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cross_similarity"</span>: sim,</span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>        <span class="st">"hist_internal"</span>: hist_internal,</span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>        <span class="st">"mod_internal"</span>: mod_internal,</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>        <span class="st">"n_hist"</span>: <span class="bu">len</span>(hist_embs),</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>        <span class="st">"n_mod"</span>: <span class="bu">len</span>(mod_embs)</span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>word<span class="sc">:15s}</span><span class="ss">  cross=</span><span class="sc">{</span>sim<span class="sc">:.3f}</span><span class="ss">  hist_internal=</span><span class="sc">{</span>hist_internal<span class="sc">:.3f}</span><span class="ss">  mod_internal=</span><span class="sc">{</span>mod_internal<span class="sc">:.3f}</span><span class="ss">  (n=</span><span class="sc">{</span><span class="bu">len</span>(hist_embs)<span class="sc">}</span><span class="ss">h, </span><span class="sc">{</span><span class="bu">len</span>(mod_embs)<span class="sc">}</span><span class="ss">m)"</span>)</span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a><span class="co"># Bar chart: cross-group similarity</span></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">--- Interpretation guide ---"</span>)</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Higher cross-similarity → BERT sees historical and modern usage as more similar"</span>)</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Lower cross-similarity → BERT sees a bigger gap between centuries"</span>)</span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Compare cross-similarity to internal similarity to see if the gap is meaningful"</span>)</span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>words_plot <span class="op">=</span> [r[<span class="st">"word"</span>] <span class="cf">for</span> r <span class="kw">in</span> results]</span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>cross_sims <span class="op">=</span> [r[<span class="st">"cross_similarity"</span>] <span class="cf">for</span> r <span class="kw">in</span> results]</span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>bars <span class="op">=</span> ax.bar(words_plot, cross_sims, color<span class="op">=</span><span class="st">"steelblue"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Cosine Similarity (Historical ↔ Modern Centroid)"</span>)</span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Target Word"</span>)</span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"How Similarly Does BERT Represent Historical vs. Modern Usage?"</span>)</span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>ax.axhline(y<span class="op">=</span><span class="fl">0.9</span>, color<span class="op">=</span><span class="st">"red"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, label<span class="op">=</span><span class="st">"High similarity threshold"</span>)</span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a><span class="co"># Add value labels on bars</span></span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> bar, val <span class="kw">in</span> <span class="bu">zip</span>(bars, cross_sims):</span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a>    ax.text(bar.get_x() <span class="op">+</span> bar.get_width()<span class="op">/</span><span class="dv">2</span>, bar.get_height() <span class="op">+</span> <span class="fl">0.01</span>,</span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"</span><span class="sc">{</span>val<span class="sc">:.3f}</span><span class="ss">"</span>, ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"bottom"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"per_word_similarity.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Saved plot to per_word_similarity.png"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="what-to-look-for" class="level3">
+<h3 class="anchored" data-anchor-id="what-to-look-for">What to look for</h3>
+<ul>
+<li>Words with <strong>high</strong> cross-similarity (close to 1.0) → BERT treats historical and modern usage as essentially the same. These words have stable meanings across centuries.</li>
+<li>Words with <strong>lower</strong> cross-similarity → BERT detects a meaningful difference. These are the words where historical meaning diverges from modern meaning.</li>
+<li>Compare <strong>cross-similarity</strong> to <strong>internal similarity</strong>. If historical sentences for “stock” have an internal similarity of 0.85, but cross-similarity with modern is 0.60, then the historical uses are more similar to <em>each other</em> than to the modern uses—a clear signal of semantic shift.</li>
+</ul>
+</section>
+</section>
+<section id="step-8-discussion-and-ner-implications" class="level2">
+<h2 class="anchored" data-anchor-id="step-8-discussion-and-ner-implications">Step 8: Discussion and NER Implications</h2>
+<p>Take a step back and think about what we have found. Write up your answers to the following questions as your deliverable (see below).</p>
+<section id="questions-to-address" class="level3">
+<h3 class="anchored" data-anchor-id="questions-to-address">Questions to address:</h3>
+<ol type="1">
+<li><p><strong>Which words showed the most divergence between historical and modern embeddings?</strong> Why do you think this is the case? Can you explain the divergence based on what you know about the history of these concepts?</p></li>
+<li><p><strong>Which words were most stable?</strong> Does this surprise you?</p></li>
+<li><p><strong>What does this mean for NER?</strong> If we used a BERT-based NER model (trained on modern data) to extract entities from mercantilist texts, where would you expect it to struggle? Think concretely: if BERT represents “stock” in a mercantilist text as something between modern “inventory” and modern “livestock,” how might that affect entity classification?</p></li>
+<li><p><strong>Domain adaptation</strong>: The Ehrmann et al.&nbsp;survey we discussed mentions that lack of domain-specific training data is one of the biggest challenges for NER on historical documents. Based on what you have seen in this tutorial, why would fine-tuning BERT on historical text (or using a historically pre-trained model) potentially improve NER performance? What specifically would change in the embedding space?</p></li>
+<li><p><strong>Limitations</strong>: What are the limitations of our approach this week? Think about: the size of our comparison corpus, the choice of target words, the fact that we used <code>bert-base-uncased</code> (which lowercases everything—what might we lose?), and the fact that we are only looking at 49 texts from a specific period.</p></li>
+</ol>
+</section>
+</section>
+<section id="deliverable" class="level2">
+<h2 class="anchored" data-anchor-id="deliverable">Deliverable</h2>
+<p>Submit the following:</p>
+<ul>
+<li>Your <strong>PCA plot</strong> (<code>pca_embeddings.png</code>)</li>
+<li>Your <strong>t-SNE plot</strong> (<code>tsne_embeddings.png</code>)</li>
+<li>Your <strong>per-word similarity chart</strong> (<code>per_word_similarity.png</code>)</li>
+<li>A <strong>written reflection</strong> (500–750 words) addressing the five questions in Step 8.</li>
+</ul>
+<p>The reflection is the most important part. I want to see that you can connect the technical results to the conceptual issues we have been discussing about applying NLP tools to historical texts.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/Astrid-Giugni\.github\.io\/IDS_570_TAD\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

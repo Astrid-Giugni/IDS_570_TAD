@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>IDS 570: “Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts” – Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts</title>
+<title>TOPY example – Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,6 +19,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -72,7 +107,7 @@ ul.task-list li input[type="checkbox"] {
 
 </head>
 
-<body class="nav-sidebar docked nav-fixed fullcontent quarto-light">
+<body class="nav-sidebar docked nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -106,7 +141,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Course</a></li><li class="breadcrumb-item"><a href="./index.html">IDS 570: “Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts”</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">TOPY example</li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -141,7 +176,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">IDS 570: “Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts”</span></a>
   </div>
 </li>
@@ -223,13 +258,38 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#part-i-from-word2vec-to-bert" id="toc-part-i-from-word2vec-to-bert" class="nav-link" data-scroll-target="#part-i-from-word2vec-to-bert">Part I — From Word2Vec to BERT</a>
+  <ul class="collapse">
+  <li><a href="#static-embeddings-word2vec-recap" id="toc-static-embeddings-word2vec-recap" class="nav-link" data-scroll-target="#static-embeddings-word2vec-recap">Static Embeddings (Word2Vec Recap)</a></li>
+  <li><a href="#contextual-embeddings" id="toc-contextual-embeddings" class="nav-link" data-scroll-target="#contextual-embeddings">Contextual Embeddings</a></li>
+  </ul></li>
+  <li><a href="#part-ii-representing-sentences-with-bert" id="toc-part-ii-representing-sentences-with-bert" class="nav-link" data-scroll-target="#part-ii-representing-sentences-with-bert">Part II — Representing Sentences with BERT</a></li>
+  <li><a href="#part-vi-historical-paraphrase-across-orthography-advanced-demonstration" id="toc-part-vi-historical-paraphrase-across-orthography-advanced-demonstration" class="nav-link" data-scroll-target="#part-vi-historical-paraphrase-across-orthography-advanced-demonstration">Part VI — Historical Paraphrase Across Orthography (Advanced Demonstration)</a></li>
+  <li><a href="#part-vii-retrieval-task" id="toc-part-vii-retrieval-task" class="nav-link" data-scroll-target="#part-vii-retrieval-task">Part VII — Retrieval Task</a></li>
+  <li><a href="#part-viii-what-is-bert-actually-doing" id="toc-part-viii-what-is-bert-actually-doing" class="nav-link" data-scroll-target="#part-viii-what-is-bert-actually-doing">Part VIII — What Is BERT Actually Doing?</a>
+  <ul class="collapse">
+  <li><a href="#masked-language-modeling" id="toc-masked-language-modeling" class="nav-link" data-scroll-target="#masked-language-modeling">Masked Language Modeling</a></li>
+  <li><a href="#conceptual-architecture" id="toc-conceptual-architecture" class="nav-link" data-scroll-target="#conceptual-architecture">Conceptual Architecture</a></li>
+  </ul></li>
+  <li><a href="#final-considerations" id="toc-final-considerations" class="nav-link" data-scroll-target="#final-considerations">Final Considerations</a>
+  <ul class="collapse">
+  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Course</a></li><li class="breadcrumb-item"><a href="./index.html">IDS 570: “Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts”</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">IDS 570: “Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts”</h1>
+<h1 class="title">TOPY example</h1>
 </div>
 
 
@@ -246,11 +306,176 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="course-description" class="level2">
-<h2 class="anchored" data-anchor-id="course-description">Course description:</h2>
-<p>With the recent explosion in availability of digitized historical and literary texts and the availability of powerful language models, researchers are increasingly turning to computational tools for the analysis of text as data. But not all text is equally amenable to computational approaches. Historical texts often require specialized approaches to bridge the gap between the books as originally produced and analysis-ready data. In this course, students will learn to prepare and analyze historical and literary texts for natural language processing. We will also consider questions of interpretation and the ethics of corpus construction.Our corpora will derive from economic documents and travel narratives from the 17th century. These texts are challenging and require careful curation and cleaning, and they will force you to learn meticulous practices and work-flows in text analysis. Whether working with contemporary or historical texts, most textual data is messy and requires careful preprocessing. By focusing on these Early Modern documents, you will learn how to approach <em>quantitative</em> text analysis with <em>qualitative</em> study of the cultural, economic, and political context that produced the data you are analyzing.</p>
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<p>In previous weeks, we represented text using:</p>
+<ul>
+<li>Character-level features (edit distance)</li>
+<li>Token-level features (DFM + TF-IDF)</li>
+<li>Word embeddings (Word2Vec: one vector per word)</li>
+</ul>
+<p>Today we move to <strong>contextual embeddings</strong> using BERT.</p>
+<p>By the end of this tutorial, you will be able to:</p>
+<ol type="1">
+<li>Explain the difference between static and contextual embeddings.</li>
+<li>Compute sentence similarity using BERT embeddings.</li>
+<li>Demonstrate how BERT handles paraphrase — even across spelling variation.</li>
+<li>Understand (at a conceptual level) how BERT is trained.</li>
+</ol>
+<hr>
+</section>
+<section id="part-i-from-word2vec-to-bert" class="level1">
+<h1>Part I — From Word2Vec to BERT</h1>
+<section id="static-embeddings-word2vec-recap" class="level2">
+<h2 class="anchored" data-anchor-id="static-embeddings-word2vec-recap">Static Embeddings (Word2Vec Recap)</h2>
+<p>Word2Vec assigns <strong>one vector per word type</strong>.</p>
+<p>This means:</p>
+<ul>
+<li>“company” has one representation</li>
+<li>regardless of context</li>
+</ul>
+<p>That is a limitation when words are polysemous.</p>
+</section>
+<section id="contextual-embeddings" class="level2">
+<h2 class="anchored" data-anchor-id="contextual-embeddings">Contextual Embeddings</h2>
+<p>BERT assigns:</p>
+<blockquote class="blockquote">
+<p>One vector per token occurrence.</p>
+</blockquote>
+<p>The embedding for “company” depends on surrounding words.</p>
+<p>This is the conceptual shift.</p>
+<hr>
+</section>
+</section>
+<section id="part-ii-representing-sentences-with-bert" class="level1">
+<h1>Part II — Representing Sentences with BERT</h1>
+<p>We will use the <code>sentence-transformers</code> library, which provides BERT models optimized for semantic similarity.</p>
+<p>```{python} # Install if needed: # !pip install sentence-transformers</p>
+<p>from sentence_transformers import SentenceTransformer from sklearn.metrics.pairwise import cosine_similarity import numpy as np</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> SentenceTransformer(<span class="st">"all-MiniLM-L6-v2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Part IV — Baseline: TF-IDF Similarity</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.feature_extraction.text <span class="im">import</span> TfidfVectorizer</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>vectorizer <span class="op">=</span> TfidfVectorizer()</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>tfidf_matrix <span class="op">=</span> vectorizer.fit_transform(sentences)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>tfidf_sim <span class="op">=</span> cosine_similarity(tfidf_matrix)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>tfidf_sim</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Part V — BERT Sentence Embeddings</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> model.encode(sentences)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>bert_sim <span class="op">=</span> cosine_similarity(embeddings)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>bert_sim</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="part-vi-historical-paraphrase-across-orthography-advanced-demonstration" class="level1">
+<h1>Part VI — Historical Paraphrase Across Orthography (Advanced Demonstration)</h1>
+<p>Now we isolate the trio</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>trio <span class="op">=</span> [</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The Virginia Companie did advance traffique beyond the seas."</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The Virginia Company did advance traffic beyond the seas."</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The Virginia Company promoted overseas trade."</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>tfidf_trio <span class="op">=</span> vectorizer.fit_transform(trio)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>tfidf_trio_sim <span class="op">=</span> cosine_similarity(tfidf_trio)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>bert_trio <span class="op">=</span> model.encode(trio)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>bert_trio_sim <span class="op">=</span> cosine_similarity(bert_trio)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"TF-IDF Similarity:</span><span class="ch">\n</span><span class="st">"</span>, tfidf_trio_sim)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">BERT Similarity:</span><span class="ch">\n</span><span class="st">"</span>, bert_trio_sim)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="part-vii-retrieval-task" class="level1">
+<h1>Part VII — Retrieval Task</h1>
+<p>Let’s treat this as a search problem.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"The Virginia Company expanded trade overseas."</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>query_embedding <span class="op">=</span> model.encode([query])</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>similarities <span class="op">=</span> cosine_similarity(query_embedding, embeddings)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>similarities</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="part-viii-what-is-bert-actually-doing" class="level1">
+<h1>Part VIII — What Is BERT Actually Doing?</h1>
+<section id="masked-language-modeling" class="level2">
+<h2 class="anchored" data-anchor-id="masked-language-modeling">Masked Language Modeling</h2>
+<p>BERT is trained by predicting masked words.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>fill_mask <span class="op">=</span> pipeline(<span class="st">"fill-mask"</span>, model<span class="op">=</span><span class="st">"bert-base-uncased"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>fill_mask(<span class="st">"The Virginia Company traded [MASK] across the Atlantic."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>BERT learns contextual representations because it must predict missing words from full sentence context.</p>
+</section>
+<section id="conceptual-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="conceptual-architecture">Conceptual Architecture</h2>
+<p>At a high level:</p>
+<ol type="1">
+<li></li>
+<li><p>Tokens → embeddings</p></li>
+<li></li>
+<li><p>Self-attention layers update each token representation</p></li>
+<li></li>
+<li><p>Final hidden states become contextual embeddings</p></li>
+<li></li>
+</ol>
+<p>These embeddings can then feed:</p>
+<ul>
+<li></li>
+<li><p>NER (as in spaCy)</p></li>
+<li></li>
+<li><p>Classification</p></li>
+<li></li>
+<li><p>Similarity</p></li>
+<li></li>
+<li><p>Retrieval</p></li>
+<li></li>
+</ul>
+</section>
+</section>
+<section id="final-considerations" class="level1">
+<h1>Final Considerations</h1>
+<p>Representation choices matter.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Captures</th>
+<th>Struggles With</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>TF-IDF</td>
+<td>Word overlap</td>
+<td>Paraphrase</td>
+</tr>
+<tr class="even">
+<td>Word2Vec</td>
+<td>Distributional similarity</td>
+<td>Context-sensitive meaning</td>
+</tr>
+<tr class="odd">
+<td>BERT</td>
+<td>Contextual semantics</td>
+<td>Domain shift, diachrony</td>
+</tr>
+</tbody>
+</table>
+<p>Next week, we scale this to 500–600 texts for:</p>
+<ul>
+<li></li>
+<li><p>Clustering</p></li>
+<li></li>
+<li><p>Classification</p></li>
+<li></li>
+<li><p>Near-duplicate detection</p></li>
+<li></li>
+<li><p>Semantic retrieval</p></li>
+</ul>
+<hr>
+<section id="section" class="level2">
+<h2 class="anchored" data-anchor-id="section"></h2>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
