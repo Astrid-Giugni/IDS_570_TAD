@@ -19,7 +19,7 @@ py_config()
 
 # Weeks 11-13 goals:
 
-With this tutorial, we are starting a three weeks unit on **BERT**. This is how the three weeks will work together:
+With this tutorial, we are starting a three weeks unit on **BERT** (and BERT-related models). This is how the three weeks will work together:
 
 **Week 11:** this tutorial uses a toy paraphrase corpus to practice tokenization; compare TF-IDF vs. BERT similarity; work with PCA visualization, compare `[CLS]` vs. mean pooling, and understand masked language modeling. We will end with a preview of how base BERT handles Early Modern English (poorly). This will set us up for...
 
@@ -83,13 +83,13 @@ When a sentence is processed by BERT, the model does not receive the raw sentenc
 
 Where:
 
--    **`[CLS]`** → special token marking the start of the sequence
+-   **`[CLS]`** → special token marking the start of the sequence
 
 -   **`[SEP]`** → separator token marking the end of the sequence (or separating two sentences)
 
 After tokenization, BERT produces an embedding for every token, including `[CLS]` and `[SEP]`.
 
-#### [BERT-base](https://huggingface.co/papers/1810.04805), [BERT-Large](https://huggingface.co/google-bert/bert-large-cased), [RoBERTa](https://huggingface.co/docs/transformers/en/model_doc/roberta), [ModernBERT](https://huggingface.co/blog/modernbert), [DistilBERT](https://huggingface.co/docs/transformers/en/model_doc/distilbert), [MacBERTh and GysBERT](https://macberth.netlify.app/),.. Oh my! 
+#### [BERT-base](https://huggingface.co/papers/1810.04805), [BERT-Large](https://huggingface.co/google-bert/bert-large-cased), [RoBERTa](https://huggingface.co/docs/transformers/en/model_doc/roberta), [ModernBERT](https://huggingface.co/blog/modernbert), [DistilBERT](https://huggingface.co/docs/transformers/en/model_doc/distilbert), [MacBERTh and GysBERT](https://macberth.netlify.app/),.. Oh my!
 
 There are a lot of BERT's and we will talk more about this in our reading for Friday! For this tutorial, we will work with the base model.
 
@@ -99,7 +99,7 @@ There are a lot of BERT's and we will talk more about this in our reading for Fr
 
 You should already have `scikit-learn` and `matplotlib` from previous weeks. We need to add a few new packages:
 
-``` Python
+``` python
 #| eval: false
 
 # Run these in your terminal:
@@ -108,7 +108,7 @@ You should already have `scikit-learn` and `matplotlib` from previous weeks. We 
 
 This will take a few minutes: `torch` in particular is a large download. Once this is done, you can verify the installation. Now, create a new file `step0_setup.py`:
 
-``` Python
+``` python
 import torch
 from transformers import BertTokenizer, BertModel
 from sentence_transformers import SentenceTransformer
@@ -128,7 +128,7 @@ Now that we are set up, we can start working with BERT. We will build a small co
 
 Create a new file, `step1_tfidf_baseline.py`, we will use this file for the creation of the toy corpus and for Part IV as well, so you will keep adding to it until we finish TF-IDF similarity. Start by creating two lists which we will name `sentences` and `labels`:
 
-``` Python
+``` python
 sentences = [
     # Group 1: Virginia Company — same content, different phrasing/spelling
     "The Virginia Companie did advance traffique beyond the seas.",
@@ -174,7 +174,7 @@ Before we use BERT, let's establish a baseline with TF-IDF. This represents each
 
 4.  Print the matrix in a human-readable labeled table
 
-``` Python
+``` python
 vectorizer = TfidfVectorizer()
 tfidf_matrix = vectorizer.fit_transform(sentences)
 
@@ -212,3 +212,361 @@ Your output should look like:
 Look at the TF-IDF similarity between sentences 0 and 2 ("The Virginia Companie did advance traffique beyond the seas" vs. "The Virginia Company promoted overseas trade"). These sentences mean the same thing, but because they use mostly different words, TF-IDF gives them a relatively low similarity score.
 
 Also look at sentences 0 and 1: the only difference is spelling ("Companie" → "Company", "traffique" → "traffic"), but TF-IDF treats these as completely different tokens. This is a fundamental limitation of bag-of-words methods for historical text.
+
+## Part V — BERT Sentence Embeddings
+
+Now let's see how BERT handles the same sentences. We will use `sentence-transformers`, which wraps a BERT-based model optimized for computing sentence similarity.
+
+### How do we select a model?
+
+The most systematic comparison of embedding models today is the MTEB leaderboard.
+
+It's a benchmark created by Hugging Face researchers. It evaluates sentence-embedding models across 50+ tasks, including (of interest to us):
+
+-   semantic similarity
+
+-   clustering
+
+-   classification
+
+I find the MTEB table to be overwhelming when I am looking for models with specific strengths. My best advice is to search scholarly reviews of models by specific tasks (like [this one](https://arxiv.org/abs/1908.10084) or [this one](https://arxiv.org/abs/1908.10084)) and if I see that a couple of models perform well on the tasks I am interested in, then I loop back to the MTEB table for more information.
+
+Now, create a new file : `step2_bert_similarity.py`.
+
+``` python
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+
+sentences = [
+    "The Virginia Companie did advance traffique beyond the seas.",
+    "The Virginia Company did advance traffic beyond the seas.",
+    "The Virginia Company promoted overseas trade.",
+    "The merchants of London traded in silks and spices.",
+    "London merchants engaged in the silk and spice trade.",
+    "The harvest was plentiful this year.",
+    "Parliament assembled to debate the new taxation.",
+]
+
+labels = [
+    "VA Co. (archaic spelling)",
+    "VA Co. (modern spelling)",
+    "VA Co. (paraphrase)",
+    "Merchants (version A)",
+    "Merchants (version B)",
+    "Harvest (unrelated)",
+    "Parliament (unrelated)",
+]
+
+# Load a sentence-transformer model
+# all-MiniLM-L6-v2 is a lightweight, fast model good for similarity tasks
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# Encode all sentences into 384-dimensional vectors
+embeddings = model.encode(sentences)
+
+print(f"Embedding shape: {embeddings.shape}")
+print(f"Each sentence is now a vector of {embeddings.shape[1]} numbers.\n")
+
+# Compute BERT-based similarity
+bert_sim = cosine_similarity(embeddings)
+
+print("BERT Cosine Similarity Matrix:\n")
+print(f"{'':>30s}", end="")
+for i in range(len(sentences)):
+    print(f"  [{i}]", end="")
+print()
+
+for i in range(len(sentences)):
+    print(f"{labels[i]:>30s}", end="")
+    for j in range(len(sentences)):
+        print(f" {bert_sim[i][j]:5.2f}", end="")
+    print()
+```
+
+Note: you will get a warning message about a parameter called `embeddings.position_ids` . You can safely ignore this, it's just part of saving the model. You can see that the embedding correctly encoded the 7 sentences as 384-dimensional vectors.
+
+You will also get a BERT Cosine Similarity Matrix that looks like this:
+
+```         
+                            [0]   [1]   [2]   [3]   [4]   [5]  [6]
+ VA Co. (archaic spelling)  1.00  0.76  0.58  0.19  0.19  0.10  0.11
+  VA Co. (modern spelling)  0.76  1.00  0.66  0.21  0.23  0.05  0.07
+       VA Co. (paraphrase)  0.58  0.66  1.00  0.39  0.41  0.14  0.08
+     Merchants (version A)  0.19  0.21  0.39  1.00  0.95  0.13  0.19
+     Merchants (version B)  0.19  0.23  0.41  0.95  1.00  0.12  0.19
+       Harvest (unrelated)  0.10  0.05  0.14  0.13  0.12  1.00  0.06
+    Parliament (unrelated)  0.11  0.07  0.08  0.19  0.19  0.06  1.00
+```
+
+### What to notice
+
+Compare these numbers to the TF-IDF matrix:
+
+-   **Paraphrase detection**: sentences 0, 1, and 2 now show a higher similarity, because BERT recognizes that "advance traffique beyond the seas" and "promoted overseas trade" mean the same thing.
+-   **Spelling robustness**: "Companie" vs. "Company" matter much to BERT than to TF-IDF.
+-   **Semantic grouping**: sentences 3 and 4 (the merchant pair) are now [very]{.underline} similar, and both are closer to the Virginia Company sentences (all about trade) than to sentence 5 (harvest) or 6 (Parliament).
+
+------------------------------------------------------------------------
+
+## Part VI — Side-by-Side: The Virginia Company Trio
+
+Let's isolate the three Virginia Company sentences to really see the difference between TF-IDF and BERT. Create a new file: `python step3_trio_comparison.py`.
+
+``` python
+rom sentence_transformers import SentenceTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# --- The Virginia Company trio ---
+trio = [
+    "The Virginia Companie did advance traffique beyond the seas.",
+    "The Virginia Company did advance traffic beyond the seas.",
+    "The Virginia Company promoted overseas trade."
+]
+trio_labels = ["Archaic spelling", "Modern spelling", "Paraphrase"]
+
+# --- TF-IDF ---
+vectorizer = TfidfVectorizer()
+tfidf_trio = vectorizer.fit_transform(trio)
+tfidf_trio_sim = cosine_similarity(tfidf_trio)
+
+# --- BERT ---
+print("Loading model...")
+model = SentenceTransformer("all-MiniLM-L6-v2")
+bert_trio = model.encode(trio)
+bert_trio_sim = cosine_similarity(bert_trio)
+
+# --- Compare ---
+print("\n=== Virginia Company Trio ===\n")
+
+print("TF-IDF Similarity:")
+for i in range(3):
+    for j in range(3):
+        print(f"  {trio_labels[i]:20s} <-> {trio_labels[j]:20s} : {tfidf_trio_sim[i][j]:.3f}")
+    print()
+
+print("BERT Similarity:")
+for i in range(3):
+    for j in range(3):
+        print(f"  {trio_labels[i]:20s} <-> {trio_labels[j]:20s} : {bert_trio_sim[i][j]:.3f}")
+    print()
+```
+
+**TF-IDF Cosine Similarity**
+
+|                      | Archaic spelling | Modern spelling | Paraphrase |
+|----------------------|------------------|-----------------|------------|
+| **Archaic spelling** | 1.000            | 0.694           | 0.206      |
+| **Modern spelling**  | 0.694            | 1.000           | 0.331      |
+| **Paraphrase**       | 0.206            | 0.331           | 1.000      |
+
+**BERT Similarity**
+
+|                      | Archaic spelling | Modern spelling | Paraphrase |
+|----------------------|------------------|-----------------|------------|
+| **Archaic spelling** | 1.000            | 0.757           | 0.579      |
+| **Modern spelling**  | 0.757            | 1.000           | 0.658      |
+| **Paraphrase**       | 0.579            | 0.658           | 1.000      |
+
+Earlier in the semester, we compared documents using token-level features such as word counts or TF-IDF weights. BERT-based embeddings move beyond individual words and instead represent the overall meaning of a sentence, allowing the model to recognize similarity even when the wording changes. For historical text, where spelling varies, vocabulary changes, and meaning persists, this distinction is crucial.
+
+## Part VII — Visualizing the Embedding Space (PCA & MDS)
+
+To help us understand a bit better this toy corpus of 7 sentences, it would be helpful to visualize how each of them is represented as a vector. Obviously, we can plot in 384 dimensions, so we will need to do dimension reduction.
+
+First, we will use [[**PCA**]{.underline}](https://www.youtube.com/watch?v=FgakZw6K1QQ) (Principal Component Analysis) to project the vectors into 2D and see how BERT organizes them spatially. PCA finds the directions in the embedding space that capture the largest variance in the data and projects the points onto those directions. This means that PCA preserves **the overall structure** of the embedding vectors, not the pairwise similarity relationships.
+
+So, you will want to use PCA when you want to:
+
+-   Get a quick overview of the embedding space
+
+-   Identify major directions of variation in the data
+
+-   Produce a fast, deterministic projection of vectors
+
+It also works well with larger datasets, though this is not the case here.
+
+Now, create a new file: `step4_visualize_pca.py` :
+
+``` python
+from sentence_transformers import SentenceTransformer
+from sklearn.decomposition import PCA
+from sklearn.metrics.pairwise import cosine_similarity
+import matplotlib.pyplot as plt
+import numpy as np
+
+# --- Same toy corpus ---
+sentences = [
+    "The Virginia Companie did advance traffique beyond the seas.",
+    "The Virginia Company did advance traffic beyond the seas.",
+    "The Virginia Company promoted overseas trade.",
+    "The merchants of London traded in silks and spices.",
+    "London merchants engaged in the silk and spice trade.",
+    "The harvest was plentiful this year.",
+    "Parliament assembled to debate the new taxation.",
+]
+
+labels = [
+    "VA Co. (archaic spelling)",
+    "VA Co. (modern spelling)",
+    "VA Co. (paraphrase)",
+    "Merchants (version A)",
+    "Merchants (version B)",
+    "Harvest (unrelated)",
+    "Parliament (unrelated)",
+]
+
+# --- Embed ---
+print("Loading model and embedding sentences...")
+model = SentenceTransformer("all-MiniLM-L6-v2")
+embeddings = model.encode(sentences)
+
+# --- PCA ---
+pca = PCA(n_components=2)
+reduced = pca.fit_transform(embeddings)
+
+print(f"Variance explained: PC1={pca.explained_variance_ratio_[0]:.1%}, "
+      f"PC2={pca.explained_variance_ratio_[1]:.1%}")
+
+# --- Plot ---
+# Colors by semantic group
+group_colors = ["#2196F3", "#2196F3", "#2196F3",   # VA Company (blue)
+                "#4CAF50", "#4CAF50",                # Merchants (green)
+                "#FF9800",                           # Harvest (orange)
+                "#9C27B0"]                           # Parliament (purple)
+
+fig, ax = plt.subplots(figsize=(10, 7))
+
+for i in range(len(reduced)):
+    ax.scatter(reduced[i, 0], reduced[i, 1],
+               c=group_colors[i], s=120, zorder=5, edgecolors="black", linewidths=0.5)
+    ax.annotate(labels[i], (reduced[i, 0], reduced[i, 1]),
+                textcoords="offset points", xytext=(8, 8), fontsize=8)
+
+ax.set_xlabel(f"PC1 ({pca.explained_variance_ratio_[0]:.1%} variance)")
+ax.set_ylabel(f"PC2 ({pca.explained_variance_ratio_[1]:.1%} variance)")
+ax.set_title("BERT Sentence Embeddings - PCA Projection")
+
+plt.tight_layout()
+plt.savefig("pca_toy_corpus.png", dpi=150, bbox_inches="tight")
+plt.show()
+
+print("\nSaved plot to pca_toy_corpus.png")
+print("\n--- What to look for ---")
+print("- The three VA Company sentences (blue) should cluster together.")
+print("- The two merchant sentences (green) should cluster together.")
+print("- Harvest (orange) and Parliament (purple) should be further away.")
+```
+
+![](Week_11_PCA.png)
+
+As we would expect if the
+
+-   The three Virginia Company sentences (the blue dots on the left) cluster together.
+-   The two merchant sentences (the green dots in the lower right corner) cluster very close together.
+-   The harvest and Parliament sentences are further away from the trade-related cluster.
+-   Within the VA Company cluster, BERT did a great job of handling the archaic and modern spelling, keeping them quite close to each other.
+
+Because PCA is a linear projection, it is also easy to interpret and computationally very stable.
+
+**However**, you want to be careful with PCA: two sentences that are very similar in cosine space may not appear close together in the PCA projection because PCA is not designed to preserve pairwise distances.
+
+Our other option is [[**MDS**]{.underline}](https://www.youtube.com/watch?v=GEn-_dAyYME) (Multidimensional Scaling) with cosine distance. MDS starts from a distance matrix (for example cosine distance between embeddings) and places points in 2D so that the distances between points are preserved as closely as possible. This is useful for us because MDS will preserve the semantic similarity relationship between our sentences.
+
+So, you will want to use PCA when you want to:
+
+-   Visualize semantic similarity relationships
+-   Preserve cosine similarity structure
+-   Show clusters of related sentences.
+
+However, while this is not a problem for our toy corpus, MDS becomes impractical with larger corpora. This is because MDS operates on an $n^2$ distance matrix, which can grow out of control quickly. I would avoid using MDS with anything more than 200 documents. [Remember]{.underline}: we are embedding documents as a unit (that is, one document = one vector), so the length of the document doesn't matter here.
+
+PCA scales better to larger corpora, because it projects the embedding vectors without computing the full distance matrix.
+
+Create a new file `step4_visualize_mds.py` :
+
+``` Python
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_distances
+from sklearn.manifold import MDS
+import matplotlib.pyplot as plt
+
+sentences = [
+    "The Virginia Companie did advance traffique beyond the seas.",
+    "The Virginia Company did advance traffic beyond the seas.",
+    "The Virginia Company promoted overseas trade.",
+    "The merchants of London traded in silks and spices.",
+    "London merchants engaged in the silk and spice trade.",
+    "The harvest was plentiful this year.",
+    "Parliament assembled to debate the new taxation.",
+]
+
+labels = [
+    "VA Co. (archaic spelling)",
+    "VA Co. (modern spelling)",
+    "VA Co. (paraphrase)",
+    "Merchants (version A)",
+    "Merchants (version B)",
+    "Harvest (unrelated)",
+    "Parliament (unrelated)",
+]
+
+group_colors = [
+    "#2196F3", "#2196F3", "#2196F3",
+    "#4CAF50", "#4CAF50",
+    "#FF9800",
+    "#9C27B0"
+]
+
+print("Loading model and embedding sentences...")
+model = SentenceTransformer("all-MiniLM-L6-v2")
+embeddings = model.encode(sentences, normalize_embeddings=True)
+
+# Cosine distance matrix
+dist_matrix = cosine_distances(embeddings)
+
+# 2D projection that tries to preserve pairwise distances
+mds = MDS(
+    n_components=2,
+    dissimilarity="precomputed",
+    random_state=42,
+    metric=True
+)
+reduced = mds.fit_transform(dist_matrix)
+
+fig, ax = plt.subplots(figsize=(10, 7))
+
+for i in range(len(reduced)):
+    ax.scatter(
+        reduced[i, 0], reduced[i, 1],
+        c=group_colors[i], s=120,
+        edgecolors="black", linewidths=0.5, zorder=5
+    )
+    ax.annotate(
+        labels[i],
+        (reduced[i, 0], reduced[i, 1]),
+        textcoords="offset points",
+        xytext=(8, 8),
+        fontsize=8
+    )
+
+ax.set_xlabel("MDS dimension 1")
+ax.set_ylabel("MDS dimension 2")
+ax.set_title("Sentence Embeddings (all-MiniLM-L6-v2) projected with MDS")
+
+plt.tight_layout()
+plt.savefig("mds_toy_corpus.png", dpi=150, bbox_inches="tight")
+plt.show()
+```
+
+Once you run the code, you should see:
+
+![](Week_11_Cosine_MDS.png)
+
+**Question for the reader:** why do you think the MDS visualization looks this way?
+
+## Part VIII — Semantic Search (Retrieval)
+
+-   Create file: `step5_semantic_search.py` — the retrieval/search demo (Part VIII)
+
+One practical application of sentence embeddings is semantic search: given a query, find the most similar sentence in a corpus.
