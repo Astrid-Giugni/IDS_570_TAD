@@ -312,7 +312,7 @@ window.Quarto = {
 
 <section id="weeks-11-13-goals" class="level1">
 <h1>Weeks 11-13 goals:</h1>
-<p>With this tutorial, we are starting a three weeks unit on <strong>BERT</strong> (and BERT-related models). This is how the three weeks will work together:</p>
+<p>With this tutorial, we are starting a three-week unit on <strong>BERT</strong> (and BERT-related models). This is how the three weeks will work together:</p>
 <p><strong>Week 11:</strong> this tutorial uses a toy paraphrase corpus to practice tokenization; compare TF-IDF vs.&nbsp;BERT similarity; work with PCA visualization, and understand masked language modeling. We will end with a preview of how base BERT handles Early Modern English (we could do better…). This will set us up for…</p>
 <p><strong>Week 12:</strong> this is where we learn how to fine-tune the model. We will work with the Geneva Bible (you can find a .xlsx file on <u>Canvas</u> under “<u>Weeks 11-13</u>”, titled “genevaBible.xlsx” alongside the corpus that we will work with in Week 13) and the tutorial will walk you through the full training loop using HuggingFace’s <code>Trainer</code>. We will then compare before/after predictions side by side. At the end, we save fine-tuned model for Week 13.</p>
 <p><strong>Week 13:</strong> this is where our hard work pays off. We will work with 626 mercantile <code>.txt</code> files, embed them using the fine-tuned model, cluster them with K-Means (with elbow/silhouette analysis for choosing k), and characterizes each cluster with TF-IDF top terms. We will end the tutorial by analyzing the possible meanings of the term “credit” in our corpus. In the 16th and 17th century, the meaning of the term “credit” spanned a wide spectrum, from social values that hinted at honor and trustworthiness to a judgment of economic ability (see the fantastic article by Alexandra Shepard, “Manhood, Credit and Patriarchy in Early Modern England c.&nbsp;1580-1640” in <em>Past &amp; Present</em> (May, 2000), pp.&nbsp;75-106). In this tutorial, we will work on analyzing these shades of meaning by finding every occurrence, extracting word-level contextual embeddings, clustering them into semantic senses, identifying the most ambiguous borderline cases, and cross-tabulating credit senses against document clusters. We will end with a base-vs-fine-tuned comparison of how the model performs!</p>
@@ -368,9 +368,9 @@ window.Quarto = {
 </ul>
 <p>After tokenization, BERT produces an embedding for every token, including <code>[CLS]</code> and <code>[SEP]</code>.</p>
 </section>
-<section id="bert-base-bert-large-roberta-modernbert-distilbert-macberth-and-gysbert..-oh-my" class="level4">
-<h4 class="anchored" data-anchor-id="bert-base-bert-large-roberta-modernbert-distilbert-macberth-and-gysbert..-oh-my"><a href="https://huggingface.co/papers/1810.04805">BERT-base</a>, <a href="https://huggingface.co/google-bert/bert-large-cased">BERT-Large</a>, <a href="https://huggingface.co/docs/transformers/en/model_doc/roberta">RoBERTa</a>, <a href="https://huggingface.co/blog/modernbert">ModernBERT</a>, <a href="https://huggingface.co/docs/transformers/en/model_doc/distilbert">DistilBERT</a>, <a href="https://macberth.netlify.app/">MacBERTh and GysBERT</a>,.. Oh my!</h4>
-<p>There are a lot of BERT’s and we will talk more about this in our reading for Friday! For this tutorial, we will work with the base model.</p>
+<section id="bert-base-bert-large-roberta-modernbert-distilbert-macberth-and-gysbert-oh-my" class="level4">
+<h4 class="anchored" data-anchor-id="bert-base-bert-large-roberta-modernbert-distilbert-macberth-and-gysbert-oh-my"><a href="https://huggingface.co/papers/1810.04805">BERT-base</a>, <a href="https://huggingface.co/google-bert/bert-large-cased">BERT-Large</a>, <a href="https://huggingface.co/docs/transformers/en/model_doc/roberta">RoBERTa</a>, <a href="https://huggingface.co/blog/modernbert">ModernBERT</a>, <a href="https://huggingface.co/docs/transformers/en/model_doc/distilbert">DistilBERT</a>, <a href="https://macberth.netlify.app/">MacBERTh and GysBERT</a>,… Oh my!</h4>
+<p>There are a lot of BERT variants and we will talk more about this in our reading for Friday! For this tutorial, we will work with the base model and a smaller model (more on that later).</p>
 </section>
 </section>
 </section>
@@ -512,7 +512,7 @@ window.Quarto = {
 <span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co"># see point [1] after the code block</span></span>
 <span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> SentenceTransformer(<span class="st">"all-MiniLM-L6-v2"</span>)</span>
 <span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Encode all sentences into 384-dimensional vectors</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Encode all sentences into 384-dimensional vectors. See point [2] below</span></span>
 <span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> model.encode(sentences)</span>
 <span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Embedding shape: </span><span class="sc">{</span>embeddings<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
@@ -535,6 +535,7 @@ window.Quarto = {
 <p>Note: you <em>may</em> get a warning message about a parameter called <code>embeddings.position_ids</code> . You can safely ignore this. You can see that the embedding correctly encoded the 7 sentences as 384-dimensional vectors.</p>
 <ol type="1">
 <li>Regarding <code>all-MiniLM-L6-v2</code>: if you want to know where does this smaller model come from, you can find the details <a href="https://github.com/microsoft/unilm/blob/master/minilm/README.md">here</a> and <a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2">here</a>.</li>
+<li>When we call <code>model.encode(sentences)</code>, the transformer processes the sentence in several stages: first, tokenization (the sentence is broken into subword tokens); second, in the <a href="https://huggingface.co/blog/Esmail-AGumaan/attention-is-all-you-need">transformer layers</a> (each token representation is updated using <a href="https://web.stanford.edu/class/cs224n/readings/cs224n-self-attention-transformers-2023_draft.pdf">self-attention</a>); third, pooling (the model combines the token vectors into a single sentence embedding). In the model we are using (all-MiniLM-L6-v2), the final sentence embedding has 384 dimensions. Each sentence is therefore represented as a point in a 384-dimensional semantic space, which allows us to measure similarity using cosine distance.</li>
 </ol>
 <p>You will also get a BERT Cosine Similarity Matrix that looks like this:</p>
 <pre><code>                            [0]   [1]   [2]   [3]   [4]   [5]  [6]
@@ -671,7 +672,7 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<p>Earlier in the semester, we compared documents using token-level features such as word counts or TF-IDF weights. BERT-based embeddings move beyond individual words and instead represent the overall meaning of a sentence, allowing the model to recognize similarity even when the wording changes. For historical text, where spelling varies, vocabulary changes, and meaning persists, this distinction is crucial.</p>
+<p>Earlier in the semester, we compared documents using token-level features such as word counts or TF-IDF weights. The <code>all-MiniLM-L6-v2</code> embeddings move beyond individual words and instead represent the overall meaning of a sentence, allowing the model to recognize similarity even when the wording changes. For historical text, where spelling varies, vocabulary changes, and meaning persists, this distinction is crucial.</p>
 </section>
 <section id="part-vii-visualizing-the-embedding-space-pca-mds" class="level2">
 <h2 class="anchored" data-anchor-id="part-vii-visualizing-the-embedding-space-pca-mds">Part VII — Visualizing the Embedding Space (PCA &amp; MDS)</h2>
@@ -769,7 +770,7 @@ window.Quarto = {
 <li>Preserve cosine similarity structure</li>
 <li>Show clusters of related sentences.</li>
 </ul>
-<p>However, while this is not a problem for our toy corpus, MDS becomes impractical with larger corpora. This is because MDS operates on an <span class="math inline">\(n^2\)</span> distance matrix, which can grow out of control quickly. I would avoid using MDS with anything more than 200 documents. <u>Remember</u>: we are embedding documents as a unit (that is, one document = one vector), so the length of the document doesn’t matter here.</p>
+<p>However, while this is not a problem for our toy corpus, MDS becomes impractical with larger corpora. This is because MDS operates on an <span class="math inline">\(n^2\)</span> distance matrix, which can grow out of control quickly. I would avoid using MDS with anything more than 200 documents. <u>Remember</u>: we are embedding documents as a unit (that is, one document = one vector), so the visualization depends on the number of documents rather than the number of words in each document.</p>
 <p>PCA scales better to larger corpora, because it projects the embedding vectors without computing the full distance matrix.</p>
 <p>Create a new file <code>step4_visualize_mds.py</code> :</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer</span>
@@ -1015,14 +1016,14 @@ window.Quarto = {
 <ol type="1">
 <li><p>In a real RAG system, a vector database stores: the text chunk; its embedding; and its metadata (id, title, source, etc.). Here we simulate that with a Python list of dictionaries.</p></li>
 <li><p>In RAG, the retrieved passages are inserted into the prompt so the language model can answer using them as evidence.</p></li>
-<li><p>If you stop at the retrieval + prompt step, you can actually run this code. For completeness, I want you to have an example of the full generation step, you can use the “generational step” by pasting a key into the api_key variable (not the most secure way to do this because you do <strong>not</strong> want to share your key, so you want to make sure that you don’t, for example, post it on GitHub!!!). If no key is available, the code will just print a message and stop after building the prompt.</p></li>
+<li><p>If you stop at the retrieval + prompt step, you can actually run this code. For completeness, I want you to have an example of the full generation step, you can use the “generation step” by pasting a key into the api_key variable (not the most secure way to do this because you do <strong>not</strong> want to share your key, so you want to make sure that you don’t, for example, post it on GitHub!!!). If no key is available, the code will just print a message and stop after building the prompt.</p></li>
 </ol>
 </section>
 </section>
 <section id="part-ix-masked-language-modeling" class="level2">
 <h2 class="anchored" data-anchor-id="part-ix-masked-language-modeling">Part IX — Masked Language Modeling</h2>
 <p>BERT was pretrained using masked language modeling (MLM). During training, about 15% of tokens are hidden, and the model must predict them using the surrounding context. (These tokens are usually replaced with [MASK], though sometimes they are replaced with random tokens or left unchanged so the model cannot rely on the mask symbol alone. In a 80/10/10 split of [MASK], random token, unchanged.)</p>
-<p>BERT was trained to predict masked words. We can use this to probe what the model has learned. This is called <strong>masked language modeling (MLM)</strong>, and it will become very important next week when we fine-tune BERT on historical text. We are going to load a <strong>pretrained BERT model</strong>, <a href="https://huggingface.co/google-bert/bert-base-uncased"><code>bert-base-uncased</code></a>. This is the original BERT model trained on tasks like masked language modeling, which helps it learn general language patterns and contextual relationships between words. However, it was not designed to produce good sentence-level embeddings for similarity tasks. By contrast, the model we were using above, <code>all-MiniLM-L6-v2</code>, is a smaller transformer model that has been fine-tuned using sentence similarity data, making it much better suited for tasks like semantic search, clustering, and cosine similarity comparisons between sentences.</p>
+<p>BERT was trained to predict masked tokens. We can use this to probe what the model has learned. This is called <strong>masked language modeling (MLM)</strong>, and it will become very important next week when we fine-tune BERT on historical text. We are going to load a <strong>pretrained BERT model</strong>, <a href="https://huggingface.co/google-bert/bert-base-uncased"><code>bert-base-uncased</code></a>. This is the original BERT model trained on tasks like masked language modeling, which helps it learn general language patterns and contextual relationships between words. However, it was not designed to produce good sentence-level embeddings for similarity tasks. By contrast, the model we were using above, <code>all-MiniLM-L6-v2</code>, is a smaller transformer model that has been fine-tuned using sentence similarity data, making it much better suited for tasks like semantic search, clustering, and cosine similarity comparisons between sentences.</p>
 <section id="comparing-the-models-we-used" class="level3">
 <h3 class="anchored" data-anchor-id="comparing-the-models-we-used">Comparing the Models We Used</h3>
 <table class="caption-top table">
@@ -1041,12 +1042,12 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td><strong>bert-base-uncased</strong></td>
-<td>Trained with <strong>masked language modeling (MLM)</strong> to predict missing words in sentences</td>
+<td>Trained with masked language modeling (MLM) to predict missing words in sentences</td>
 <td>Understanding language patterns and predicting masked words</td>
 </tr>
 <tr class="even">
 <td><strong>all-MiniLM-L6-v2</strong></td>
-<td>Fine-tuned on <strong>sentence similarity tasks</strong> using contrastive learning</td>
+<td>Fine-tuned on sentence similarity tasks using contrastive learning</td>
 <td>Sentence embeddings, semantic search, clustering, cosine similarity</td>
 </tr>
 </tbody>
