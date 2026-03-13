@@ -1,5 +1,5 @@
 ---
-title: "Weeks 11: BERT and Historical Language Change"
+title: "Week 11: Introduction to BERT"
 editor: visual
 format: html
 execute:
@@ -21,9 +21,9 @@ py_config()
 
 With this tutorial, we are starting a three weeks unit on **BERT** (and BERT-related models). This is how the three weeks will work together:
 
-**Week 11:** this tutorial uses a toy paraphrase corpus to practice tokenization; compare TF-IDF vs. BERT similarity; work with PCA visualization, compare `[CLS]` vs. mean pooling, and understand masked language modeling. We will end with a preview of how base BERT handles Early Modern English (poorly). This will set us up for...
+**Week 11:** this tutorial uses a toy paraphrase corpus to practice tokenization; compare TF-IDF vs. BERT similarity; work with PCA visualization, and understand masked language modeling. We will end with a preview of how base BERT handles Early Modern English (we could do better...). This will set us up for...
 
-**Week 12:** this is where we learn how to fine-tune the model. We will work with the Geneva Bible (you can find a .xlsx file on [Canvas]{.underline} under "[Weeks 11-13]{.underline}", titled "genevaBible.xlsx" alongside the corpus that we will work with in Week 13) and the tutorail will walk you through the full training loop using HuggingFace's `Trainer`. We will then compare before/after predictions side by side. At the end, we save fine-tuned model for Week 13.
+**Week 12:** this is where we learn how to fine-tune the model. We will work with the Geneva Bible (you can find a .xlsx file on [Canvas]{.underline} under "[Weeks 11-13]{.underline}", titled "genevaBible.xlsx" alongside the corpus that we will work with in Week 13) and the tutorial will walk you through the full training loop using HuggingFace's `Trainer`. We will then compare before/after predictions side by side. At the end, we save fine-tuned model for Week 13.
 
 **Week 13:** this is where our hard work pays off. We will work with 626 mercantile `.txt` files, embed them using the fine-tuned model, cluster them with K-Means (with elbow/silhouette analysis for choosing k), and characterizes each cluster with TF-IDF top terms. We will end the tutorial by analyzing the possible meanings of the term "credit" in our corpus. In the 16th and 17th century, the meaning of the term "credit" spanned a wide spectrum, from social values that hinted at honor and trustworthiness to a judgment of economic ability (see the fantastic article by Alexandra Shepard, "Manhood, Credit and Patriarchy in Early Modern England c. 1580-1640" in *Past & Present* (May, 2000), pp. 75-106). In this tutorial, we will work on analyzing these shades of meaning by finding every occurrence, extracting word-level contextual embeddings, clustering them into semantic senses, identifying the most ambiguous borderline cases, and cross-tabulating credit senses against document clusters. We will end with a base-vs-fine-tuned comparison of how the model performs!
 
@@ -229,7 +229,7 @@ It's a benchmark created by Hugging Face researchers. It evaluates sentence-embe
 
 -   classification
 
-I find the MTEB table to be overwhelming when I am looking for models with specific strengths. My best advice is to search scholarly reviews of models by specific tasks (like [this one](https://arxiv.org/abs/1908.10084) or [this one](https://arxiv.org/abs/1908.10084)) and if I see that a couple of models perform well on the tasks I am interested in, then I loop back to the MTEB table for more information.
+I find the MTEB table to be overwhelming when I am looking for models with specific strengths. My best advice is to search scholarly reviews of models by specific tasks (like [this one](https://arxiv.org/abs/1908.10084)) and if I see that a couple of models perform well on the tasks I am interested in, then I loop back to the MTEB table for more information.
 
 Now, create a new file : `step2_bert_similarity.py`.
 
@@ -259,6 +259,7 @@ labels = [
 
 # Load a sentence-transformer model
 # all-MiniLM-L6-v2 is a lightweight, fast model good for similarity tasks
+# see point [1] after the code block
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # Encode all sentences into 384-dimensional vectors
@@ -283,7 +284,9 @@ for i in range(len(sentences)):
     print()
 ```
 
-Note: you will get a warning message about a parameter called `embeddings.position_ids` . You can safely ignore this, it's just part of saving the model. You can see that the embedding correctly encoded the 7 sentences as 384-dimensional vectors.
+Note: you *may* get a warning message about a parameter called `embeddings.position_ids` . You can safely ignore this. You can see that the embedding correctly encoded the 7 sentences as 384-dimensional vectors.
+
+1.  Regarding `all-MiniLM-L6-v2`: if you want to know where does this smaller model come from, you can find the details [here](https://github.com/microsoft/unilm/blob/master/minilm/README.md) and [here](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2).
 
 You will also get a BERT Cosine Similarity Matrix that looks like this:
 
@@ -303,17 +306,17 @@ You will also get a BERT Cosine Similarity Matrix that looks like this:
 Compare these numbers to the TF-IDF matrix:
 
 -   **Paraphrase detection**: sentences 0, 1, and 2 now show a higher similarity, because BERT recognizes that "advance traffique beyond the seas" and "promoted overseas trade" mean the same thing.
--   **Spelling robustness**: "Companie" vs. "Company" matter much to BERT than to TF-IDF.
+-   **Spelling robustness**: "Companie" vs. "Company" matter much less to BERT than to TF-IDF.
 -   **Semantic grouping**: sentences 3 and 4 (the merchant pair) are now [very]{.underline} similar, and both are closer to the Virginia Company sentences (all about trade) than to sentence 5 (harvest) or 6 (Parliament).
 
 ------------------------------------------------------------------------
 
 ## Part VI — Side-by-Side: The Virginia Company Trio
 
-Let's isolate the three Virginia Company sentences to really see the difference between TF-IDF and BERT. Create a new file: `python step3_trio_comparison.py`.
+Let's isolate the three Virginia Company sentences to really see the difference between TF-IDF and BERT. Create a new file: `step3_trio_comparison.py`.
 
 ``` python
-rom sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -372,9 +375,9 @@ Earlier in the semester, we compared documents using token-level features such a
 
 ## Part VII — Visualizing the Embedding Space (PCA & MDS)
 
-To help us understand a bit better this toy corpus of 7 sentences, it would be helpful to visualize how each of them is represented as a vector. Obviously, we can plot in 384 dimensions, so we will need to do dimension reduction.
+To help us understand a bit better this toy corpus of 7 sentences, it would be helpful to visualize how each of them is represented as a vector. Obviously, we can't plot in 384 dimensions, so we will need to do dimension reduction.
 
-First, we will use [[**PCA**]{.underline}](https://www.youtube.com/watch?v=FgakZw6K1QQ) (Principal Component Analysis) to project the vectors into 2D and see how BERT organizes them spatially. PCA finds the directions in the embedding space that capture the largest variance in the data and projects the points onto those directions. This means that PCA preserves **the overall structure** of the embedding vectors, not the pairwise similarity relationships.
+First, we will use [[**PCA**]{.underline}](https://www.youtube.com/watch?v=FgakZw6K1QQ) (Principal Component Analysis) to project the vectors into 2D and see how BERT organizes them spatially. PCA finds the directions in the embedding space that capture the largest variance in the data and projects the points onto those directions. This means that PCA is useful for a quick overview, but is not designed to preserve the pairwise cosine similarity relationships.
 
 So, you will want to use PCA when you want to:
 
@@ -460,7 +463,7 @@ print("- Harvest (orange) and Parliament (purple) should be further away.")
 
 ![](Week_11_PCA.png)
 
-As we would expect if the
+As we would expect:
 
 -   The three Virginia Company sentences (the blue dots on the left) cluster together.
 -   The two merchant sentences (the green dots in the lower right corner) cluster very close together.
@@ -471,9 +474,9 @@ Because PCA is a linear projection, it is also easy to interpret and computation
 
 **However**, you want to be careful with PCA: two sentences that are very similar in cosine space may not appear close together in the PCA projection because PCA is not designed to preserve pairwise distances.
 
-Our other option is [[**MDS**]{.underline}](https://www.youtube.com/watch?v=GEn-_dAyYME) (Multidimensional Scaling) with cosine distance. MDS starts from a distance matrix (for example cosine distance between embeddings) and places points in 2D so that the distances between points are preserved as closely as possible. This is useful for us because MDS will preserve the semantic similarity relationship between our sentences.
+Our other option is [[**MDS**]{.underline}](https://www.youtube.com/watch?v=GEn-_dAyYME) (Multidimensional Scaling) with cosine distance. MDS starts from a distance matrix (for example cosine distance between embeddings) and places points in 2D so that the distances between points are preserved as closely as possible. This is useful for us because MDS gives us a good visual representation in which sentences that are semantically similar appear closer together, and sentences that are less similar appear farther apart.
 
-So, you will want to use PCA when you want to:
+So, you will want to use MDS when you want to:
 
 -   Visualize semantic similarity relationships
 -   Preserve cosine similarity structure
@@ -485,7 +488,7 @@ PCA scales better to larger corpora, because it projects the embedding vectors w
 
 Create a new file `step4_visualize_mds.py` :
 
-``` Python
+``` python
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_distances
 from sklearn.manifold import MDS
@@ -567,6 +570,323 @@ Once you run the code, you should see:
 
 ## Part VIII — Semantic Search (Retrieval)
 
--   Create file: `step5_semantic_search.py` — the retrieval/search demo (Part VIII)
+Now that we have played around with our embeddings and visualized them, let's start looking at a simple application. In the next couple of weeks, we will go in more depth on specific applications with a real corpus, but this example will give us a good starting point.
 
-One practical application of sentence embeddings is semantic search: given a query, find the most similar sentence in a corpus.
+An important, practical application of sentence embeddings is **semantic search**: given a query, find the most similar sentence in a corpus. Instead of matching documents based on shared keywords, we represent both the query and the documents as vectors in an embedding space. We then retrieve the documents whose vectors are closest to the query vector using cosine similarity.
+
+Create a new file: `step5_semantic_search.py`:
+
+``` python
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# --- Same toy corpus ---
+sentences = [
+    "The Virginia Companie did advance traffique beyond the seas.",
+    "The Virginia Company did advance traffic beyond the seas.",
+    "The Virginia Company promoted overseas trade.",
+    "The merchants of London traded in silks and spices.",
+    "London merchants engaged in the silk and spice trade.",
+    "The harvest was plentiful this year.",
+    "Parliament assembled to debate the new taxation.",
+]
+
+# --- Embed the corpus ---
+print("Loading model...")
+model = SentenceTransformer("all-MiniLM-L6-v2")
+embeddings = model.encode(sentences)
+
+# --- Query ---
+query = "The Virginia Company expanded trade overseas."
+query_embedding = model.encode([query])
+similarities = cosine_similarity(query_embedding, embeddings)[0]
+
+print(f'Query: "{query}"\n')
+print("Ranked results:")
+print("-" * 70)
+
+ranked = sorted(enumerate(similarities), key=lambda x: x[1], reverse=True)
+for rank, (idx, sim) in enumerate(ranked, 1):
+    print(f"  {rank}. [{sim:.3f}] {sentences[idx]}")
+```
+
+This same idea underlies modern semantic search systems and **retrieval-augmented generation** (RAG). Instead of retrieving documents based on keyword overlap, the system retrieves documents whose embeddings are closest to the query embedding in semantic space.
+
+### Brief Aside: from semantic search to RAG
+
+The same idea used in our small example is the core retrieval step in many modern AI systems. A typical RAG pipeline works like this:
+
+-   Step 1: Build embeddings for a document collection. A large corpus (articles, books, PDFs, archival texts, etc.) is split into chunks and converted into embeddings using a model like BERT or Sentence-BERT.
+
+-   Step 2: Store the embeddings in a vector database. Each text chunk is stored together with its embedding so the system can quickly search for similar vectors.
+
+-   Step 3: Embed the user’s query. When a user asks a question, the system converts the query into an embedding using the same model.
+
+-   Step 4: Retrieve the most similar passages. The system computes cosine similarity between the query embedding and the stored embeddings and retrieves the closest matches.
+
+-   Step 5: Provide the retrieved text to an LLM. The retrieved passages are inserted into the prompt of a language model so that the model can generate an answer grounded in those sources.
+
+Retrieval-Augmented Generation (RAG) is essentially semantic search plus text generation: first the system retrieves relevant passages using embeddings, then a language model uses those passages to generate an answer.
+
+It would look something like the following chunk of code.
+
+-   **Note:** you would have to have an API key to run this code, so it won't work unless you have an account with OpenAI, which is what I happen to use for this type of work, though I am experimenting with others as well. This is here as an [example]{.underline} so that you know what this process would look like, but you won't be able to run it!
+
+``` python
+# Mini RAG Demonstration: for OpenAI, don't try to run it as it won't work! 
+
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+
+sentences = [
+    "The Virginia Companie did advance traffique beyond the seas.",
+    "The Virginia Company did advance traffic beyond the seas.",
+    "The Virginia Company promoted overseas trade.",
+    "The merchants of London traded in silks and spices.",
+    "London merchants engaged in the silk and spice trade.",
+    "The harvest was plentiful this year.",
+    "Parliament assembled to debate the new taxation.",
+]
+
+
+# Load the embedding model (all-MiniLM-L6-v2 in our case)
+
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# Encode the corpus once
+embeddings = model.encode(sentences)
+
+
+# Build a simple "vector database" simulation--see point [1] below
+
+vector_store = [
+    {
+        "id": i,
+        "text": sentences[i],
+        "embedding": embeddings[i],
+        "source": "toy corpus"
+    }
+    for i in range(len(sentences))
+]
+
+print("Vector store created with", len(vector_store), "records.\n")
+
+
+# Embed the query in the same semantic vector space
+
+query = "How did the Virginia Company expand overseas trade?"
+query_embedding = model.encode([query])[0]
+
+print(f'Query: "{query}"\n')
+
+
+# Retrieve the most similar records using cosine similarity for all records in 
+# the vector database. Then sort from highest to lowest similarity.
+
+scored_results = []
+
+for record in vector_store:
+    score = cosine_similarity([query_embedding], [record["embedding"]])[0][0]
+    scored_results.append((score, record))
+
+# Sort results: highest similarity first
+scored_results.sort(key=lambda x: x[0], reverse=True)
+
+# Retrieve the top-k most relevant passages
+top_k = 3
+retrieved_records = [record for score, record in scored_results[:top_k]]
+
+print("Top retrieved passages:")
+for rank, (score, record) in enumerate(scored_results[:top_k], start=1):
+    print(f"{rank}. [{score:.3f}] {record['text']}")
+
+
+# Build the context and prompt. See point [2] below.
+
+context = "\n".join([record["text"] for record in retrieved_records])
+
+prompt = f"""
+Answer the question using only the context below.
+
+Context:
+{context}
+
+Question:
+{query}
+
+Answer:
+"""
+
+print("\n" + "-" * 60)
+print("Prompt that would be sent to the language model:")
+print("-" * 60)
+print(prompt)
+
+# Generation step with the OpenAI API. See note [3] below.
+
+from openai import OpenAI
+
+api_key = ""  # Optional: paste your OpenAI API key here
+
+if api_key:
+
+    client = OpenAI(api_key=api_key)
+
+    response = client.responses.create(
+        model="gpt-4.1-mini",
+        input=prompt
+    )
+
+    print("-" * 60)
+    print("Generated answer:")
+    print("-" * 60)
+    print(response.output_text)
+
+else:
+    print("\nNo API key provided.")
+    print("Retrieval step completed successfully.")
+    print("To run the generation step, paste your API key into the api_key variable above.")
+```
+
+1.  In a real RAG system, a vector database stores: the text chunk; its embedding; and its metadata (id, title, source, etc.). Here we simulate that with a Python list of dictionaries.
+
+2.  In RAG, the retrieved passages are inserted into the prompt so the language model can answer using them as evidence.
+
+3.  If you stop at the retrieval + prompt step, you can actually run this code. For completeness, I want you to have an example of the full generation step, you can use the "generational step" by pasting a key into the api_key variable (not the most secure way to do this because you do **not** want to share your key, so you want to make sure that you don't, for example, post it on GitHub!!!). If no key is available, the code will just print a message and stop after building the prompt.
+
+## Part IX — Masked Language Modeling
+
+BERT was pretrained using masked language modeling (MLM). During training, about 15% of tokens are hidden, and the model must predict them using the surrounding context. (These tokens are usually replaced with \[MASK\], though sometimes they are replaced with random tokens or left unchanged so the model cannot rely on the mask symbol alone. In a 80/10/10 split of \[MASK\], random token, unchanged.)
+
+BERT was trained to predict masked words. We can use this to probe what the model has learned. This is called **masked language modeling (MLM)**, and it will become very important next week when we fine-tune BERT on historical text. We are going to load a **pretrained BERT model**, [`bert-base-uncased`](https://huggingface.co/google-bert/bert-base-uncased). This is the original BERT model trained on tasks like masked language modeling, which helps it learn general language patterns and contextual relationships between words. However, it was not designed to produce good sentence-level embeddings for similarity tasks. By contrast, the model we were using above, `all-MiniLM-L6-v2`, is a smaller transformer model that has been fine-tuned using sentence similarity data, making it much better suited for tasks like semantic search, clustering, and cosine similarity comparisons between sentences.
+
+### Comparing the Models We Used
+
+| Model | Training Objective | Best Use Case |
+|------------------|-------------------------------|-----------------------|
+| **bert-base-uncased** | Trained with **masked language modeling (MLM)** to predict missing words in sentences | Understanding language patterns and predicting masked words |
+| **all-MiniLM-L6-v2** | Fine-tuned on **sentence similarity tasks** using contrastive learning | Sentence embeddings, semantic search, clustering, cosine similarity |
+
+Although both models are based on transformer architectures, they are optimized for different purposes. bert-base-uncased is designed to model language and predict masked words, while all-MiniLM-L6-v2 is optimized to produce sentence embeddings that can be compared using cosine similarity. Also, and importantly for us, MiniLM models are also much smaller and faster than the original BERT models, which makes them practical for computing embeddings for large collections of sentences.
+
+Researchers have also created smaller versions of BERT that run faster while preserving most of its capabilities. A standard example is [DistilBERT](https://huggingface.co/docs/transformers/model_doc/distilbert), which compresses the original BERT architecture into a lighter model using a technique called knowledge distillation. For those of you who are interested in knowledge distillation, here's a list of good starting points:
+
+-   [HuggingFace tutorial](https://huggingface.co/learn/llm-course/chapter7/3) that uses DistilBERT.
+
+-   The [foundational paper](https://arxiv.org/abs/1503.02531) on knowledge distillation; Hinton, Vinyals, & Dean (2015).
+
+-   The [DistilBERT paper](https://arxiv.org/abs/1910.01108); Sanh et al (2019).
+
+-   A different [compressed BERT model](https://arxiv.org/abs/2002.10957) (MiniLM), including the one we used `all-MiniLM-L6-v2`, paper; Wang et al. (2020).
+
+-   A survey of [BERT compression methods](https://arxiv.org/abs/2003.08271); Xu et al. (2021).
+
+For this class, you don't need any of the above information (except you might like the HuggingFace tutorial). But I know that many (some) of you want to dig deeper.
+
+Create a new (and final) file: `step6_mlm.py`.
+
+``` python
+from transformers import pipeline
+ 
+# Load fill-mask pipeline
+print("Loading BERT for masked language modeling...")
+fill_mask = pipeline("fill-mask", model="bert-base-uncased")
+ 
+
+# MLM on modern-ish sentences
+
+print("\n=== Masked Language Modeling (Modern Sentences) ===\n")
+print("BERT predicts the most likely word for [MASK]:\n")
+ 
+modern_tests = [
+    "The Virginia Company traded [MASK] across the Atlantic.",
+    "The merchants of London bought and sold [MASK].",
+    "The king granted a royal [MASK] to the trading company.",
+]
+ 
+for sent in modern_tests:
+    print(f"Input: {sent}")
+    results = fill_mask(sent)
+    for r in results[:3]:
+        print(f"  -> {r['token_str']:15s}  (score: {r['score']:.3f})")
+    print()
+```
+
+[Your output will look like this]{.underline}:
+
+=== Masked Language Modeling (Modern Sentences) ===
+
+BERT predicts the most likely word for \[MASK\]:
+
+Input: The Virginia Company traded \[MASK\] across the Atlantic.
+
+-\> goods (score: 0.120)
+
+-\> coal (score: 0.100)
+
+-\> products (score: 0.043)
+
+Input: The merchants of London bought and sold \[MASK\].
+
+-\> it (score: 0.141)
+
+-\> them (score: 0.108)
+
+-\> slaves (score: 0.102)
+
+Input: The king granted a royal \[MASK\] to the trading company.
+
+-\> charter (score: 0.963)
+
+-\> warrant (score: 0.009)
+
+-\> license (score: 0.006)
+
+These predictions reveal what BERT "knows" from its training data. Notice that BERT predicts modern words in modern-feeling contexts.
+
+We now want to see what happens when we give it Early Modern English. In the same file, add the following:
+
+``` python
+historical_tests = [
+    "The companie did [MASK] traffique beyond the seas.",
+    "The merchants had [MASK] in silkes and spices.",
+    "to all Sea-men [MASK] an enchanted den of Furies and Devils.",
+]
+ 
+for sent in historical_tests:
+    print(f"Input: {sent}")
+    results = fill_mask(sent)
+    for r in results[:3]:
+        print(f"  -> {r['token_str']:15s}  (score: {r['score']:.3f})")
+    print()
+```
+
+The output looks like:
+
+Input: The companie did \[MASK\] traffique beyond the seas.
+
+-\> not (score: 0.814)
+
+-\> no (score: 0.029)
+
+-\> a (score: 0.017)
+
+Input: The merchants had \[MASK\] in silkes and spices.
+
+-\> traded (score: 0.697)
+
+-\> brought (score: 0.087)
+
+-\> trade (score: 0.065)
+
+Input: to all Sea-men \[MASK\] an enchanted den of Furies and Devils.
+
+-\> is (score: 0.290)
+
+-\> was (score: 0.223)
+
+-\> lies (score: 0.162)
+
+BERT is having somewhat of a hard time here. The first input is obviously challenging and the third input is from Captain John Smith's description of a shipwreck in the Bermudas, that should read "no less terrible than" for the \[MASK\]. It was trained on modern text (Wikipedia, contemporary books), so Early Modern spellings and syntax are outside its comfort zone. The predictions are plausible (especially given how difficult the third input is), but slightly off and the confidence scores are noticeably lower.
+
+**This is the motivation for next week**: if we fine-tune BERT on historical text, we can teach it to be better at understanding and predicting the language of our period.

@@ -42,3 +42,5 @@ website:
             text: "Week 08 and 09:Weak Supervision & Supervised Text Classification in Python"
           - href: week-10-spaCy.qmd
             text: "Week 10: Classifying New Text & spaCy"
+          - href: week-11-BERT.qmd
+            text: "Week 11: Introduction to BERT"
