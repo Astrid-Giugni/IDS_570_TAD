@@ -19,7 +19,7 @@ py_config()
 
 # Weeks 11-13 goals:
 
-With this tutorial, we are starting a three weeks unit on **BERT** (and BERT-related models). This is how the three weeks will work together:
+With this tutorial, we are starting a three-week unit on **BERT** (and BERT-related models). This is how the three weeks will work together:
 
 **Week 11:** this tutorial uses a toy paraphrase corpus to practice tokenization; compare TF-IDF vs. BERT similarity; work with PCA visualization, and understand masked language modeling. We will end with a preview of how base BERT handles Early Modern English (we could do better...). This will set us up for...
 
@@ -89,9 +89,9 @@ Where:
 
 After tokenization, BERT produces an embedding for every token, including `[CLS]` and `[SEP]`.
 
-#### [BERT-base](https://huggingface.co/papers/1810.04805), [BERT-Large](https://huggingface.co/google-bert/bert-large-cased), [RoBERTa](https://huggingface.co/docs/transformers/en/model_doc/roberta), [ModernBERT](https://huggingface.co/blog/modernbert), [DistilBERT](https://huggingface.co/docs/transformers/en/model_doc/distilbert), [MacBERTh and GysBERT](https://macberth.netlify.app/),.. Oh my!
+#### [BERT-base](https://huggingface.co/papers/1810.04805), [BERT-Large](https://huggingface.co/google-bert/bert-large-cased), [RoBERTa](https://huggingface.co/docs/transformers/en/model_doc/roberta), [ModernBERT](https://huggingface.co/blog/modernbert), [DistilBERT](https://huggingface.co/docs/transformers/en/model_doc/distilbert), [MacBERTh and GysBERT](https://macberth.netlify.app/),... Oh my!
 
-There are a lot of BERT's and we will talk more about this in our reading for Friday! For this tutorial, we will work with the base model.
+There are a lot of BERT variants and we will talk more about this in our reading for Friday! For this tutorial, we will work with the base model and a smaller model (more on that later).
 
 ## Part II — Setup
 
@@ -262,7 +262,7 @@ labels = [
 # see point [1] after the code block
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# Encode all sentences into 384-dimensional vectors
+# Encode all sentences into 384-dimensional vectors. See point [2] below
 embeddings = model.encode(sentences)
 
 print(f"Embedding shape: {embeddings.shape}")
@@ -287,6 +287,7 @@ for i in range(len(sentences)):
 Note: you *may* get a warning message about a parameter called `embeddings.position_ids` . You can safely ignore this. You can see that the embedding correctly encoded the 7 sentences as 384-dimensional vectors.
 
 1.  Regarding `all-MiniLM-L6-v2`: if you want to know where does this smaller model come from, you can find the details [here](https://github.com/microsoft/unilm/blob/master/minilm/README.md) and [here](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2).
+2.  When we call `model.encode(sentences)`, the transformer processes the sentence in several stages: first, tokenization (the sentence is broken into subword tokens); second, in the [transformer layers](https://huggingface.co/blog/Esmail-AGumaan/attention-is-all-you-need) (each token representation is updated using [self-attention](https://web.stanford.edu/class/cs224n/readings/cs224n-self-attention-transformers-2023_draft.pdf)); third, pooling (the model combines the token vectors into a single sentence embedding). In the model we are using (all-MiniLM-L6-v2), the final sentence embedding has 384 dimensions. Each sentence is therefore represented as a point in a 384-dimensional semantic space, which allows us to measure similarity using cosine distance.
 
 You will also get a BERT Cosine Similarity Matrix that looks like this:
 
@@ -371,7 +372,7 @@ for i in range(3):
 | **Modern spelling**  | 0.757            | 1.000           | 0.658      |
 | **Paraphrase**       | 0.579            | 0.658           | 1.000      |
 
-Earlier in the semester, we compared documents using token-level features such as word counts or TF-IDF weights. BERT-based embeddings move beyond individual words and instead represent the overall meaning of a sentence, allowing the model to recognize similarity even when the wording changes. For historical text, where spelling varies, vocabulary changes, and meaning persists, this distinction is crucial.
+Earlier in the semester, we compared documents using token-level features such as word counts or TF-IDF weights. The `all-MiniLM-L6-v2` embeddings move beyond individual words and instead represent the overall meaning of a sentence, allowing the model to recognize similarity even when the wording changes. For historical text, where spelling varies, vocabulary changes, and meaning persists, this distinction is crucial.
 
 ## Part VII — Visualizing the Embedding Space (PCA & MDS)
 
@@ -482,7 +483,7 @@ So, you will want to use MDS when you want to:
 -   Preserve cosine similarity structure
 -   Show clusters of related sentences.
 
-However, while this is not a problem for our toy corpus, MDS becomes impractical with larger corpora. This is because MDS operates on an $n^2$ distance matrix, which can grow out of control quickly. I would avoid using MDS with anything more than 200 documents. [Remember]{.underline}: we are embedding documents as a unit (that is, one document = one vector), so the length of the document doesn't matter here.
+However, while this is not a problem for our toy corpus, MDS becomes impractical with larger corpora. This is because MDS operates on an $n^2$ distance matrix, which can grow out of control quickly. I would avoid using MDS with anything more than 200 documents. [Remember]{.underline}: we are embedding documents as a unit (that is, one document = one vector), so the visualization depends on the number of documents rather than the number of words in each document.
 
 PCA scales better to larger corpora, because it projects the embedding vectors without computing the full distance matrix.
 
@@ -752,20 +753,20 @@ else:
 
 2.  In RAG, the retrieved passages are inserted into the prompt so the language model can answer using them as evidence.
 
-3.  If you stop at the retrieval + prompt step, you can actually run this code. For completeness, I want you to have an example of the full generation step, you can use the "generational step" by pasting a key into the api_key variable (not the most secure way to do this because you do **not** want to share your key, so you want to make sure that you don't, for example, post it on GitHub!!!). If no key is available, the code will just print a message and stop after building the prompt.
+3.  If you stop at the retrieval + prompt step, you can actually run this code. For completeness, I want you to have an example of the full generation step, you can use the "generation step" by pasting a key into the api_key variable (not the most secure way to do this because you do **not** want to share your key, so you want to make sure that you don't, for example, post it on GitHub!!!). If no key is available, the code will just print a message and stop after building the prompt.
 
 ## Part IX — Masked Language Modeling
 
 BERT was pretrained using masked language modeling (MLM). During training, about 15% of tokens are hidden, and the model must predict them using the surrounding context. (These tokens are usually replaced with \[MASK\], though sometimes they are replaced with random tokens or left unchanged so the model cannot rely on the mask symbol alone. In a 80/10/10 split of \[MASK\], random token, unchanged.)
 
-BERT was trained to predict masked words. We can use this to probe what the model has learned. This is called **masked language modeling (MLM)**, and it will become very important next week when we fine-tune BERT on historical text. We are going to load a **pretrained BERT model**, [`bert-base-uncased`](https://huggingface.co/google-bert/bert-base-uncased). This is the original BERT model trained on tasks like masked language modeling, which helps it learn general language patterns and contextual relationships between words. However, it was not designed to produce good sentence-level embeddings for similarity tasks. By contrast, the model we were using above, `all-MiniLM-L6-v2`, is a smaller transformer model that has been fine-tuned using sentence similarity data, making it much better suited for tasks like semantic search, clustering, and cosine similarity comparisons between sentences.
+BERT was trained to predict masked tokens. We can use this to probe what the model has learned. This is called **masked language modeling (MLM)**, and it will become very important next week when we fine-tune BERT on historical text. We are going to load a **pretrained BERT model**, [`bert-base-uncased`](https://huggingface.co/google-bert/bert-base-uncased). This is the original BERT model trained on tasks like masked language modeling, which helps it learn general language patterns and contextual relationships between words. However, it was not designed to produce good sentence-level embeddings for similarity tasks. By contrast, the model we were using above, `all-MiniLM-L6-v2`, is a smaller transformer model that has been fine-tuned using sentence similarity data, making it much better suited for tasks like semantic search, clustering, and cosine similarity comparisons between sentences.
 
 ### Comparing the Models We Used
 
 | Model | Training Objective | Best Use Case |
 |------------------|-------------------------------|-----------------------|
-| **bert-base-uncased** | Trained with **masked language modeling (MLM)** to predict missing words in sentences | Understanding language patterns and predicting masked words |
-| **all-MiniLM-L6-v2** | Fine-tuned on **sentence similarity tasks** using contrastive learning | Sentence embeddings, semantic search, clustering, cosine similarity |
+| **bert-base-uncased** | Trained with masked language modeling (MLM) to predict missing words in sentences | Understanding language patterns and predicting masked words |
+| **all-MiniLM-L6-v2** | Fine-tuned on sentence similarity tasks using contrastive learning | Sentence embeddings, semantic search, clustering, cosine similarity |
 
 Although both models are based on transformer architectures, they are optimized for different purposes. bert-base-uncased is designed to model language and predict masked words, while all-MiniLM-L6-v2 is optimized to produce sentence embeddings that can be compared using cosine similarity. Also, and importantly for us, MiniLM models are also much smaller and faster than the original BERT models, which makes them practical for computing embeddings for large collections of sentences.
 
