@@ -21,13 +21,13 @@ py_config()
 
 We are now going to build on the understanding of BERT we built last week and learn how to fine-tune the model. We will work with the Geneva Bible (you can find a .xlsx file on [Canvas]{.underline} under "[Weeks 11-13]{.underline}", titled "genevaBible.xlsx" alongside the corpus that we will work with in Week 13) and the tutorial will walk you through the full training loop using HuggingFace's `Trainer`. We will then compare before/after predictions side by side. At the end, we save fine-tuned model for Week 13!
 
-**A warning:** this tutorial is more computationally intensive! The fine-tuning step (**step 5**) will take 10-30 minutes on CPU, or 2-5 minutes on GPU. Plan accordingly.
+**A warning:** this tutorial is more computationally intensive! The fine-tuning step (**step 5**) will take 10-30 minutes on CPU, or 2-5 minutes on GPU. Plan accordingly. To make this manageable, I am using a smaller training set for fine-tuning than I would in practice–I want the tutorial to give you a *sense* of the correct steps and decision making for fine-tuning without taking an inordinate amount of time.
 
 Let's get started!
 
 Last week, we started to play around with BERT and become familiar with contextual embeddings. When we tested BERT's performance with Early Modern texts, we saw that it had some clear limitations: presented with Early Modern text, its masked-word predictions were sometimes off, and its confidence was lower than for modern English. This is because BERT was pre-trained on Wikipedia and contemporary books: it knows modern English fluently, but Early Modern English is a foreign dialect.
 
-This week, we see how to improve BERT's performance with Early Modern English. The approach we are taking today will also work with other specialized forms of langauge We will **fine-tune** BERT on the Geneva Bible (1560). This is an approach that I use in my own work because the Geneva Bible has a large vocabulary and it was deeply influential (Shakespeare, Bunyan, and Milton drew from its language and it would have been familiar to audiences both in the Old and New World in the 16th and 17th century), especially for religious language. **Note:** this isn't a perfect training set (ideally, we would want a more varied and larger training set), but it will demonstrate the process and improve the results.
+This week, we will see how to improve BERT's performance with Early Modern English. The approach we are taking today will also work with other specialized forms of language. We will **fine-tune** BERT on the Geneva Bible (1560). This is an approach that I use in my own work because the Geneva Bible has a large vocabulary and it was deeply influential (Shakespeare, Bunyan, and Milton drew from its language and it would have been familiar to audiences both in the Old and New World in the 16th and 17th century), especially for religious language. **Note:** this isn't a perfect training set (ideally, we would want a more varied and larger training set), but it will demonstrate the process and improve the results.
 
 The goal is simple: we want to add to BERT's training and teach it the spelling, vocabulary, and syntax of the period. This process is called **domain-adaptive pretraining**.
 
@@ -50,7 +50,7 @@ When BERT encounters Early Modern spellings, such as "heauen" (heaven), "darkene
 
 The embeddings BERT produces for Early Modern sentences are therefore *noisier* and *less semantically coherent* than those it produces for modern text.
 
-To attempt to solve this problem and improve BERT's performance (note: I am saying *improve* not fully fix). We continue BERT's MLM training on a substantial body of Early Modern English. The Geneva Bible is a good starting point for this because:
+To attempt to solve this problem and improve BERT's performance (note: I am saying *improve* not fully fix), we continue BERT's MLM training on a substantial(-ish) body of Early Modern English. The Geneva Bible is a good starting point for this because:
 
 -   It is a reasonably sized corpus with a varied vocabulary: 31,102 verses with a vocabulary of 14,653 unique words, and a total of 779,862 words (note: this file does not contain the marginal notes). Because of the number of proper names and variant Early Modern spellings (such "wiers" = wires meaning "threads"), 5,150 words in this file (a third of the vocabulary) are *hapax legomena*. As a **fine-tuning corpus**, this is rather small, but it will serve our purpose.
 -   There is a clean, well-structured version freely available (no OCR errors)
@@ -59,13 +59,51 @@ To attempt to solve this problem and improve BERT's performance (note: I am sayi
 
 After fine-tuning, BERT will produce **better** embeddings for our Early Modern English text–let's see just how much better we can do (*a priori*, we are not expecting a large improvement, but we want to see how far we can take this exercize). The model learns the *language*, not just the content. During fine-tuning, we randomly mask 15% of tokens in each sentence and ask BERT to predict them. When BERT predicts "heauen" where "heauen" was masked, it updates its internal weights to be better at representing that word and its context.
 
-## Step 0: Step up
+## Step 0: Set up
 
 Let's start by making sure that all the required packages are installed. This week, I will also include more links and resources for the packages (last week, I focused my links on more conceptual points about BERT models).
 
 First, you will need to `pip install datasets openpyxl`. [`datasets`](https://huggingface.co/docs/datasets/index) is the standard datasets library from Hugging Face and it will handle loading, manipulating, and preparing our data for BERT. In our pipeline, you will first see it when we turn the Bible text from a Python list of text strings into a structured [dataset object](https://huggingface.co/docs/datasets/process).
 
-[openpyxl](https://openpyxl.readthedocs.io/en/stable/)is the library that we use for reading and writing Excel files (which is the format of the Geneva Bible file I uploaded on Canvas).
+[openpyxl](https://openpyxl.readthedocs.io/en/stable/) is the library that we use for reading and writing Excel files (which is the format of the Geneva Bible file I uploaded on Canvas).
+
+You will also need to `pip install accelerate`. We will discuss the role of `accelerate` below, when we use it in the code.
+
+-   In addition, if you **haven't** done so yet:
+
+> pip install transformers
+>
+> pip install torch
+>
+> pip install sentence-transformers
+>
+> pip install scikit-learn
+>
+> pip install matplotlib
+
+If you want to make sure that everything install, you can run this quick check:
+
+``` python
+import transformers
+import torch
+import datasets
+import sentence_transformers
+import sklearn
+import matplotlib
+import openpyxl
+import accelerate
+
+print("Environment check passed.\n")
+
+print("Library versions:")
+print("transformers:", transformers.__version__)
+print("torch:", torch.__version__)
+print("datasets:", datasets.__version__)
+print("sentence-transformers:", sentence_transformers.__version__)
+print("scikit-learn:", sklearn.__version__)
+print("matplotlib:", matplotlib.__version__)
+print("accelerate:", accelerate.__version__)
+```
 
 Create a new file, `week-12-step0.py` and run it:
 
@@ -92,7 +130,7 @@ print("openpyxl version:", openpyxl.__version__)
 print("\nAll imports successful. You are ready for Week 12.")
 ```
 
-Assuming that this step was successfully, this is what you have imported:
+Assuming that this step was successful, this is what you have imported:
 
 -   [PyTorch](https://pytorch.org/docs/stable/index.html): PyTorch is a machine learning framework that provides tensor operations, GPU acceleration, and automatic differentiation (=\> minimizing the loss function), and it is the backend library used to train and run neural network models like BERT.
 
@@ -109,33 +147,28 @@ Excel file (.xlsx)
         ↓
 openpyxl
 (reads the Excel file format)
-
         ↓
 pandas
-(converts the spreadsheet into a DataFrame)
-
+(loads the spreadsheet into a DataFrame)
         ↓
-Select text column → Python list
-(e.g., df["text"].tolist())
-
+Iterate through verse text in order
+(df["Text"])
         ↓
-Hugging Face `datasets`
+Build fixed-size multi-verse chunks
+(~200 words each)
+        ↓
+Hugging Face datasets
 Dataset.from_dict(...)
-(organizes the corpus for machine learning)
-
         ↓
-Transformers tokenizer
-BertTokenizer(...)
-(converts text into BERT inputs)
-
+BERT tokenizer
+(truncation=True, max_length=512, padding="max_length")
         ↓
 Tokenized dataset
 (input_ids, attention_mask, etc.)
-
+        ↓
+Train/eval split
         ↓
 Trainer / PyTorch
-(model training and optimization)
-
         ↓
 Fine-tuned BERT model
 ```
@@ -169,7 +202,7 @@ for _, row in samples.iterrows():
 
 This code loads the Geneva Bible dataset into a pandas DataFrame, prints summary information about the corpus, and displays a small sample of verses so we can observe the Early Modern English language that we will later use to fine-tune BERT.
 
-Take a few seconds to look over the ortographic or syntactic features that might be a problem for BERT. Since we are randomly selecting the verses and I changed the random seed from the one in this tutorial when I ran the code, you will have different results from me, so take a moment to read *your* verses. In mine, can see things like:
+Take a few seconds to look over the orthographic or syntactic features that might be a problem for BERT. Since we are randomly selecting the verses and I changed the random seed from the one in this tutorial when I ran the code, you will have different results from me, so take a moment to read *your* verses. In mine, can see things like:
 
 -   **Spelling**: "voyce" for voice, "darkenesse" for darkness, "vnto" for unto, "sayde" for said
 -   **Verb forms**: "hath," "doth," "saith" — archaic conjugations
@@ -272,11 +305,11 @@ Once we run the code, the results are... well.. expected. The pretrained `bert-b
 
 For example, in the case of "made the man of the \[MASK\] of the grounde", instead of "dust", we get \['color', 'earth', 'heart', 'land', 'lord'\]. My assumption (educated guess?) is that the archaic spelling of "grounde" and the unusual phrasing (when compared to modern English) is throwing BERT off.
 
-**This is important to pay attention to:** the text of the Bible *was* in the training set for BERT (it's in the English Wikipedia), but the Early Modern syntax and spelling is enough to throw it off (!!!). For what I think is an interesting experiment with different translations of the Bible, including the King James Version (1611), where BERT finds that the sentiment of the Sermon On the Mount to be, among other things, joking, see [**here**](https://arxiv.org/pdf/2401.00689#:~:text=A%20robust%20model%20requires%20a,framework%20for%20senti%2D%20ment%20analysis.).
+**This is important to pay attention to:** some parts of the Bible *were* in the training set for BERT (it's in the English Wikipedia), but the Early Modern syntax and spelling is enough to throw it off (!!!). For what I think is an interesting experiment with different translations of the Bible, including the King James Version (1611), where BERT finds that the sentiment of the Sermon On the Mount to be, among other things, joking, see [**here**](https://arxiv.org/pdf/2401.00689#:~:text=A%20robust%20model%20requires%20a,framework%20for%20senti%2D%20ment%20analysis.).
 
 ## Step 3: Baseline Embedding Quality
 
-We also want to measure whether BERT produces *coherent* embeddings for Geneva Bible text. We will compute similarity between theologically related verses and unrelated verses to see how well BERT distinguishes them. In fact, for completeness sake, we are going to compare the similarity scores produced by `BERT-base-uncased` and those produced by `all-MiniLM-L6-v2` (see the tutorial for Week 11 for the difference between the two models).
+We also want to measure whether BERT produces *coherent* embeddings for Geneva Bible text. We will compute similarity between theologically related verses and unrelated verses to see how well BERT distinguishes them. In fact, for completeness' sake, we are going to compare the similarity scores produced by `BERT-base-uncased` and those produced by `all-MiniLM-L6-v2` (see the tutorial for Week 11 for the difference between the two models).
 
 Create a new file `step3_baseline_embeddings.py` , but don't run the first chunk yet:
 
@@ -299,11 +332,19 @@ print("Loading sentence-transformer model...")
 st_model = SentenceTransformer("all-MiniLM-L6-v2")
 ```
 
-Raw BERT gives us one vector per token, not one vector per sentence. So we need to pool the token vectors into a single sentence vector. Int he following code, we use **mean pooling** (there are different pooling strategies and they can give different results based on the downstream task, see, for example, [here](https://arxiv.org/html/2411.14654v1) and [here](https://web.stanford.edu/class/archive/cs/cs224n/cs224n.1244/final-projects/AnicetDushimeWaMungu.pdf)):
+Raw BERT gives us one vector per token, not one vector per sentence. So we need to pool the token vectors into a single sentence vector. In the following code, we use **mean pooling** (there are different pooling strategies and they can give different results based on the downstream task, see, for example, [here](https://arxiv.org/html/2411.14654v1) and [here](https://web.stanford.edu/class/archive/cs/cs224n/cs224n.1244/final-projects/AnicetDushimeWaMungu.pdf)):
 
 -   get the contextual embedding for each token
 
 -   average across the token dimension
+
+**Note:** Even though BERT was not trained for sentence similarity, its contextual token embeddings still contain semantic information. So averaging them often produces *usable* sentence vectors. That is why this method is a good learning step. But because BERT was not trained to produce sentence embeddings, raw BERT sentence embeddings have two known problems:
+
+1.  BERT sentence vectors tend to [cluster]{.underline} in a narrow region of vector space and therefore cosine similarity between unrelated sentences is often higher than it "should" be (see [here](https://aclanthology.org/D19-1006/) and [here](https://arxiv.org/abs/1908.10084)).
+
+2.  Mean-pooling is one option among several pooling strategies: \[CLS\] token; max pooling; and weighted pooling. None of these were explicitly optimized for semantic similarity in the original BERT training.
+
+This is why we use `all-MiniLM-L6-v2` :
 
 By contrast, `all-MiniLM-L6-v2` is a sentence-transformer model. It is built specifically to produce sentence-level embeddings that work well for cosine similarity, clustering, and semantic search. In other words, it has been fine-tuned so that sentences with similar meanings are placed closer together in vector space. That means we should usually expect it to do a better job than raw BERT at distinguishing related verse pairs from unrelated ones.
 
@@ -313,7 +354,7 @@ Now add the following chunk of code to `step3_baseline_embeddings.py` and run it
 # Define a helper function for BERT-base embeddings
 
 def embed_with_bert(sentence):
-    # Tokenize the sentence for BERT
+    # Tokenize the sentence for BERT ==> See [1] below: this is important!
     inputs = bert_tokenizer(
         sentence,
         return_tensors="pt",
@@ -330,7 +371,7 @@ def embed_with_bert(sentence):
     token_embeddings = outputs.last_hidden_state
 
     # Mean pooling across tokens:
-    # average over sequence_length dimension
+    # average over sequence_length dimension. SEE point [1] below
     sentence_embedding = token_embeddings.mean(dim=1)
 
     # Convert from PyTorch tensor to NumPy array
@@ -433,6 +474,13 @@ else:
     print("\nIn this test, raw BERT performed as well as or better than the sentence-transformer model.")
 ```
 
+1.  This works for single-sentence inference because there are no padding tokens. For batched inputs with padding, you would need to mask out padding tokens before averaging (using the `attention_mask`) to avoid diluting the embedding with meaningless zeros. For the curious: if you ever adapt this function to embed multiple sentences at once, you'll need to account for padding. The standard approach is to multiply each token embedding by its attention mask (1 for real tokens, 0 for padding) before averaging, so that padding tokens don't pull the sentence vector toward zero. That looks like:
+
+    ``` Python
+    mask = inputs["attention_mask"].unsqueeze(-1)  # shape: [batch, seq_len, 1]
+    sentence_embedding = (token_embeddings * mask).sum(dim=1) / mask.sum(dim=1)
+    ```
+
 When you compare the two models, the most important number is the gap between the average similarity of related pairs and the average similarity of unrelated pairs. A larger gap means the model is doing a better job separating semantically connected verses from semantically unconnected ones. If we summarize the results from this comparison, you should have the following numbers (not in this format):
 
 | Model | Related Verses | Unrelated Verses | Separation Gap |
@@ -448,8 +496,7 @@ Now that we have a clear sense of what things look like *before* we fine-tune th
 
 1.  Extract the text of each verse
 2.  Group verses into longer chunks (individual verses are often too short for effective training)
-
-Tokenize everything with BERT's tokenizer
+3.  Tokenize everything with BERT's tokenizer
 
 Create a new file `step4_prepare_data.py` and run it:
 
@@ -473,7 +520,7 @@ print(f"\nSample verse: {sample}")
 print(f"Tokens ({len(tokens)}): {tokens}")
 
 
-# Group verses into chapter-level chunks. See [2] below
+# Group verses into 200-word chunks. See [2] below
 
 TARGET_WORDS = 200
 
@@ -506,8 +553,8 @@ print(f"Average chunk length (words): {np.mean([len(c.split()) for c in chunks])
 print(f"\nSample chunk (first 300 chars):")
 print(chunks[0][:300] + "...")
 
-# --------------------------------------------------
-# 5. Optional diagnostic: how many chunks still exceed 512 tokens?
+#####
+# Diagnostic: how many chunks still exceed 512 tokens?
 # --------------------------------------------------
 # This helps us verify that the new chunking strategy is working.
 # We tokenize WITHOUT truncation here just to measure true length.
@@ -566,7 +613,7 @@ print("Ready for fine-tuning in step 5.")
 
 1.  Tokenizer on archaic text: as you can see from the output once you run the code, BERT will try to map Early Modern spellings onto its modern WordPiece vocabulary, so it breaks many words into awkward subword fragments. Now, some of these splits are not catastrophic. For example, "forme" becoming "form ##e" still preserves a recognizable stem. But "darkenesse → dark ##enes ##se" is a less than ideal segmentation.
 
-2.  Individual verses are too short for effective training. A natural solution is to chunk by chapters to give BERT more context to learn from. If we try to do this, we run into a problem: the average chapter length is 659 *words* (I know because I tried this approach before), while BERT can only process 512 *tokens* at a time. To avoid throwing away large portions of the text through truncation, we instead build medium-sized chunks of about 200 words. This gives the model more context than a single verse while keeping most chunks short enough to fit within BERT’s maximum input size. **Note**: this version creates chunks purely by running verse order, so a chunk may cross a chapter boundary. In my experience, this is fine for language-model fine-tuning.
+2.  Individual verses are too short for effective training. A natural solution is to chunk by chapters to give BERT more context to learn from. If we try to do this, we run into a problem: the average chapter length is 659 *words* (I know because I tried this approach before), while BERT can only process 512 *tokens* at a time. In addition, tokens are subword units, not words, meaning that we have to be extra careful with the length of the chunks. In this tutorial we create chunks of roughly 200 words, which usually produces fewer than 512 tokens (on average, 1 word ≈ 1.3 tokens, so 200 words should keep us safe). This avoids throwing away large portions of the text through truncation. This gives the model more context than a single verse while keeping most chunks short enough to fit within BERT’s maximum input size. **Note**: this version creates chunks purely by running verse order, so a chunk may cross a chapter boundary. In my experience, this is fine for language-model fine-tuning.
 
 3.  Why this split? We have 4,227 training examples, which is a moderate corpus for MLM fine-tuning. A 90/10 split works well because it maximizes data available for training, but still provides enough examples (423) to measure evaluation loss. **A finer point to think about** (but not enough to be a real problem for our use): because our dataset was built by chunking continuous text, the chunks may still contain neighboring passages from the same chapter. That means the training and evaluation sets are not completely independent in a strict document sense.
 
@@ -587,7 +634,9 @@ Here is what happens at each step:
 
 **Warning:** this will take 10-30 minutes on CPU, or 2-5 minutes on GPU.
 
-Now create a new file, step5_finetune.py, run it (and grab a cup of coffee, tea, water,... if you have a slower machine):
+In addition, if you get a `Trainer` error, you will likely solve it by `pip install "accelerate>=1.1.0"`
+
+Now create a new file, `step5_finetune.py`, run it (and grab a cup of coffee, tea, water,... if you have a slower machine):
 
 ``` python
 import json
@@ -781,15 +830,17 @@ print("Next step: compare baseline and fine-tuned MLM predictions.")
 
 2.  This section checks three things before training begins: first, is `PyTorch` installed correctly? Second, can `PyTorch` see the GPU? And, which device (GPU or CPU) will the model run on? In this tutorial, the Trainer class will automatically use the GPU if one is available, but these diagnostics help us verify that everything is configured correctly.
 
-3.  We load `bert-base-uncased`. We then attach the masked language modeling (MLM) prediction head and continue training the model on the Geneva Bible. During this fine-tuning process, the model *hopefully/should* learns to adapt its language representationsto Early Modern biblical English (we will see how well it did in step 6).
+3.  We load `bert-base-uncased`. We then attach the masked language modeling (MLM) prediction head and continue training the model on the Geneva Bible. During this fine-tuning process, the model *hopefully/should* learns to adapt its language representations to Early Modern biblical English (we will see how well it did in step 6).
 
 4.  CUDA: is a software platform developed by NVIDIA that allows programs to use their GPU for general purpose computation (not just graphics). So, CUDA lets libraries like `PyTorch` run large mathematical operations on the GPU instead of the CPU, which is faster.
 
-5.  At the end of training, my evaluation results look like this: [Eval loss]{.underline}: 1.7048; [Perplexity]{.underline}: 5.50. These two numbers are related: loss ≈ 1.7048 ==\> perplexity ≈ e\^1.7048 ≈ 5.5. The [evaluation loss]{.underline} measures how well the model predicts masked words in text it did not train on. Lower values indicate better predictions. [Perplexity]{.underline} is a bit more intuitive to interpret (and it's what I tend to focus on): it measures how uncertain the model is when predicting the next word. A perplexity of 5.5 means the model behaves as if it is choosing among roughly five or six plausible words. Together these results suggest that the model has successfully adapted to the language patterns of the Geneva Bible.
+5.  At the end of training, my evaluation results look like this: [Eval loss]{.underline}: 1.7048; [Perplexity]{.underline}: 5.50. These two numbers are related: loss ≈ 1.7048 ==\> perplexity ≈ e\^1.7048 ≈ 5.5. The [evaluation loss]{.underline} measures how well the model predicts masked words in text it did not train on. Lower values indicate better predictions. [Perplexity]{.underline} is a bit more intuitive to interpret (and it's what I tend to focus on): it measures how uncertain the model is when predicting the masked word/token. A perplexity of 5.5 means the model behaves as if it is choosing among roughly five or six plausible words. Together these results suggest that the model has adapted, to a certain extent, to the language patterns of the Geneva Bible and that training proceeded in a stable manner.
 
 ## Step 6 — Post Fine-Tuning Evaluation
 
-That all fine and good, but did fine-tuning actually help? Let's re-run the exact same tests from Step 2. Create a new file `step6_evaluate.py` and run it:
+That's all well and good, but did fine-tuning actually help? Let's re-run the exact same tests from Step 2. Create a new file `step6_evaluate.py` and run it.
+
+-   [Quick note]{.underline}: I am reloading both models fresh here rather than reusing the objects from Step 2. This is a bit annoying, but intentional: it ensures that this script is self-contained and reproducible. You can run it on its own without having Step 2's variables still in memory. The tradeoff is that loading `bert-base-uncased` a second time adds 30-60 seconds on most machines. If you're on a slower laptop, this is a good moment for a stretch break.
 
 ``` python
 import json
@@ -797,7 +848,7 @@ import numpy as np
 from pathlib import Path
 from transformers import pipeline
 
-#Load baseline results from Step 3 above
+#Load baseline results from Step 2 above
 with open(Path("data") / "baseline_results.json", "r") as f:
     baseline_results = json.load(f)
 
@@ -902,7 +953,7 @@ Once you run the model, you will notice some rather disappointing results. The f
 
 Let's look at some of the test sentences:
 
--   "The Lord is my \[MASK\], I shall not want." The model predicts "lord" or "god" rather than "sheperd." The predictions *make sense for Biblical language* even if they are not right for this particular quote, which would require Biblical *knowledge* rather than language modeling.
+-   "The Lord is my \[MASK\], I shall not want." The model predicts "lord" or "god" rather than "shepherd." The predictions *make sense for Biblical language* even if they are not right for this particular quote, which would require Biblical *knowledge* rather than language modeling.
 
 ### So, what do we do?
 
@@ -931,7 +982,7 @@ def load_tests(path):
         return json.load(f)
 
 
-def normalize(word):
+def normalize(word):                             #See [1] below
     """
     Normalize Early Modern spellings so comparisons are fairer.
 
@@ -1120,6 +1171,10 @@ if __name__ == "__main__":
     main()
 ```
 
+1.  This uses an explicit dictionary of known mappings rather than general-purpose rules (like stripping trailing -e or swapping u/v). I prefer this approach to keep the tutorial manageable: general rules produce too many false positives with Early Modern text unless you are *extremely* careful in how you implement them. For example, stripping trailing -e would turn "feare" into "fear" (correct), but also "ore" into "or" (wrong — "ore" is a real word). The u/v swap would fix "vnto" → "unto" but could also mangle words where u and v are already correct. A closed dictionary is less ambitious but more reliable for a small evaluation set like ours.
+
+    If you were building this for a larger project, you would want a more sophisticated normalization tool: look into [VARD2](https://ucrel.lancs.ac.uk/vard/about/) or [MoNoise](https://arxiv.org/abs/1710.03476) for historical English normalization. I have **not** used MoNoise and have had mixed success with VARD2. This is mostly because my texts have other problems.
+
 So, how did the fine-tuned model do?
 
 **Model Comparison on Early Modern Masked Sentences**
@@ -1146,3 +1201,89 @@ So, how did the fine-tuned model do?
 The fine-tuned Geneva Bible model shows a modest improvement over the base BERT model when evaluated on non-Biblical Early Modern prose. Top-5 accuracy increases from **19.0% to 21.4%**, and the fine-tuned model produces slightly higher confidence scores on average. Several predictions improve either by introducing new correct answers or by ranking the correct word higher among the model’s predictions. However, the improvement is **limited**, and many items remain difficult. This result suggests that fine-tuning on a narrow corpus such as the Geneva Bible helps the model adapt somewhat to Early Modern English, but does not fully generalize across historical genres.
 
 Fine-tuning improved performance slightly, but the modest gains remind us that adapting language models to historical language often requires larger and more diverse training corpora.
+
+## A few final points — Visualizing the Training Process
+
+Let's look at how the training loss changed over time. A decreasing loss means the model was progressively getting better at predicting masked tokens in Geneva Bible text. We are going to visualize the training and evaluation loss curves. Create a new file, `step7_training_curves.py`, and run it:
+
+``` python
+import json
+import numpy as np
+from pathlib import Path
+import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.rcParams["figure.dpi"] = 150
+
+# Load training log 
+with open(Path("data") / "training_log.json", "r") as f:
+    log_data = json.load(f)
+
+log_history = log_data["log_history"]
+
+# Separate training and eval logs
+train_logs = [l for l in log_history if "loss" in l and "eval_loss" not in l]
+eval_logs = [l for l in log_history if "eval_loss" in l]
+
+# --- Plot ---
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+# Training loss over steps
+if train_logs:
+    steps = [l["step"] for l in train_logs]
+    losses = [l["loss"] for l in train_logs]
+    ax1.plot(steps, losses, "b-", alpha=0.7, linewidth=1.5)
+    ax1.set_xlabel("Training Step")
+    ax1.set_ylabel("Loss")
+    ax1.set_title("Training Loss Over Time")
+    ax1.grid(True, alpha=0.3)
+
+# Eval loss per epoch
+if eval_logs:
+    epochs = list(range(1, len(eval_logs) + 1))
+    eval_losses = [l["eval_loss"] for l in eval_logs]
+    ax2.bar(epochs, eval_losses, color="steelblue", edgecolor="black", alpha=0.8)
+    ax2.set_xlabel("Epoch")
+    ax2.set_ylabel("Evaluation Loss")
+    ax2.set_title("Evaluation Loss Per Epoch")
+
+    for e, l in zip(epochs, eval_losses):
+        ax2.text(e, l + 0.02, f"{l:.3f}", ha="center", fontsize=10)
+
+plt.tight_layout()
+plt.savefig("training_progress.png", dpi=150, bbox_inches="tight")
+plt.show()
+
+print("Saved plot to training_progress.png")
+print(f"\nFinal training loss: {log_data['train_loss']:.4f}")
+print(f"Final eval loss: {log_data['eval_loss']:.4f}")
+print(f"Final perplexity: {np.exp(log_data['eval_loss']):.2f}")
+```
+
+![](Week_12_Loss.png)
+
+### Training Results
+
+After fine-tuning BERT on the Geneva Bible corpus, the model achieved:
+
+-   Final training loss: 2.06. This is the **cross-entropy loss** (which we discussed in class before Spring Break) and it measures how well the model’s predicted probability distribution matches the correct answer. For each masked word, the model assigns probabilities to many possible tokens; cross-entropy penalizes the model when it assigns low probability to the correct word. In practice, lower cross-entropy loss means the model is placing higher probability on the correct tokens, so it is learning to predict words in context more accurately.\
+-   Final evaluation loss: 1.70
+
+Perplexity measures how uncertain the model is when predicting masked words. A perplexity of 5.5 means that the model behaves roughly as if it is choosing among about five or six plausible words at each prediction step. For a small fine-tuning corpus, this represents a reasonably strong language model.
+
+Interestingly, although perplexity improved, the masked-sentence comparison test showed only modest gains over the base model. This highlights an important distinction: improving a model’s general language modeling ability does not always produce large improvements on specific historical prediction tasks. In general:
+
+**Interpreting Training vs Evaluation Loss**
+
+| Pattern | Training Loss | Evaluation Loss | Interpretation |
+|------------------|------------------|------------------|------------------|
+| Ideal learning | ↓ decreasing | ↓ decreasing | The model is learning useful patterns that generalize to unseen data. |
+| Overfitting | ↓ decreasing | ↑ increasing | The model is memorizing the training data but performing worse on new data. |
+| Underfitting | High or not decreasing | High or not decreasing | The model has not learned enough from the data (training may be too short or data too limited). |
+
+Note, in the table above, the arrows describe how the loss values change during training, not simply whether they are high or low.
+
+-   **↓ decreasing** means the loss becomes smaller over time as training progresses.
+-   **↑ increasing** means the loss becomes larger during training.
+
+For example, if training loss steadily decreases but evaluation loss begins to increase, the model is likely **overfitting**: it is memorizing the training data instead of learning patterns that generalize to new text.
