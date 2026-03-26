@@ -1,0 +1,1191 @@
+---
+title: "Week 13: BERT and Credit"
+editor: visual
+format: html
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| include: false
+
+library(reticulate)
+
+use_python("C:/Users/astri/miniconda3/envs/tad/python.exe", required = TRUE)
+py_config()
+```
+
+## Week 13 goals:
+
+To recap what we have been doing for this sequence of tutorails: first, we learned how BERT produces contextual embeddings (Week 11); and, second, we fine-tuned BERT on the Geneva Bible to teach it Early Modern English (Week 12). With this last tutorial, we will put that toolkit to use on a real historical archive.
+
+We have 626 mercantile documents from the early modern period. We are going to:
+
+1.  **Cluster** the documents to discover what kinds of texts the archive contains
+2.  Investigate the word **"credit"** across the corpus, asking: in which documents does "credit" mean *social reputation and trustworthiness*, and in which does it mean *a financial instrument or debt*? In the overview section of Week 11, I linked to the work of Alexandra Shepard for those of you interested in the historical context. The goal of this tutorial is to see if BERT can help us trace these interconnected meanings of "credit."
+
+Our plan is to:
+
+1.  Embed documents using the fine-tuned BERT model from Week 12
+2.  Cluster embeddings and interpret the results
+3.  Extract word-level contextual embeddings from specific passages
+4.  Analyze how the same word carries different meanings across a corpus
+
+Let's get started on this very last tutorial!
+
+### A warning:
+
+**Step 1** will take a while to run: consider setting the process up before you are going to do something else (like cook dinner) and then letting it run.
+
+## Step 0 — Setup, Data and Model Loading
+
+We use the model we saved last week. If some tragedy happened along the way and you no longer have the tutorial saved, you can also use base BERT. The tutorial will still work, but the embeddings will be (slightly) less attuned to Early Modern English.
+
+Make sure that the files are in a folder called "texts" (or change the path in the code). **Quick reminder:** you have a slightly different set of texts from the ones that I have, so our results won't match exactly!
+
+-   In the terminal, install `umap-learn`: `pip install umap-learn` . We will use `umap-learn` to visualize our clusters.
+
+Create a new file, `step0_setup_and_load.py`, and run it:
+
+``` python
+import torch
+import numpy as np
+from pathlib import Path
+from transformers import BertTokenizer, BertModel
+
+#Load the fine-tuned model
+MODEL_PATH = "geneva-bert"
+
+try:
+    tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
+    model = BertModel.from_pretrained(MODEL_PATH)
+    print(f"Loaded fine-tuned model from {MODEL_PATH}")
+except Exception:
+    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+    model = BertModel.from_pretrained("bert-base-uncased")
+    print("Fine-tuned model not found. Using base BERT instead.")
+    print("(Results will be less accurate for Early Modern English.)")
+
+model.eval()
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
+print(f"Using device: {device}")
+
+# Load texts
+TEXT_DIR = Path("texts")
+
+documents = []
+for path in sorted(TEXT_DIR.glob("*.txt")):
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        text = f.read().strip()
+    if len(text) > 50:
+        documents.append({
+            "filename": path.name,  # record the filename
+            "text": text,
+            "word_count": len(text.split()),
+        })
+
+print(f"\nLoaded {len(documents)} documents from {TEXT_DIR}")
+print(f"Total words: {sum(d['word_count'] for d in documents):,}")
+print(f"Average document length: {np.mean([d['word_count'] for d in documents]):.0f} words")
+print(f"Shortest: {min(d['word_count'] for d in documents)} words")
+print(f"Longest: {max(d['word_count'] for d in documents)} words")
+
+# --- Preview ---
+print("\n=== Sample Documents ===\n")
+for doc in documents[:3]:
+    print(f"[{doc['filename']}] ({doc['word_count']} words)")
+    print(f"  {doc['text'][:200]}...")
+    print()
+
+print(f"Setup complete. {len(documents)} documents ready for analysis.")
+```
+
+### Aside:
+
+You will get a number of warning messages. They are not a problem. The saved model from Week 12, `geneva-bert`, was fine-tuned for masked language modeling (MLM), which doesn't use BERT's pooler. If you want to dig deeper into the pooler, [**this**](https://gmihaila.github.io/tutorial_notebooks/bert_inner_workings/) is the best, [readily-available]{.underline} explanation that I have found. The upshot is that MLM doesn't need pooler, so it wasn't saved at the end of Week 12. When you load those weights into a standard BertModel (which does define a pooler layer), the loader notices those two parameters have no matching weights in the checkpoint, so it initializes them randomly and flags them as "MISSING." Since we are using this model to analyze word embeddings and semantic meaning, this is not a problem. The weights simply won't be used in our workflow.
+
+## Step 1: Embed the Documents
+
+To cluster the documents, we need to represent each one as a single vector. Since most documents are longer than BERT's 512-token limit (the shortest one in *my* set has 202 words and the longest one has over a million!), we use a **chunking and averaging** strategy:
+
+1.  Split each document into [overlapping]{.underline} chunks of \~512 tokens
+2.  Embed each chunk separately
+3.  We then use [mean pooling](https://arxiv.org/html/2411.14654v1) within each chunk (over token embeddings)
+4.  ength-weighted averaging across chunks: length-weighting means that longer chunks contribute more to the final document embedding than very short leftover chunks at the end.
+
+**Some details:** Within each chunk, we use mean pooling over the token embeddings in the final hidden layer. This gives us a single vector that summarizes that [chunk’s contextual meaning]{.underline}. We exclude the special `[CLS]` and `[SEP]` tokens before averaging, since our goal is to represent the actual chunk text rather than those structural markers.To create one embedding for the full document, we then combine the chunk embeddings using a length-weighted average.
+
+**Why overlap?** Chunk boundaries are created in token space, which means that important phrases or sentences can fall near the edge of a chunk and lose some context if they are split. By overlappin, we reduce that risk: material near the end of one chunk reappears near the beginning of the next, making it more likely that meaningful passages are represented with adequate context in at least one chunk.
+
+Create a new file, `step1_embed_documents.py`, and run it. This step takes [**longer**]{.underline} since we are embedding our full corpus (go ahead grab a snack or even consider running it while you are doing homework for another class or, if you are like me, while you make dinner...).
+
+**An aside:** If you have a good CUDA GPU on your machine, the code is going to be slow because it feeds the GPU one chunk at a time. I wrote it this way because I don't know your machine and I need to make sure that everyone can run the tutorial.
+
+``` python
+import json
+from pathlib import Path
+
+import numpy as np
+import torch
+from transformers import BertModel, BertTokenizer
+
+# Configuration
+
+MODEL_PATH = "geneva-bert"
+FALLBACK_MODEL = "bert-base-uncased"
+TEXT_DIR = Path("texts")
+OUTPUT_DIR = Path("data")
+OUTPUT_FILE = OUTPUT_DIR / "doc_embeddings.json"
+
+MAX_LENGTH = 512          # BERT maximum input length
+STRIDE = 256              # overlap step
+MIN_TOKENS = 10           # ignore small leftover chunks
+MIN_CHARS = 50            # ignore extremely short documents
+
+# Device setup
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+
+# Load tokenizer and model
+
+def load_model_and_tokenizer(model_path, fallback_model):
+    """
+    Try to load the fine-tuned model. If that fails, fall back to base BERT.
+    """
+    try:
+        tokenizer = BertTokenizer.from_pretrained(model_path)
+        model = BertModel.from_pretrained(model_path)
+        print(f"Loaded fine-tuned model from '{model_path}'")
+    except Exception as e:
+        print(f"Could not load '{model_path}': {e}")
+        print(f"Falling back to '{fallback_model}'")
+        tokenizer = BertTokenizer.from_pretrained(fallback_model)
+        model = BertModel.from_pretrained(fallback_model)
+
+    model.to(device)
+    model.eval()
+    return tokenizer, model
+
+# Load text files
+
+def load_documents(text_dir, min_chars=50):
+    """
+    Load .txt documents from a folder.
+    Returns a list of dictionaries with filename and text.
+    """
+    documents = []
+
+    for path in sorted(text_dir.glob("*.txt")):
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            text = f.read().strip()
+
+        if len(text) >= min_chars:
+            documents.append({
+                "filename": path.name,
+                "text": text
+            })
+
+    return documents
+
+
+# Create overlapping token chunks
+
+def chunk_token_ids(token_ids, max_length=512, stride=256, min_tokens=10):
+  
+    chunk_token_limit = max_length - 2
+    chunks = []
+
+    for start in range(0, len(token_ids), stride):
+        chunk = token_ids[start:start + chunk_token_limit]
+        if len(chunk) >= min_tokens:
+            chunks.append(chunk)
+
+    return chunks
+
+
+# Embed a single chunk
+
+def embed_chunk(chunk_token_ids, tokenizer, model):
+
+    input_ids_list = [tokenizer.cls_token_id] + chunk_token_ids + [tokenizer.sep_token_id]
+
+    input_ids = torch.tensor([input_ids_list], dtype=torch.long, device=device)
+    attention_mask = torch.ones_like(input_ids, device=device)
+
+    with torch.no_grad():
+        outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+
+    # Shape: [1, seq_len, hidden_dim]
+    last_hidden = outputs.last_hidden_state
+
+    # Exclude [CLS] and [SEP]
+    token_embeddings = last_hidden[0, 1:-1, :]
+
+    # Mean pooling across tokens in this chunk
+    chunk_embedding = token_embeddings.mean(dim=0).cpu().numpy()
+
+    return chunk_embedding
+
+# Embed a full document
+
+def embed_document(text, tokenizer, model, max_length=512, stride=256, min_tokens=10):
+    """
+    Embed one long document by:
+      1. tokenizing the full document,
+      2. splitting into overlapping chunks,
+      3. embedding each chunk,
+      4. combining chunk embeddings with a length-weighted average.
+    """
+    ###### IMPORTANT:
+    # We use tokenizer.tokenize(...) + convert_tokens_to_ids(...)
+    # instead of tokenizer.encode(...), because encode(...) can produce
+    # a warning when the full document is longer than 512 tokens.
+    #
+    # Here we are *not* sending the full document to BERT. We are only
+    # tokenizing it first, then chunking it manually.
+    tokens = tokenizer.tokenize(text)
+    token_ids = tokenizer.convert_tokens_to_ids(tokens)
+
+    if len(token_ids) == 0:
+        return None
+
+    chunks = chunk_token_ids(
+        token_ids,
+        max_length=max_length,
+        stride=stride,
+        min_tokens=min_tokens
+    )
+
+    if not chunks:
+        return None
+
+    chunk_embeddings = []
+    chunk_weights = []
+
+    for chunk in chunks:
+        chunk_embedding = embed_chunk(chunk, tokenizer, model)
+        chunk_embeddings.append(chunk_embedding)
+        chunk_weights.append(len(chunk))  # length-weight the final average
+
+    document_embedding = np.average(
+        np.array(chunk_embeddings),
+        axis=0,
+        weights=np.array(chunk_weights)
+    )
+
+    return document_embedding
+
+####
+# Main pipeline. SEE [1] below
+
+def main():
+    tokenizer, model = load_model_and_tokenizer(MODEL_PATH, FALLBACK_MODEL)
+
+    documents = load_documents(TEXT_DIR, min_chars=MIN_CHARS)
+    print(f"Loaded {len(documents)} documents.\n")
+
+    print("Embedding documents (this will take a while)...\n")
+
+    doc_embeddings = []
+    doc_filenames = []
+
+    for i, doc in enumerate(documents, start=1):
+        embedding = embed_document(
+            doc["text"],
+            tokenizer,
+            model,
+            max_length=MAX_LENGTH,
+            stride=STRIDE,
+            min_tokens=MIN_TOKENS
+        )
+
+        if embedding is not None:
+            doc_embeddings.append(embedding.tolist())
+            doc_filenames.append(doc["filename"])
+
+        if i % 50 == 0 or i == len(documents):
+            print(f"Processed {i}/{len(documents)} documents...")
+
+    if not doc_embeddings:
+        print("No embeddings were created.")
+        return
+
+    print(f"\nSuccessfully embedded {len(doc_embeddings)} documents.")
+    print(f"Embedding dimensionality: {len(doc_embeddings[0])}")
+
+    OUTPUT_DIR.mkdir(exist_ok=True)
+
+    output = {
+        "filenames": doc_filenames,
+        "embeddings": doc_embeddings
+    }
+
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(output, f)
+
+    print(f"Saved to {OUTPUT_FILE}")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+\[1\] At a high level, this loop turns each document into a single vector:
+
+-   document → tokens → overlapping chunks → chunk embeddings → document embedding
+
+The final vector reflects the document's dominant themes by aggregating information across all chunks, with longer sections contributing more than very short ones (via length-weighted averaging). These document-level embeddings can then be used for clustering...
+
+## Step 2: Document Clustering
+
+Now we cluster the documents to see what structure BERT discovers in the archive. We will use K-Means clustering and visualize the results with UMAP (or PCA as a fallback).
+
+### Choosing the Number of Clusters
+
+We will try several values of k and use the **elbow method** and [**silhouette scores**](https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html) to pick a good number \[[**this explanation**](https://uc-r.github.io/kmeans_clustering) is helpful for k-means, even if the code is in R (which is standard for statistical work and with which you should be familiar from the first part of the semester)\].
+
+-   The **elbow plot** should help us decide how many clusters to use by showing how much we improve as we add more clusters. On the x-axis, we will plot the number of clusters (k) and on the y-axis we will plot *inertia.* Inertia measures how tightly grouped the points are inside each cluster. This means that lower inertia = tighter, more compact clusters. You are looking for a bend (“elbow”) in the curve. The idea is that, at first, adding clusters gives big improvements in how compact the clusters are. However, the improvements slow down after a certain number of clusters. The point where this change happens is called the “elbow.” The problem is that sometimes the curve will look fairly smooth, without a clear elbow. The elbow method does not measure separation between clusters — only compactness.
+
+-   The **silhoutte score** tells us how well-separated and well-formed the clusters are. When we plot it, on the x-axis, we will have the number of clusters (k), while on the y-axis we will have the silhouette score. For each point *p*, it compare how close *p* is to points in its own cluster vs. how close *p* is to points in other clusters. Unlike the elbow method, silhouette explicitly measures cluster separation, not just compactness. The image below (created with the help of Claude), show you how to understand the Silhouette score. While I added the formula too, you want to focus on the image to develop your understanding ([wikipedia](https://en.wikipedia.org/wiki/Silhouette_(clustering)) has clear explanation too):
+
+    ![](silhouette_score(2).png)
+
+The elbow plot helps us find an efficient number of clusters, while the silhouette score tells us whether those clusters are actually meaningful. We typically choose a value of k that balances both: a point where the elbow begins to flatten and the silhouette score is high. [In text analysis]{.underline}, especially with embeddings, clustering often reveals only a few strong distinctions (or even just one). A lack of many clusters is perfectly normal and may indicate that the texts are organized along one or two dominant dimensions.
+
+Create a new file `step2_cluster_documents.py` and run it:
+
+``` python
+import json
+import numpy as np
+from pathlib import Path
+from collections import Counter
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.rcParams["figure.dpi"] = 150
+
+# Load embeddings
+with open(Path("data") / "doc_embeddings.json", "r") as f:
+    data = json.load(f)
+
+doc_embeddings = np.array(data["embeddings"])
+doc_filenames = data["filenames"]
+
+print(f"Loaded {len(doc_embeddings)} document embeddings.")
+print(f"Embedding shape: {doc_embeddings.shape}")
+
+# Find optimal k
+print("\nTesting cluster counts...")
+k_range = range(2, 12)
+inertias = []
+silhouettes = []
+
+for k in k_range:
+    km = KMeans(n_clusters=k, random_state=42, n_init=10)
+    labels = km.fit_predict(doc_embeddings)
+    inertias.append(km.inertia_)
+    silhouettes.append(silhouette_score(doc_embeddings, labels))
+    print(f"  k={k}: silhouette={silhouettes[-1]:.3f}")
+
+# Plot elbow and silhouette
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+ax1.plot(list(k_range), inertias, "bo-")
+ax1.set_xlabel("Number of Clusters (k)")
+ax1.set_ylabel("Inertia (within-cluster sum of squares)")
+ax1.set_title("Elbow Method")
+ax1.grid(True, alpha=0.3)
+
+ax2.plot(list(k_range), silhouettes, "ro-")
+ax2.set_xlabel("Number of Clusters (k)")
+ax2.set_ylabel("Silhouette Score")
+ax2.set_title("Silhouette Analysis")
+ax2.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.savefig("cluster_selection.png", dpi=150, bbox_inches="tight")
+plt.show()
+
+best_k = list(k_range)[np.argmax(silhouettes)]
+print(f"\nBest k by silhouette score: {best_k}")
+
+# Fit final clustering
+K = best_k
+km = KMeans(n_clusters=K, random_state=42, n_init=10)
+cluster_labels = km.fit_predict(doc_embeddings)
+
+print(f"\nClustering with k={K}:")
+for cluster_id, count in sorted(Counter(cluster_labels).items()):
+    print(f"  Cluster {cluster_id}: {count} documents")
+
+# Visualize
+try:
+    import umap
+    reducer = umap.UMAP(n_components=2, random_state=42, n_neighbors=15, min_dist=0.1)
+    reduced = reducer.fit_transform(doc_embeddings)
+    method = "UMAP"
+except ImportError:
+    print("\nUMAP not installed. Using PCA. (For better results: pip install umap-learn)")
+    pca = PCA(n_components=2)
+    reduced = pca.fit_transform(doc_embeddings)
+    method = "PCA"
+
+fig, ax = plt.subplots(figsize=(12, 9))
+cmap = plt.cm.Set2
+
+for cluster_id in range(K):
+    mask = cluster_labels == cluster_id
+    ax.scatter(
+        reduced[mask, 0], reduced[mask, 1],
+        c=[cmap(cluster_id / K)], s=30, alpha=0.6,
+        label=f"Cluster {cluster_id} (n={mask.sum()})",
+        edgecolors="black", linewidths=0.3,
+    )
+
+ax.set_xlabel(f"{method} Dimension 1")
+ax.set_ylabel(f"{method} Dimension 2")
+ax.set_title(f"Mercantile Document Clusters ({method}, k={K})")
+ax.legend(loc="upper right", fontsize=8)
+
+plt.tight_layout()
+plt.savefig("document_clusters.png", dpi=150, bbox_inches="tight")
+plt.show()
+
+print(f"\nSaved plots to cluster_selection.png and document_clusters.png")
+
+# Save cluster assignments for later steps
+cluster_output = {
+    "cluster_labels": cluster_labels.tolist(),
+    "filenames": doc_filenames,
+    "K": K,
+}
+with open(Path("data") / "cluster_assignments.json", "w") as f:
+    json.dump(cluster_output, f, indent=2)
+
+print("Saved cluster assignments to data/cluster_assignments.json")
+```
+
+![](Week_13_Elbow_Silhouette.png)
+
+The elbow plot is not very helpful in this case: it suggests that the data does not naturally break into many compact clusters. However, the silhouette score shows a clear peak at k = 2, indicating that there is one strong, well-separated division in the data. This combination points us to think that the corpus is organized primarily along a single dominant distinction rather than multiple discrete groups.
+
+As we discussed in class, we can use UMAP to visualize the clusters. We use UMAP instead of PCA because while PCA preserves large-scale, linear structure in the data, UMAP is better at revealing local relationships and cluster structure. Since we are trying to visualize clusters in high-dimensional embeddings, UMAP usually produces a clearer and more interpretable picture. [But remember]{.underline}: while UMAP is better for visualization, it can distort global distances. That means that, with this dimension-reduction, the exact distances between clusters are not always meaningful. The conclusion to [**this paper**](https://arxiv.org/html/2502.11036v1) gives a good summary of your options.
+
+![](Week_13_UMPAP.png)
+
+## Step 3: Interpreting the Clusters
+
+To understand what each cluster "is about," we look at the most representative documents and extract key terms. To interpret the clusters, we are going to create an exploratory script. That will look at the top TF-IDF terms
+
+It does three good things:
+
+loads the cluster assignments, pulls back the original texts, gives you quick interpretive handles: top TF-IDF terms within each cluster, sample filenames, a snippet from one document.
+
+That makes it a strong diagnostic / inspection script.
+
+1.  fitting TF-IDF on the full corpus,
+
+2.  comparing each cluster to the rest of the corpus
+
+3.  using custom early modern stopwords,
+
+4.  showing sample filenames and snippets.
+
+Create a new file, `step3_interpret_clusters.py`, and run it:
+
+``` python
+import json
+import numpy as np
+from pathlib import Path
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+
+
+# Configuration
+
+CLUSTER_FILE = Path("data") / "cluster_assignments.json"
+TEXT_DIR = Path("texts")
+
+TOP_N_TERMS = 12
+MAX_FEATURES = 3000
+MIN_DF = 2
+SNIPPET_LENGTH = 200
+N_SAMPLE_FILES = 5
+N_SAMPLE_SNIPPETS = 2
+
+# Custom stopwords
+# I had to be pretty aggressive to get rid of a bunch of noise
+
+custom_stopwords = {
+    "haue", "hee", "hath", "bee", "shall", "unto", "thy", "thee", "ye", "thou",
+    "doth", "art", "may", "might", "must", "one", "two", "three", "also", "yet",
+    "upon", "thereof", "therein", "whereof", "wherein", "whose", "said", "say",
+    "saith", "come", "make", "made", "man", "men", "good", "great", "time",
+    "god", "king", "let", "much", "many", "well", "now", "thus", "hither",
+    "thence", "hee", "shee", "themselues", "selues", "ha", "hast", "hath",
+    "bee", "beene", "doe", "did", "done", "giueth", "giue", "giuen", "take",
+    "taken", "tho", "although", "therefore", "whereby", "whereunto", "thereunto",     "vpon", "vnto", "vs", "wee", "vp", "onely", "selfe", "himselfe",
+    "herselfe", "themselues", "ourselues", "yourselfe", "selues",
+    "neuer", "euer", "thing", "things", "called", "owne"
+}
+
+
+# Load cluster assignments
+
+with open(CLUSTER_FILE, "r", encoding="utf-8") as f:
+    cluster_data = json.load(f)
+
+cluster_labels = np.array(cluster_data["cluster_labels"])
+filenames = cluster_data["filenames"]
+K = cluster_data["K"]
+
+
+# Load documents
+
+documents = {}
+for path in sorted(TEXT_DIR.glob("*.txt")):
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        documents[path.name] = f.read().strip()
+
+# Keep only filenames that appear in the cluster file and exist on disk
+matched_filenames = [fn for fn in filenames if fn in documents]
+matched_texts = [documents[fn] for fn in matched_filenames]
+
+# Align labels to matched filenames
+matched_indices = [i for i, fn in enumerate(filenames) if fn in documents]
+matched_labels = cluster_labels[matched_indices]
+
+print(f"Loaded {len(matched_filenames)} clustered documents for interpretation.\n")
+
+
+
+# Build TF-IDF on the full corpus
+# Combine built-in English stopwords with custom early modern ones.
+
+vectorizer = TfidfVectorizer(
+    max_features=MAX_FEATURES,
+    min_df=MIN_DF,
+    stop_words="english",
+     token_pattern=r"(?u)\b[a-zA-Z]{4,}\b" #SEE [1] below
+)
+
+tfidf_matrix = vectorizer.fit_transform(matched_texts)
+feature_names = np.array(vectorizer.get_feature_names_out())
+
+keep_mask = np.array([term not in custom_stopwords for term in feature_names])
+
+tfidf_matrix = tfidf_matrix[:, keep_mask]
+feature_names = feature_names[keep_mask]
+
+
+
+# Helper function: see [2] below
+
+def get_top_distinctive_terms(tfidf_matrix, labels, target_cluster, feature_names, top_n=10):
+
+    in_cluster = labels == target_cluster
+    out_cluster = labels != target_cluster
+
+    if in_cluster.sum() == 0 or out_cluster.sum() == 0:
+        return []
+
+    mean_in = tfidf_matrix[in_cluster].mean(axis=0).A1
+    mean_out = tfidf_matrix[out_cluster].mean(axis=0).A1
+    diff = mean_in - mean_out  ## see the end of [2]
+
+    top_indices = diff.argsort()[-top_n:][::-1]
+    top_terms = [(feature_names[i], diff[i]) for i in top_indices if diff[i] > 0]
+
+    return top_terms
+
+
+# Characterize each cluster
+
+print(f"=== Cluster Characterization (k={K}) ===\n")
+
+for cluster_id in range(K):
+    cluster_mask = matched_labels == cluster_id
+    cluster_files = [matched_filenames[i] for i in range(len(matched_filenames)) if cluster_mask[i]]
+    cluster_texts = [matched_texts[i] for i in range(len(matched_texts)) if cluster_mask[i]]
+
+    print("=" * 70)
+    print(f"CLUSTER {cluster_id} — {len(cluster_files)} documents")
+    print("=" * 70)
+
+    # Distinctive TF-IDF terms (cluster vs. rest)
+    top_terms = get_top_distinctive_terms(
+        tfidf_matrix=tfidf_matrix,
+        labels=matched_labels,
+        target_cluster=cluster_id,
+        feature_names=feature_names,
+        top_n=TOP_N_TERMS
+    )
+
+    if top_terms:
+        formatted_terms = ", ".join([term for term, score in top_terms])
+        print(f"Top distinctive terms: {formatted_terms}")
+    else:
+        print("Top distinctive terms: (none found)")
+
+    # Sample filenames
+    print(f"Sample files: {cluster_files[:N_SAMPLE_FILES]}")
+
+    # Sample snippets
+    if cluster_texts:
+        print("Sample snippets:")
+        for snippet_text in cluster_texts[:N_SAMPLE_SNIPPETS]:
+            snippet = " ".join(snippet_text.split())[:SNIPPET_LENGTH]
+            print(f"  - {snippet}...")
+    else:
+        print("Sample snippets: (none)")
+
+    print()
+```
+
+**Notes:**
+
+1.  When I first ran the code, I didn't have this line. That made my TF-IDF terms for the first cluster hard to interpret because they were dominated by "noise" (things like "vs," 'vp," "wee," etc.). I expanded my stop word list to include some of these terms explicitly, but added this line to be on the safe side. Now we are only keeping tokens that are at least 4 letters long and consist of alphabetic characters.
+
+2.  In the helper function section, we compute the terms that are most distinctive for one cluster compared to the rest of the corpus. To do this, we compare how important each word is inside the cluster versus outside it. We compute the average TF-IDF value for each word **in** **the cluster** and subtract the average TF-IDF value for the same word **in all other** documents. Words with high positive values are more characteristic of the cluster, because they appear more prominently there than elsewhere in the corpus.
+
+    For each term we are computing: `diff(term) = mean_in(term) − mean_out(term)`, where `mean_in = tfidf_matrix[in_cluster].mean(axis=0)` looks at how important each word is to the cluster; and `mean_out = tfidf_matrix[out_cluster].mean(axis=0)` looks at how important the word is to all the other documents. This subtraction isolates words that are **over-represented** and **therefore** important to the cluster. [For example]{.underline}:
+
+    | Word    | In cluster | Outside cluster | Result            |
+    |---------|------------|-----------------|-------------------|
+    | "soule" | high       | low             | ✔ distinctive     |
+    | "year"  | low        | high            | ✘ not distinctive |
+    | "the"   | high       | high            | ✘ not distinctive |
+
+My output looks like this (remember, my corpus is slightly different from yours):
+
+> Loaded 622 clustered documents for interpretation.
+>
+> === Cluster Characterization (k=2) ===
+>
+> ====================================================================== CLUSTER 0 — 525 documents ====================================================================== **Top distinctive terms:** loue, euery, gods, sinne, againe, soule, euen, vnder, ouer, hauing, came, downe
+>
+> Sample files: \['A00419.txt', 'A00448.txt', 'A00503.txt', 'A00504.txt', 'A00505.txt'\] Sample snippets: - THE FIRST BOOKE OF THE COVNTRIE FARME. CHAP. I. What manner of Husbandrie is entreated of in the Discourse following. EVen as the manner of building vsed at this day,The varietie of Countries causeth ... - THE DAYES REPORT OF GODS GLORY. PSALM. 19. VERSH 2. One Day Telleth another, etc. IT is GOD (saith the Prophet David Psal 94. 10.)that teacheth ma\^ knowledge, knowledge of GOD, and of himselfe. This l...
+>
+> ====================================================================== CLUSTER 1 — 97 documents ====================================================================== **Top distinctive terms:** year, majesty, leave, receive, pass, hear, kingdom, mean, river, love, diverse, near
+>
+> Sample files: \['A00169.txt', 'A00183.txt', 'A00188.txt', 'A00206.txt', 'A00250.txt'\] Sample snippets: - article to be inquire of in the diocese of chester in the ordinary visitation hold 1605. titul i. article concern religion prayer and sacrament first whether there be any abide in heretical opinion or... - article to BEE enqvire of within the archdeaconry of the diocese of Gloucester in the visitation to be hold in the year of our lord God 1618. article concern the clergy whether have your minister read...
+
+I am particularly interested in the **top terms**. For [cluster 0]{.underline}, these terms clearly indicate theological texts (and the sample snippets of text confirm this). For [cluster 1]{.underline}, the terms are much more administrative and they indicate that the documents are institutional/governance oriented (also confirmed by the snippets, which are about ecclesiastic administrative visits to various dioceses). This is reassuring: the clustering separates theological discourse from administrative and institutional documents, showing a genre-based division in the corpus. (This is also correct given that I baked the texts this way.)
+
+**Note:** you may be surprised that we have a theological cluster in our corpus. However, in the 17th century, sermons and other texts that we may describe as theological were used a vehicles for discussions of colonial and mercantile concepts.
+
+## Step 4: Finding "Credit" in the Corpus
+
+OK, now we need to find every document that uses the word "credit" in the corpus and extract the relevant passages. Once we have these passages, we can use BERT to create contextual embeddings for them.
+
+To find all instances of "credit," we will need to look for all the spelling variants.
+
+Create a new file, `step4_find_credit.py`, and run it:
+
+``` Python
+import re
+import json
+from pathlib import Path
+
+# Load documents
+TEXT_DIR = Path("texts")
+documents = []
+for path in sorted(TEXT_DIR.glob("*.txt")):
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        text = f.read().strip()
+    if len(text) > 50:
+        documents.append({"filename": path.name, "text": text})
+
+print(f"Loaded {len(documents)} documents.\n")
+
+# Search for "credit" and spelling variants:
+
+credit_pattern = re.compile(
+    r"\b(credit|creditt|creditte|credite|creditts?|credits?|creddit)\b", re.IGNORECASE
+)
+
+credit_occurrences = []
+
+for i, doc in enumerate(documents):
+    # Split on sentence-ending punctuation
+    sentences = re.split(r"[.;!?]+", doc["text"])
+
+    for sent in sentences:
+        sent = sent.strip()
+        if len(sent.split()) < 5:
+            continue
+
+        matches = credit_pattern.findall(sent)
+        if matches:
+            credit_occurrences.append({
+                "doc_index": i,
+                "filename": doc["filename"],
+                "sentence": sent,
+                "match": matches[0].lower(),
+            })
+
+# Report
+unique_docs = len(set(o["doc_index"] for o in credit_occurrences))
+print(f"Found {len(credit_occurrences)} occurrences of 'credit'")
+print(f"across {unique_docs} documents.\n")
+
+# Show examples
+print("=== Sample 'Credit' Occurrences ===\n")
+for occ in credit_occurrences[:10]:
+    print(f"[{occ['filename']}]")
+    print(f"  ...{occ['sentence'][:200]}...")
+    print()
+
+# --- Save for next step ---
+Path("data").mkdir(exist_ok=True)
+with open(Path("data") / "credit_occurrences.json", "w", encoding="utf-8") as f:
+    json.dump(credit_occurrences, f, ensure_ascii=False, indent=2)
+
+print(f"Saved {len(credit_occurrences)} occurrences to data/credit_occurrences.json")
+```
+
+When you run this, you will get something like this:
+
+`Loaded 622 documents.`
+
+`Found 5749 occurrences of 'credit' across 424 documents.`
+
+> === Sample 'Credit' Occurrences ===
+>
+> \[A00169.txt\] ...have any adultery fornication or incest or any other offence commit within your parish be conceal for favour fear or any other respect by the churchwarden and sideman or quest-man or by any other pers...
+>
+> \[A00188.txt\] ...) ourselves hurt or take it to the heart yet this (\@) confident avouch that if I have a intention to (\@) over all thing that have be promiscuous and confuse both say and write by many man against cour...
+>
+> \[A00188.txt\] ...) not serious consider with himself that even in these seem sweet and odoriferous rose of courtly delight full many thorn and thistle do privy grow up for if we do but judge and examine one thing by a...
+>
+> \[A00188.txt\] ...and that one thing i be sure will health procure and with my credit stand a country-loving heart true tongue a all-assisting hand final let this most memorable verse also like and delight every courti...
+>
+> \[A00188.txt\] ...such a kind of life I say if thou be wise I wish thou will especial desire and delight in and assure if thou greedy gape not after more or more necessary thing than be competent sufficient this may ve...
+>
+> \[A00188.txt\] ...keep not company with he which reveal secret that therefore which thou will not have another to blab do not thou thyself blaze abroad now after all this these subsequent consideration will to do nothi...
+>
+> \[A00188.txt\] ...and serm\^ a man have joy say he by the answer of his mouth and a word speak in due season be most excellent but enough of these thing now to the matter in the undertake and handle of any public employ...
+>
+> \[A00188.txt\] ...when the discreet courtier shall perceive that he have what the courtier must do when he have inconsiderate displease his prince inconsiderate and unadvised displease his prince let he without all del...
+>
+> \[A00188.txt\] ...the truthless troop of flatterer proceed from court of king and there they breed and feed all this not withstand be thou kind courtier which intend to lead this life a lover of honesty justice and int...
+>
+> \[A00188.txt\] ...confirm the truth hereof at great spirit though provoke be soon appea'sd their noble heart soon move be soon please the lion leave the corpse that lie prostrate and when foe yield the fight do termina...
+>
+> Saved 5749 occurrences to data/credit_occurrences.json
+
+### What do you notice?
+
+First of all, this seems promising! We have found 5749 occurrences across 424 documents (from a total of 622 documents). Clearly the term "credit" is central to our corpus. So far so good, but you should also note that in the *sample* text snippets, credit is not showing up all that much. This **could** be a sign of a problem with the code. **Or** it could be a due to the vagaries of Early Modern texts.
+
+Our script prints only the first 200 characters of each sentence, but these texts often use semicolons or colons much in the way that we would use a period at the end of a sentence, which means our sentence splitter often produces very long segments. The word "credit" might appear 300 or 500 characters into the sentence, so well past the preview window. Let's investigate by searching for the target word within each extracted sentence and printing the surrounding context. Create a `step_4_sanity.py` file and run it:
+
+``` Python
+import json
+from pathlib import Path
+
+with open(Path("data") / "credit_occurrences.json", "r", encoding="utf-8") as f:
+    data = json.load(f)
+
+# Check: how many sentences actually contain "credit" visibly?
+visible = 0
+for occ in data[:20]:
+    sent = occ["sentence"].lower()
+    if "credit" in sent:
+        visible += 1
+        print(f"FOUND: ...{sent[max(0,sent.index('credit')-50):sent.index('credit')+60]}...")
+    else:
+        print(f"NOT VISIBLE: {sent[:100]}...")
+
+print(f"\n{visible}/20 contain 'credit' in the text")
+```
+
+The output is reassuring:
+
+> FOUND: ... any part thereof in this realm or do impeach the credit or state of any ecclesiastical person or governor by ...
+>
+> FOUND: ... since that unless we will too much extenuate the credit of that old proverb which be sometime the blind may h...
+>
+> FOUND: ...f most excellent and considerate man may have any credit or estimation with we nothing as they true hold be mo...
+>
+> FOUND: ...e thing i be sure will health procure and with my credit stand a country-loving heart true tongue a all-assist...
+>
+> FOUND: ...not only be very prejudicial and obnoxious to thy credit and estimation but even to thy prince himself most un...
+>
+> FOUND: ... utter overthrow the high build of all his former credit and reputation these thing i can hearty desire every ...
+>
+> FOUND: ...t and to prince which they for the most part will credit and commit to their dispatch and performance which co...
+>
+> FOUND: ... blemish and wrong the reputation of thy name and credit and indeed it be very conducible to the good of the c...
+>
+> FOUND: ... for the present most odious and opposite to true credit and reputation and will undoubted in process of time ...
+>
+> FOUND: ...agistrate decease and taunt and tear in piece the credit of their fellow officer yet live he who hap it be to ...
+>
+> FOUND: ...se author by this mean i say thou shall easy gain credit and authority and maintain and keep it be once get mo...
+>
+> FOUND: ...n ascend humily be it be far better and much more credit as that most prudent king solamon admonish that it be...
+>
+> FOUND: ...o certain in my opinion be not in this case to be credit for if we do compare one thing with another what exce...
+>
+> FOUND: ...sound judgement and curious choice for if we will credit the comedian there be but a few friend among many tha...
+>
+> FOUND: ...pleasure soon will take his flight shame stay and credit be crack but let the wise and cautolous courtier dimi...
+>
+> FOUND: ...ratus which indeed i hold most worthy due respect credit eternal memory and observation among all great peer a...
+>
+> FOUND: ...you may find by proofe, if you please not to giue credit to our relation...
+>
+> FOUND: ...and that because they credit deceitfull and ignorant workemen to sway the worke...
+>
+> FOUND: ...sary that he be resolve to which he ought to give credit to wit whether to the holy scripture expound by the g...
+>
+> FOUND: ... likewise can produce far more and more worthy of credit all which have pronounce that the holy ghost proceed ...
+
+This output indicates that the regex we set up is working correctly. Looking at these results, you can already see the social/economic split that I promised at the beginning of Week 11 is starting to emerge even in a quick read. Many of these are clearly the social sense: "credit and reputation," "credit and estimation," "gain credit and authority," "crack credit." These are about standing, honor, trustworthiness. A few lean more ambiguous or economic: "give credit to our relation," "credit deceitfull and ignorant workemen."
+
+Great, we are good to keep going.
+
+## Step 5: Extracting Contextual Embeddings for "Credit"
+
+For each occurrence of "credit," we extract BERT's contextual embedding of that specific token *in its specific sentence context*. As we discussed in class, the same word will have different embeddings depending on whether the surrounding text is about financial transactions or about a person's reputation.
+
+Create a new file, `python step5_credit_embeddings.py`, and run it:
+
+``` Python
+import torch
+import json
+import numpy as np
+from pathlib import Path
+from transformers import BertTokenizer, BertModel
+
+# Load mode:
+
+MODEL_PATH = "geneva-bert"
+try:
+    tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
+    model = BertModel.from_pretrained(MODEL_PATH)
+    print(f"Loaded fine-tuned model from {MODEL_PATH}")
+except Exception:
+    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+    model = BertModel.from_pretrained("bert-base-uncased")
+    print("Using base BERT (fine-tuned model not found).")
+
+model.eval()
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
+
+# Load credit occurrences:
+with open(Path("data") / "credit_occurrences.json", "r", encoding="utf-8") as f:
+    credit_occurrences = json.load(f)
+
+print(f"Loaded {len(credit_occurrences)} credit occurrences.\n")
+
+
+# Word embedding extraction function. See [1] below
+def get_word_embedding(sentence, target_word, tokenizer, model):
+    
+    inputs = tokenizer(sentence, return_tensors="pt", truncation=True, max_length=512)
+    inputs = {k: v.to(device) for k, v in inputs.items()}
+    tokens = tokenizer.convert_ids_to_tokens(inputs["input_ids"][0].cpu())
+
+    # Reconstruct words from subword tokens to find our target
+    target_lower = target_word.lower()
+    target_indices = []
+    current_word = ""
+    current_indices = []
+
+    for idx, token in enumerate(tokens):
+        if token in ["[CLS]", "[SEP]", "[PAD]"]:
+            if current_word == target_lower and current_indices:
+                target_indices = current_indices
+                break
+            current_word = ""
+            current_indices = []
+            continue
+
+        if token.startswith("##"):
+            current_word += token[2:]
+            current_indices.append(idx)
+        else:
+            if current_word == target_lower and current_indices:
+                target_indices = current_indices
+                break
+            current_word = token
+            current_indices = [idx]
+
+    if not target_indices and current_word == target_lower and current_indices:
+        target_indices = current_indices
+
+    if not target_indices:
+        return None
+
+    with torch.no_grad():
+        outputs = model(**inputs)
+
+    hidden_states = outputs.last_hidden_state[0].cpu()
+    word_embedding = hidden_states[target_indices].mean(dim=0).numpy()
+
+    return word_embedding
+
+
+# Extract embeddings:
+print("Extracting contextual embeddings for 'credit'...\n")
+
+credit_embeddings = []
+credit_metadata = []
+
+for i, occ in enumerate(credit_occurrences):
+    emb = get_word_embedding(occ["sentence"], "credit", tokenizer, model)
+
+    if emb is not None:
+        credit_embeddings.append(emb.tolist())
+        credit_metadata.append(occ)
+
+    if (i + 1) % 25 == 0:
+        print(f"  Processed {i + 1}/{len(credit_occurrences)}...")
+
+print(f"\nExtracted {len(credit_embeddings)} embeddings for 'credit'.")
+
+# Save
+output = {
+    "embeddings": credit_embeddings,
+    "metadata": credit_metadata,
+}
+with open(Path("data") / "credit_embeddings.json", "w", encoding="utf-8") as f:
+    json.dump(output, f, ensure_ascii=False)
+
+print("Saved to data/credit_embeddings.json")
+```
+
+1.  At this step, we extract the contextual embedding for a specific word in a sentence. Recall the discussion in Week 11 of **WordPiece** (BERT's tokenizer): if the word is split into multiple subword tokens by BERT's tokenizer, we average their embeddings to get a single word-level representation.
+
+Let's take a look at our results from step 5. The process created **4,681** embeddignsout of 5,749 occurrences of the word "credit": about 1,068 occurrences were skipped. This happens when the `get_word_embedding` function can't find the "credit" token after BERT's subword tokenization. The most common cause is that the sentence is longer than 512 tokens, so BERT truncates it and "credit" falls past the cutoff. With your very long semicolon-delimited "sentences," this is expected. Now, 81% extraction is a healthy rate, and 4,681 embeddings is more than enough for clustering.
+
+### But suppose that we wanted to improve on this, what can we do? 
+
+The main fix would be back in Step 4, where we define what a "sentence" is. Right now we split on \[.;!?\], which produces very long segments. Many of those segments exceed BERT's 512-token limit, and when "credit" happens to appear late in a long segment, it gets truncated away. The most straight forwad approach is to use a smaller context window around "credit."
+
+Instead of extracting the full "sentence," we can extract a fixed window: 200 characters on either side of the word would give us a rich context since 200 characters are approximately 60-80 words in English. This approach guarantees "credit" is always near the center of the passage and well within the 512-token limit.
+
+The trade-off is that you might cut off some useful surrounding context, but for word-level embedding extraction, BERT really only needs a few clauses of context to produce a good representation. But again, I would be surprised given that we are creating a 60-80 words window on each side of "credit."
+
+In any case, here's the alternative code, create a file named `step4-alt.py` and run it:
+
+``` Python
+import re
+import json
+from pathlib import Path
+
+# Load documents
+TEXT_DIR = Path("texts")
+documents = []
+for path in sorted(TEXT_DIR.glob("*.txt")):
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        text = f.read().strip()
+    if len(text) > 50:
+        documents.append({"filename": path.name, "text": text})
+
+print(f"Loaded {len(documents)} documents.\n")
+
+# Search for "credit" and spelling variants:
+credit_pattern = re.compile(
+    r"\b(credit|creditt|creditte|credite|creditts?|credits?|creddit)\b", re.IGNORECASE
+)
+
+# Context window: 200 characters on each side
+
+CONTEXT_CHARS = 200
+
+credit_occurrences = []
+
+for i, doc in enumerate(documents):
+    for match in credit_pattern.finditer(doc["text"]):
+        # Extract a window around the match
+        start = max(0, match.start() - CONTEXT_CHARS)
+        end = min(len(doc["text"]), match.end() + CONTEXT_CHARS)
+        context = doc["text"][start:end].strip()
+
+        # Clean up whitespace
+        context = re.sub(r"\s+", " ", context)
+
+        if len(context.split()) < 5:
+            continue
+
+        credit_occurrences.append({
+            "doc_index": i,
+            "filename": doc["filename"],
+            "sentence": context,
+            "match": match.group().lower(),
+            "match_position": match.start(),
+        })
+
+# Report
+unique_docs = len(set(o["doc_index"] for o in credit_occurrences))
+print(f"Found {len(credit_occurrences)} occurrences of 'credit'")
+print(f"across {unique_docs} documents.\n")
+
+# Check "credit" is visible in every extracted passage
+visible = sum(1 for o in credit_occurrences if "credit" in o["sentence"].lower())
+print(f"Verification: 'credit' visible in {visible}/{len(credit_occurrences)} passages "
+      f"({visible/len(credit_occurrences):.0%})\n")
+
+# --- Examples with "credit"
+print("=== Sample 'Credit' Occurrences ===\n")
+for occ in credit_occurrences[:10]:
+    sent = occ["sentence"]
+    # Find "credit" in the passage and show surrounding context
+    idx = sent.lower().index("credit")
+    highlight_start = max(0, idx - 60)
+    highlight_end = min(len(sent), idx + 70)
+    snippet = sent[highlight_start:highlight_end]
+
+    print(f"[{occ['filename']}]")
+    print(f"  ...{snippet}...")
+    print()
+
+# Save for step 5
+Path("data").mkdir(exist_ok=True)
+with open(Path("data") / "credit_occurrences.json", "w", encoding="utf-8") as f:
+    json.dump(credit_occurrences, f, ensure_ascii=False, indent=2)
+
+print(f"Saved {len(credit_occurrences)} occurrences to data/credit_occurrences.json")
+```
+
+Note that we went from 5,749 to 5,955 occurrences of credit (the window approach catches matches that the sentence splitter was breaking apart), and 5,952 out of 5,955 have "credit" visible.
+
+This isn't 100%, though it's close: This is because the verification check searches for "credit" in o\["sentence"\].lower(), which will find "credit," "creditt," "credite," and "credits" because they all contain "credit" as a substring. But "creddit" does not contain "credit" (the "dd" doesn't match). So if our corpus has 3 instances of "creddit," the regex matches them correctly, but the simple substring check "credit" in the verification code misses them. It's a quirk of the verification code, not of the extraction.
+
+-   **Now re-run Step 5**.
+
+The output will look like: `Extracted 5028 embeddings for 'credit'`.
+
+Great, we went from 4,681 to 5,028 extracted embeddings, recovering about 350 additional occurrences. The extraction rate is now 84%, up from 81%. The remaining 927 misses are cases where the get_word_embedding function can't match "credit" after BERT's subword tokenization. Because we are working with Early Modern texts that contain unusual characters, BERT's tokenizer splits the text differently than expected, and the word-reconstruction logic doesn't find a match.
+
+However, with 5,028 embeddings, we have a very robust dataset for clustering, so this is a good place to proceed to **step 6** as far as the tutorial goes. For research, I would want to push this further and try to recover the last 16%. The fix would be in step 5's `get_word_embedding` function: there I would want to use a looser matching strategy that searches for any subword token starting with "credit" rather than requiring exact full-word reconstruction. I would also want to attempt a normalizing strategy in pre-processing that targets "credit."
+
+## Step 6: Clustering the Meanings of "Credit"
+
+If BERT is doing its job, the contextual embeddings of "credit" should naturally separate into groups corresponding to its different senses. Let's cluster them and see.
+
+``` Python
+# step6_cluster_credit.py
+# Week 3: Cluster the "credit" embeddings to find distinct senses.
+#
+# Our hypothesis: the embeddings should separate into at least two
+# groups — social credit (reputation, trustworthiness) and economic
+# credit (financial debt, accounting entry).
+#
+# Prerequisites: run step5_credit_embeddings.py first.
+#
+# Run this file:  python step6_cluster_credit.py
+
+import json
+import numpy as np
+from pathlib import Path
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.rcParams["figure.dpi"] = 150
+
+# --- Load credit embeddings ---
+with open(Path("data") / "credit_embeddings.json", "r", encoding="utf-8") as f:
+    data = json.load(f)
+
+credit_embeddings = np.array(data["embeddings"])
+credit_metadata = data["metadata"]
+
+print(f"Loaded {len(credit_embeddings)} 'credit' embeddings.")
+print(f"Embedding shape: {credit_embeddings.shape}")
+
+# --- Find optimal k ---
+if len(credit_embeddings) >= 10:
+    k_range = range(2, min(8, len(credit_embeddings) // 2))
+    sil_scores = []
+
+    for k in k_range:
+        km = KMeans(n_clusters=k, random_state=42, n_init=10)
+        labels = km.fit_predict(credit_embeddings)
+        sil_scores.append(silhouette_score(credit_embeddings, labels))
+        print(f"  k={k}: silhouette={sil_scores[-1]:.3f}")
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(list(k_range), sil_scores, "ro-")
+    ax.set_xlabel("Number of Clusters (k)")
+    ax.set_ylabel("Silhouette Score")
+    ax.set_title("Optimal Clusters for 'Credit' Embeddings")
+    ax.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig("credit_cluster_selection.png", dpi=150, bbox_inches="tight")
+    plt.show()
+
+    best_k = list(k_range)[np.argmax(sil_scores)]
+    print(f"\nBest k by silhouette: {best_k}")
+else:
+    best_k = 2
+    print(f"Too few occurrences for silhouette analysis. Using k={best_k}.")
+
+# --- Cluster with k=2 (social vs economic) as primary hypothesis ---
+K_CREDIT = 2
+km_credit = KMeans(n_clusters=K_CREDIT, random_state=42, n_init=10)
+credit_cluster_labels = km_credit.fit_predict(credit_embeddings)
+
+print(f"\nCredit clusters (k={K_CREDIT}):")
+for c in range(K_CREDIT):
+    count = (credit_cluster_labels == c).sum()
+    print(f"  Cluster {c}: {count} occurrences")
+
+# --- PCA visualization ---
+pca_credit = PCA(n_components=2)
+credit_2d = pca_credit.fit_transform(credit_embeddings)
+
+colors = ["#E74C3C", "#3498DB"]
+
+fig, ax = plt.subplots(figsize=(10, 8))
+
+for c in range(K_CREDIT):
+    mask = credit_cluster_labels == c
+    ax.scatter(
+        credit_2d[mask, 0], credit_2d[mask, 1],
+        c=colors[c], s=50, alpha=0.6, label=f"Cluster {c}",
+        edgecolors="black", linewidths=0.3,
+    )
+
+ax.set_xlabel(f"PC1 ({pca_credit.explained_variance_ratio_[0]:.1%} variance)")
+ax.set_ylabel(f"PC2 ({pca_credit.explained_variance_ratio_[1]:.1%} variance)")
+ax.set_title("Contextual Embeddings of 'Credit' - Two Senses?")
+ax.legend()
+ax.grid(True, alpha=0.2)
+
+plt.tight_layout()
+plt.savefig("credit_embeddings_pca.png", dpi=150, bbox_inches="tight")
+plt.show()
+
+print("\nSaved plots to credit_cluster_selection.png and credit_embeddings_pca.png")
+
+# --- Save cluster labels for later steps ---
+output = {
+    "credit_cluster_labels": credit_cluster_labels.tolist(),
+    "K_CREDIT": K_CREDIT,
+}
+with open(Path("data") / "credit_cluster_labels.json", "w") as f:
+    json.dump(output, f, indent=2)
+
+print("Saved cluster labels to data/credit_cluster_labels.json")
+```
+
+![](week_13_Silhouette.png)
+
+jkdjasd
+
+![](Week_13_Clusters_Credit.png)

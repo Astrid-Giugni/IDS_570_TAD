@@ -476,7 +476,7 @@ else:
 
 1.  This works for single-sentence inference because there are no padding tokens. For batched inputs with padding, you would need to mask out padding tokens before averaging (using the `attention_mask`) to avoid diluting the embedding with meaningless zeros. For the curious: if you ever adapt this function to embed multiple sentences at once, you'll need to account for padding. The standard approach is to multiply each token embedding by its attention mask (1 for real tokens, 0 for padding) before averaging, so that padding tokens don't pull the sentence vector toward zero. That looks like:
 
-    ``` Python
+    ``` python
     mask = inputs["attention_mask"].unsqueeze(-1)  # shape: [batch, seq_len, 1]
     sentence_embedding = (token_embeddings * mask).sum(dim=1) / mask.sum(dim=1)
     ```
@@ -1180,7 +1180,7 @@ So, how did the fine-tuned model do?
 **Model Comparison on Early Modern Masked Sentences**
 
 | Metric | BERT-base | Fine-tuned (Geneva) | Interpretation |
-|------------------|------------------|------------------|------------------|
+|----|----|----|----|
 | Test items | 42 | 42 | Same evaluation set |
 | Top-5 accuracy | 19.0% | **21.4%** | Small improvement |
 | Avg. top-1 confidence | 0.234 | **0.261** | Fine-tuned model slightly more confident |
@@ -1192,7 +1192,7 @@ So, how did the fine-tuned model do?
 **Cases Where the Fine-Tuned Model Improved**
 
 | Sentence ID | Expected Word | BERT-base Result | Fine-tuned Result | Improvement Type |
-|---------------|---------------|---------------|---------------|---------------|
+|----|----|----|----|----|
 | 3 | power | Rank 5 | Rank 2 | Correct word ranked higher |
 | 8 | sicile → sicily | Miss | Rank 2 | New correct prediction |
 | 23 | places | Miss | Hit | New correct prediction |
@@ -1276,7 +1276,7 @@ Interestingly, although perplexity improved, the masked-sentence comparison test
 **Interpreting Training vs Evaluation Loss**
 
 | Pattern | Training Loss | Evaluation Loss | Interpretation |
-|------------------|------------------|------------------|------------------|
+|----|----|----|----|
 | Ideal learning | ↓ decreasing | ↓ decreasing | The model is learning useful patterns that generalize to unseen data. |
 | Overfitting | ↓ decreasing | ↑ increasing | The model is memorizing the training data but performing worse on new data. |
 | Underfitting | High or not decreasing | High or not decreasing | The model has not learned enough from the data (training may be too short or data too limited). |
