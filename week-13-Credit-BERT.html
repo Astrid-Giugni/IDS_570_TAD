@@ -141,7 +141,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-13-Credit-BERT.html">Week 12: BERT and Early Modern Credit</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-13-Credit-BERT.html">Week 13: BERT and Early Modern Credit</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -260,7 +260,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./week-13-Credit-BERT.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Week 12: BERT and Early Modern Credit</span></a>
+ <span class="menu-text">Week 13: BERT and Early Modern Credit</span></a>
   </div>
 </li>
       </ul>
@@ -274,7 +274,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-13-Credit-BERT.html">Week 12: BERT and Early Modern Credit</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./week-01-introduction.html">Weeks</a></li><li class="breadcrumb-item"><a href="./week-13-Credit-BERT.html">Week 13: BERT and Early Modern Credit</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Week 13: BERT and Early Modern Credit</h1>
 </div>
@@ -2187,9 +2187,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 <p>The fine-tuned model produces larger ambiguity gaps on average, which means documents are assigned to their nearest clusters with greater confidence. Most importantly, the proportion of clear-cut documents increases from <strong>38.9%</strong> to <strong>45.5%</strong>, suggesting that fine-tuning creates a semantic space in which more documents fall decisively into one cluster rather than lying near a boundary.</p>
 <p><img src="Week_13_Ambiguity_Gap.png" class="img-fluid"></p>
-
-
 </section>
+</section>
+<section id="final-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="final-comparison">Final comparison:</h2>
+<p>In Week 12, we tested fine-tuning by asking BERT to predict specific masked words in Early Modern sentences. The results were modest: top-5 accuracy improved from 19% to 21%, with only two new correct predictions. This was … somewhat disappointing. In Week 13, however, we tested the same fine-tuned model from a different angle: instead of asking it to predict words, we asked whether it produces better <em>representations</em> of meaning. Here the results were more substantial. The fine-tuned model was 9.4% better at separating the three senses of “credit” (silhouette score), and the proportion of occurrences where the model confidently assigned “credit” to a single sense increased from 39% to 46% (this level of improvement is worth my while!). This is because organizing a semantic space so that related meanings cluster together is a broader capability that draws on the model’s overall understanding of language. Fine-tuning on the Geneva Bible improved BERT’s general comprehension of Early Modern English more than it improved its ability to guess individual words and that’s absolutely fine by me!</p>
+<p>These two results are not contradictory; they just measure different things. This is something that we need to keep in mind when making decisions about fine-tuning.</p>
+
+
 </section>
 
 </main> <!-- /main -->
