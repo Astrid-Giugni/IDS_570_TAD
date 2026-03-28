@@ -44,5 +44,7 @@ website:
             text: "Week 10: Classifying New Text & spaCy"
           - href: week-11-BERT.qmd
             text: "Week 11: Introduction to BERT"
-            - href: week-12-Fine-Tuning-BERT.qmd
+          - href: week-12-Fine-Tuning-BERT.qmd
             text: "Week 12: Fine Tuning BERT for Early Modern English"
+          - href: week-13-Credit-BERT.qmd
+            text: "Week 12: BERT and Early Modern Credit"

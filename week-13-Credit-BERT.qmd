@@ -1,5 +1,5 @@
 ---
-title: "Week 13: BERT and Credit"
+title: "Week 13: BERT and Early Modern Credit"
 editor: visual
 format: html
 execute:
@@ -21,7 +21,7 @@ py_config()
 
 To recap what we have been doing for this sequence of tutorails: first, we learned how BERT produces contextual embeddings (Week 11); and, second, we fine-tuned BERT on the Geneva Bible to teach it Early Modern English (Week 12). With this last tutorial, we will put that toolkit to use on a real historical archive.
 
-We have 626 mercantile documents from the early modern period. We are going to:
+We (well, I) have 626 mercantile documents from the early modern period. We are going to:
 
 1.  **Cluster** the documents to discover what kinds of texts the archive contains
 2.  Investigate the word **"credit"** across the corpus, asking: in which documents does "credit" mean *social reputation and trustworthiness*, and in which does it mean *a financial instrument or debt*? In the overview section of Week 11, I linked to the work of Alexandra Shepard for those of you interested in the historical context. The goal of this tutorial is to see if BERT can help us trace these interconnected meanings of "credit."
@@ -35,9 +35,11 @@ Our plan is to:
 
 Let's get started on this very last tutorial!
 
-### A warning:
+### Two warnings:
 
-**Step 1** will take a while to run: consider setting the process up before you are going to do something else (like cook dinner) and then letting it run.
+-   **Step 1** will take a while to run: consider setting the process up before you are going to do something else (like cook dinner) and then letting it run.
+
+-   **Corpus**: I have a (very slightly) different corpus than you do. I have a reason for doing this: as the analysis progresses, you will need to compare my results and interpretations with yours. The differences are minor, but I want you to pay attention to see if small changes in the corpus produce major differences in the analysis.
 
 ## Step 0 — Setup, Data and Model Loading
 
@@ -689,7 +691,7 @@ To find all instances of "credit," we will need to look for all the spelling var
 
 Create a new file, `step4_find_credit.py`, and run it:
 
-``` Python
+``` python
 import re
 import json
 from pathlib import Path
@@ -787,7 +789,7 @@ First of all, this seems promising! We have found 5749 occurrences across 424 do
 
 Our script prints only the first 200 characters of each sentence, but these texts often use semicolons or colons much in the way that we would use a period at the end of a sentence, which means our sentence splitter often produces very long segments. The word "credit" might appear 300 or 500 characters into the sentence, so well past the preview window. Let's investigate by searching for the target word within each extracted sentence and printing the surrounding context. Create a `step_4_sanity.py` file and run it:
 
-``` Python
+``` python
 import json
 from pathlib import Path
 
@@ -859,7 +861,7 @@ For each occurrence of "credit," we extract BERT's contextual embedding of that 
 
 Create a new file, `python step5_credit_embeddings.py`, and run it:
 
-``` Python
+``` python
 import torch
 import json
 import numpy as np
@@ -969,7 +971,7 @@ print("Saved to data/credit_embeddings.json")
 
 Let's take a look at our results from step 5. The process created **4,681** embeddignsout of 5,749 occurrences of the word "credit": about 1,068 occurrences were skipped. This happens when the `get_word_embedding` function can't find the "credit" token after BERT's subword tokenization. The most common cause is that the sentence is longer than 512 tokens, so BERT truncates it and "credit" falls past the cutoff. With your very long semicolon-delimited "sentences," this is expected. Now, 81% extraction is a healthy rate, and 4,681 embeddings is more than enough for clustering.
 
-### But suppose that we wanted to improve on this, what can we do? 
+### But suppose that we wanted to improve on this, what can we do?
 
 The main fix would be back in Step 4, where we define what a "sentence" is. Right now we split on \[.;!?\], which produces very long segments. Many of those segments exceed BERT's 512-token limit, and when "credit" happens to appear late in a long segment, it gets truncated away. The most straight forwad approach is to use a smaller context window around "credit."
 
@@ -979,7 +981,7 @@ The trade-off is that you might cut off some useful surrounding context, but for
 
 In any case, here's the alternative code, create a file named `step4-alt.py` and run it:
 
-``` Python
+``` python
 import re
 import json
 from pathlib import Path
@@ -1073,20 +1075,9 @@ However, with 5,028 embeddings, we have a very robust dataset for clustering, so
 
 ## Step 6: Clustering the Meanings of "Credit"
 
-If BERT is doing its job, the contextual embeddings of "credit" should naturally separate into groups corresponding to its different senses. Let's cluster them and see.
+If BERT is doing its job, the contextual embeddings of "credit" should naturally separate into groups corresponding to its different senses. What we would like to see is the embeddings separating into at least two groups: first, social credit (reputation, trustworthiness) and, second, economic credit (financial debt, accounting entry). Let's run a cluster analysis using the Silhouette method to choose
 
-``` Python
-# step6_cluster_credit.py
-# Week 3: Cluster the "credit" embeddings to find distinct senses.
-#
-# Our hypothesis: the embeddings should separate into at least two
-# groups — social credit (reputation, trustworthiness) and economic
-# credit (financial debt, accounting entry).
-#
-# Prerequisites: run step5_credit_embeddings.py first.
-#
-# Run this file:  python step6_cluster_credit.py
-
+``` python
 import json
 import numpy as np
 from pathlib import Path
@@ -1098,7 +1089,7 @@ import matplotlib
 
 matplotlib.rcParams["figure.dpi"] = 150
 
-# --- Load credit embeddings ---
+#Load credit embeddings:
 with open(Path("data") / "credit_embeddings.json", "r", encoding="utf-8") as f:
     data = json.load(f)
 
@@ -1108,7 +1099,7 @@ credit_metadata = data["metadata"]
 print(f"Loaded {len(credit_embeddings)} 'credit' embeddings.")
 print(f"Embedding shape: {credit_embeddings.shape}")
 
-# --- Find optimal k ---
+# Find optimal k using Slihouette score
 if len(credit_embeddings) >= 10:
     k_range = range(2, min(8, len(credit_embeddings) // 2))
     sil_scores = []
@@ -1127,7 +1118,9 @@ if len(credit_embeddings) >= 10:
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.savefig("credit_cluster_selection.png", dpi=150, bbox_inches="tight")
-    plt.show()
+    plt.show()  
+    
+    #### SEE [1] 
 
     best_k = list(k_range)[np.argmax(sil_scores)]
     print(f"\nBest k by silhouette: {best_k}")
@@ -1135,7 +1128,7 @@ else:
     best_k = 2
     print(f"Too few occurrences for silhouette analysis. Using k={best_k}.")
 
-# --- Cluster with k=2 (social vs economic) as primary hypothesis ---
+# Cluster with k=2 (social vs economic). 
 K_CREDIT = 2
 km_credit = KMeans(n_clusters=K_CREDIT, random_state=42, n_init=10)
 credit_cluster_labels = km_credit.fit_predict(credit_embeddings)
@@ -1145,7 +1138,8 @@ for c in range(K_CREDIT):
     count = (credit_cluster_labels == c).sum()
     print(f"  Cluster {c}: {count} occurrences")
 
-# --- PCA visualization ---
+# PCA visualization. 
+    #### SEE [2] below for the visualization
 pca_credit = PCA(n_components=2)
 credit_2d = pca_credit.fit_transform(credit_embeddings)
 
@@ -1184,8 +1178,800 @@ with open(Path("data") / "credit_cluster_labels.json", "w") as f:
 print("Saved cluster labels to data/credit_cluster_labels.json")
 ```
 
+**\[1\]** Silhouette score results and plot:
+
+> k=2: silhouette=0.070 k=3: silhouette=0.072 k=4: silhouette=0.071 k=5: silhouette=0.061 k=6: silhouette=0.068 k=7: silhouette=0.060 Best k by silhouette: 3 Credit clusters (k=2): Cluster 0: 2887 occurrences Cluster 1: 2141 occurrences
+
 ![](week_13_Silhouette.png)
 
-jkdjasd
+### What does this mean?
+
+-   The silhouette scores are very low: 0.070 to 0.072. This means means that the clusters are not well separated. On a scale from -1 to 1, anything below 0.25 is generally considered weak clustering structure.
+
+-   How can we intepret this result? If the social and economic senses of "credit" were clearly distinct in this period, BERT would find clean clusters. The fact that it can't cleanly separate them is evidence that the two meanings were still deeply entangled in how writers in our corpus actually used the word. A merchant's financial credit was closely connected to social reputation. The two meanings hadn't yet become separate concepts the way they are in modern English. The roughly even split (2,887 vs. 2,141) suggests BERT is finding some structure, but the low silhouette score tells us there's massive overlap between the groups. This interpreation is in line with Craig Muldrew's argument about Early Modern credit culture in *The Economy of Obligation: The Culture of Credit and Social Relations in Early Modern England* (1998), which reassures me that we are picking up on something real. **Note:** since this is a class exercise, I set up the analysis to work with a well-known concept, such as the role of "credit." If this were a "real" research question, we wouldn't want to simply reproduce, computationally and at scale, a well-established historical point. But it's good to know that the method *works* with complex, historical concepts and data.
+
+**\[2\]** Cluster with k= 2:
 
 ![](Week_13_Clusters_Credit.png)
+
+Given the silhouette scores results, we want to also look at what `K=3` might look like. Create a new file, `step6b_cluster_credit_k3.py,` and run it:
+
+``` python
+import json
+import numpy as np
+from pathlib import Path
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.rcParams["figure.dpi"] = 150
+
+# Load credit embeddings 
+with open(Path("data") / "credit_embeddings.json", "r", encoding="utf-8") as f:
+    data = json.load(f)
+
+credit_embeddings = np.array(data["embeddings"])
+credit_metadata = data["metadata"]
+
+print(f"Loaded {len(credit_embeddings)} 'credit' embeddings.")
+
+# Cluster with k=3
+K_CREDIT = 3
+km_credit = KMeans(n_clusters=K_CREDIT, random_state=42, n_init=10)
+credit_cluster_labels = km_credit.fit_predict(credit_embeddings)
+
+sil = silhouette_score(credit_embeddings, credit_cluster_labels)
+print(f"\nClustering with k={K_CREDIT}")
+print(f"Silhouette score: {sil:.3f}")
+print(f"\nCluster sizes:")
+for c in range(K_CREDIT):
+    count = (credit_cluster_labels == c).sum()
+    print(f"  Cluster {c}: {count} occurrences")
+
+# PCA visualization 
+pca_credit = PCA(n_components=2)
+credit_2d = pca_credit.fit_transform(credit_embeddings)
+
+colors = ["#E74C3C", "#3498DB", "#2ECC71"]  # Red, Blue, Green
+
+fig, ax = plt.subplots(figsize=(10, 8))
+
+for c in range(K_CREDIT):
+    mask = credit_cluster_labels == c
+    ax.scatter(
+        credit_2d[mask, 0], credit_2d[mask, 1],
+        c=colors[c], s=40, alpha=0.5, label=f"Cluster {c} (n={mask.sum()})",
+        edgecolors="black", linewidths=0.2,
+    )
+
+ax.set_xlabel(f"PC1 ({pca_credit.explained_variance_ratio_[0]:.1%} variance)")
+ax.set_ylabel(f"PC2 ({pca_credit.explained_variance_ratio_[1]:.1%} variance)")
+ax.set_title("Contextual Embeddings of 'Credit' — Three Senses?")
+ax.legend()
+ax.grid(True, alpha=0.2)
+
+plt.tight_layout()
+plt.savefig("credit_embeddings_pca_k3.png", dpi=150, bbox_inches="tight")
+plt.show()
+
+print("\nSaved plot to credit_embeddings_pca_k3.png")
+
+# Show sample sentences from each cluster 
+print("\n" + "=" * 80)
+print("SAMPLE SENTENCES FROM EACH CLUSTER")
+print("=" * 80)
+
+for c in range(K_CREDIT):
+    indices = [i for i, label in enumerate(credit_cluster_labels) if label == c]
+
+    print(f"\n{'=' * 60}")
+    print(f"CLUSTER {c} — {len(indices)} occurrences")
+    print(f"{'=' * 60}\n")
+
+    for idx in indices[:10]:
+        meta = credit_metadata[idx]
+        sent = meta["sentence"]
+        # Show "credit" in context
+        lower = sent.lower()
+        if "credit" in lower:
+            pos = lower.index("credit")
+            start = max(0, pos - 80)
+            end = min(len(sent), pos + 80)
+            snippet = sent[start:end]
+        else:
+            snippet = sent[:160]
+
+        print(f"  [{meta['filename']}]")
+        print(f"  ...{snippet}...")
+        print()
+
+# Save k=3 cluster labels
+output = {
+    "credit_cluster_labels": credit_cluster_labels.tolist(),
+    "K_CREDIT": K_CREDIT,
+}
+with open(Path("data") / "credit_cluster_labels_k3.json", "w") as f:
+    json.dump(output, f, indent=2)
+
+print("Saved cluster labels to data/credit_cluster_labels_k3.json")
+```
+
+As part of your output, you will see a list of sample sentences. Look them over and compare them with my summary of my sample sentences (remember: I have a slightly different corpus than yours!). My takeaways:
+
+**Cluster 0 (1,962 occurrences)** looks like "credit" in the sense of: to believe, to give credence to, to trust testimony. We'll call it **epistemic**. I have examples such as: "give credit to our relation," "he ought to give credit to wit whether to the holy scripture," "if we gave so much credit to God as we do to men," "give credit at the first to every flying tale," "if we will credit the comedian." In almost every case, the construction is "give credit to \[a person or statement\]" or "credit \[someone\]" as a verb meaning "believe them." This is the Latin root (credere, to believe) at its most transparent.
+
+**Cluster 1 (2,455 occurrences)** looks more like the **social/reputational** sense: "credit" as standing, honor, good name. I have phrases such as: "credit and reputation" (appears multiple times), "credit and estimation," "prejudicial to thy credit," "impeach the credit or state of any ecclesiastical person," "opposite to true credit and reputation." This sense Muldrew is tied to a person's public character and trustworthiness in the community.
+
+**Cluster 2 (611 occurrences)** is smaller and harder to pin down from these samples, but it looks like it might be the most materially/**financially** inflected sense! The sample phrases, such as "Credit grows just as fast as money," "wasted your stock of credit, and of Wares," "letters of credit," "keeping up his Credit," lean toward credit as something quantifiable, transferable, or linked to concrete economic instruments. "Letters of credit" are a specific financial document.
+
+That said, the silhouette score is still low (0.072), so there's a lot of overlap between these groups. Many sentences probably participate in two senses at once, which is historically reasonable. Here's the visualization with 3 clusters, which makes it visually clear that these senses blend into each other:
+
+![](Week_13_Credit_CLuster_k3.png)
+
+## Step 7: The Borderline Cases
+
+To understand the overlap of these connotation of the term "credit," let's specifically look for the sentences where BERT is most uncertain. That is, let's look at the ones closest to the boundary between clusters. With three clusters, the borderline cases are especially interesting: they are the sentences where BERT cannot decide which sense of "credit" is dominant. Create a new file, `step7_borderline_cases_k3.py`, and run it:
+
+``` python
+import json
+import numpy as np
+from pathlib import Path
+from sklearn.cluster import KMeans
+
+# Load data
+with open(Path("data") / "credit_embeddings.json", "r", encoding="utf-8") as f:
+    emb_data = json.load(f)
+
+credit_embeddings = np.array(emb_data["embeddings"])
+credit_metadata = emb_data["metadata"]
+
+# Re-fit k=3 clustering to get centroids. SEE [1] below
+
+K_CREDIT = 3
+km = KMeans(n_clusters=K_CREDIT, random_state=42, n_init=10)
+km.fit(credit_embeddings)
+centroids = km.cluster_centers_
+cluster_labels = km.labels_
+
+# Compute ambiguity. SEE [2] below.
+
+distances = np.array([
+    [np.linalg.norm(emb - centroid) for centroid in centroids]
+    for emb in credit_embeddings
+])
+
+# Sort distances for each point: smallest first
+sorted_distances = np.sort(distances, axis=1)
+
+# Ambiguity = difference between closest and second-closest centroid
+# Small value = the point is torn between two senses
+ambiguity = sorted_distances[:, 1] - sorted_distances[:, 0]
+
+# Also identify WHICH two clusters each point is torn between
+closest_two = np.argsort(distances, axis=1)[:, :2]
+
+
+def show_credit_in_context(sentence, width=100):
+    """Show the sentence with 'credit' centered in a window."""
+    lower = sentence.lower()
+    if "credit" in lower:
+        pos = lower.index("credit")
+        start = max(0, pos - width)
+        end = min(len(sentence), pos + width)
+        return "..." + sentence[start:end] + "..."
+    return sentence[:200] + "..."
+
+
+
+# MOST AMBIGUOUS: torn between two senses
+
+most_ambiguous = np.argsort(ambiguity)[:15]
+
+cluster_names = {0: "Epistemic", 1: "Social/Reputational", 2: "Financial/Material"}
+
+print("=" * 80)
+print("MOST AMBIGUOUS USES OF 'CREDIT' (k=3)")
+print("These sentences sit at the boundary between two senses.")
+print("=" * 80)
+
+for rank, idx in enumerate(most_ambiguous, 1):
+    meta = credit_metadata[idx]
+    assigned = cluster_labels[idx]
+    c1, c2 = closest_two[idx]
+    d1, d2 = distances[idx][c1], distances[idx][c2]
+
+    print(f"\n{rank}. Assigned to Cluster {assigned} ({cluster_names.get(assigned, '?')})")
+    print(f"   Torn between: Cluster {c1} ({cluster_names.get(c1, '?')}) "
+          f"and Cluster {c2} ({cluster_names.get(c2, '?')})")
+    print(f"   Distances: {d1:.4f} vs {d2:.4f}  (gap: {ambiguity[idx]:.4f})")
+    print(f"   [{meta['filename']}]")
+    print(f"   {show_credit_in_context(meta['sentence'])}")
+
+
+# BORDERLINES BETWEEN EACH PAIR OF CLUSTERS
+
+print("\n\n" + "=" * 80)
+print("BORDERLINE CASES BY CLUSTER PAIR")
+print("=" * 80)
+
+pairs = [(0, 1), (0, 2), (1, 2)]
+pair_labels = [
+    ("Epistemic", "Social/Reputational"),
+    ("Epistemic", "Financial/Material"),
+    ("Social/Reputational", "Financial/Material"),
+]
+
+for (ca, cb), (name_a, name_b) in zip(pairs, pair_labels):
+    print(f"\n{'='*60}")
+    print(f"BETWEEN Cluster {ca} ({name_a}) AND Cluster {cb} ({name_b})")
+    print(f"{'='*60}")
+
+    # Find points whose two closest clusters are this pair
+    pair_mask = np.array([
+        set(closest_two[i]) == {ca, cb} for i in range(len(credit_embeddings))
+    ])
+
+    if pair_mask.sum() == 0:
+        print("  No borderline cases between these clusters.\n")
+        continue
+
+    # Among those, find the most ambiguous
+    pair_indices = np.where(pair_mask)[0]
+    pair_ambiguity = ambiguity[pair_indices]
+    most_ambig_in_pair = pair_indices[np.argsort(pair_ambiguity)[:5]]
+
+    for idx in most_ambig_in_pair:
+        meta = credit_metadata[idx]
+        assigned = cluster_labels[idx]
+        print(f"\n  [Assigned: Cluster {assigned}] Gap: {ambiguity[idx]:.4f}")
+        print(f"  [{meta['filename']}]")
+        print(f"  {show_credit_in_context(meta['sentence'])}")
+
+
+# MOST CLEAR-CUT: firmly in one sense
+
+print("\n\n" + "=" * 80)
+print("MOST CLEAR-CUT USES (for contrast)")
+print("=" * 80)
+
+most_clear = np.argsort(ambiguity)[-5:][::-1]
+
+for rank, idx in enumerate(most_clear, 1):
+    meta = credit_metadata[idx]
+    assigned = cluster_labels[idx]
+
+    print(f"\n{rank}. Cluster {assigned} ({cluster_names.get(assigned, '?')})  "
+          f"Gap: {ambiguity[idx]:.4f}")
+    print(f"   [{meta['filename']}]")
+    print(f"   {show_credit_in_context(meta['sentence'])}")
+```
+
+**\[1\]** You can refer back to our discussion in class, but as a reminder: a **centroid** is the average point of a cluster. If you took all the vectors assigned to one cluster and averaged them, the result is that cluster's centroid. It represents the "typical" meaning of "credit" in that group. When we measure a sentence's distance to the financial cluster's centroid, we're asking: how close is this particular use of "credit" to the typical financial use? A sentence that is nearly equidistant from two centroids is one where the meaning genuinely sits between two senses ( = ambiguity, see point **\[2\]** below). You can find a clear example of how centroids are computed [**here**](https://online.stat.psu.edu/stat505/lesson/14/14.8). For the implementation with scikit learn, see [here](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html).
+
+-   **Important semantic interpretation:** *a priori*, it is not obvious that averaging the vectors (that is, computing the centroid) will yield the typical/average meaning. The distributional hypothesis that we discussed at the beginning of the semester by Harris hints that this is a *plausible* outcome, but plausible is not enough. Thankfully, we have a quantitative analysis of BERT that answers this question: Yenicelik, Schmidt, and Kilcher, ["How does BERT capture semantics? A closer look at polysemous workds"](https://aclanthology.org/2020.blackboxnlp-1.15/) (2020). I also recommend, Nair, Srinivasan and Meylan ["Contextualized Word Embeddings Encode Aspects of Human-Like Word Sense Knowledge"](https://aclanthology.org/2020.cogalex-1.16.pdf) (2020) (this paper was mentioned in our reading for Week 11, "Modelling Language" by Jumbly Grindrod).
+
+-   **Remember**: PCA projects the 768-dimensional centroid down to 2 dimensions, which preserves the general direction of the centroid relative to other points but discards most of the information. If you look back to step 6, you will see that the two PCA components explained only a small percentage of the total variance. That means the real distances between points and centroids (the ones we are computing here) are measured in the full 768-dimensional space, where they're reliable. The 2D PCA plot is just a rough sketch of that space for us to develop some intuition about the embedding space. This is why the borderline analysis here uses the full embeddings rather than the PCA projection. Two points that look far apart in the PCA plot might actually be close in 768 dimensions (the distance is carried in dimensions PCA threw away), and two points that overlap in the plot might be far apart.
+
+**\[2\]** For k=3, **ambiguity** is how close the two nearest centroids are in distance. Each "credit" embedding has a distance to all three centroids. It is assigned to the nearest one. But how confident is that assignment? If the nearest centroid is much closer than the second-nearest, the assignment is clear and the word strongly belongs to one sense. If the nearest and second-nearest centroids are almost the same distance away, the word sits at the boundary between two senses, and BERT effectively "can't decide" which meaning is dominant. We measure this by subtracting the closest distance from the second-closest: a small gap means high ambiguity
+
+### Interpreting the results:
+
+I won't give you my outputs! I want you to look over yours carefully and think through the results. Again, your results might be slightly different from mine since I varied the corpus (very slightly), but here's how I *interpret* my outputs:
+
+-   The vast majority of borderline cases are between Cluster 0 (Epistemic) and Cluster 1 (Social/Reputational):11 out of your 15 most ambiguous sentences fall on this boundary. That's useful to know: in this corpus, the line between "believing someone" and "respecting someone's standing" is almost nonexistent! This makes historical sense. In a culture without modern verification systems (credit bureaus, identification documents, institutional guarantees), it makes sense that our sense of trust, the question "should I believe this person?", and our social estimate of the person, the question "does this person have standing in the community?", would be closely connected. A person's word was credible because they had social credit, and they had social credit because their word was credible.
+
+-   The Standout Sentences from my output:
+
+    "I cannot conceive that these fictions can carie credit with many understanding Papists." Does "carry credit" mean "be believed" (epistemic) or "have standing/authority" (social)? It means both simultaneously: a fiction that "carries credit" is one that is believed because it has the appearance of authority. BERT's gap is 0.0018, essentially zero.
+
+    Similarly: "Angelus Breuentanus, a man of good credit, the authour of this description." Is he "a man of good credit" because he is believable (epistemic) or because he has standing (social)? He's a reliable author precisely because he has a good reputation.
+
+    And: "for which I give they credit they promise to come over to the other side within fourteen day and make i payment." Here "give credit" slides from the epistemic (I believe their promise) toward the financial (I extend them goods without immediate payment) within a single clause. BERT places it on the epistemic/social boundary, but the sentence actually reaches toward all three senses at once.
+
+-   The Cluster Pairs Epistemic ↔ Social has the most borderline cases and the smallest gaps. These two senses are nearly indistinguishable in this corpus. Epistemic ↔ Financial is rarer but produces an interesting single example: "a letter of credit from the Constable." A letter of credit is simultaneously a document you believe (epistemic), backed by a person of standing (social), authorizing financial transactions (financial). It's a three-way intersection in one phrase.
+
+-   Social ↔ Financial includes the most nakedly economic borderline case: "credit shall you have in Naples, for the said summe of ducc. of Venice." This is accounting language (ducats, sums, credit entries) yet BERT still sees it as partially social because in this period, even a financial "credit" in a ledger depended on the reputation of the parties involved.
+
+-   The Clear-Cut Cases: The most unambiguous cases are all from *The Wealth of Nations* (1776), which I have been using as a bridge to modern language in our class. Adam Smith is writing two centuries after most of our other texts. "Paper bills of credit, to be redeemed fifteen years after their date" is purely financial, with no social or epistemic ambiguity. The gap scores are enormous (3.4, compared to 0.002 for the most ambiguous cases). By Smith's time, "credit" as a financial instrument had become a fully distinct concept. The semantic separation that your early modern corpus hasn't yet achieved is complete in the late eighteenth century.
+
+[**Takeaway**]{.underline}: our corpus is documenting the semantic split fo the different sense of the term "credit". The three senses of "credit" that modern English treats as distinct (believing, reputation, and finance) are still fused together in these early modern texts, with the epistemic and social senses most tightly bound. The financial sense is beginning to pull away (Cluster 2 is the smallest and most distinct), but even it hasn't fully separated.
+
+## Step 8: Mapping "Credit" Back to Document Clusters
+
+We can now bring everything we have done together and tabulate the results for interpretatoin. This connects our two analyses: which types of documents (that is, from which cluster) use "credit" in which sense (epistemic, social, or financial)? We also look at which documents contain the most ambiguous uses.
+
+Create a new file, `step8_cross_tabulation.py`, and run it:
+
+``` python
+import json
+import numpy as np
+from pathlib import Path
+from collections import defaultdict
+
+# Load document cluster assignments
+with open(Path("data") / "cluster_assignments.json", "r") as f:
+    doc_cluster_data = json.load(f)
+
+doc_cluster_labels = doc_cluster_data["cluster_labels"]
+doc_filenames = doc_cluster_data["filenames"]
+K_DOC = doc_cluster_data["K"]
+
+# Build a filename -> document cluster lookup
+filename_to_doc_cluster = {}
+for i, fn in enumerate(doc_filenames):
+    filename_to_doc_cluster[fn] = doc_cluster_labels[i]
+
+# --- Load credit data (k=3) ---
+with open(Path("data") / "credit_embeddings.json", "r", encoding="utf-8") as f:
+    credit_data = json.load(f)
+
+credit_metadata = credit_data["metadata"]
+
+with open(Path("data") / "credit_cluster_labels_k3.json", "r") as f:
+    credit_cluster_data = json.load(f)
+
+credit_cluster_labels = credit_cluster_data["credit_cluster_labels"]
+K_CREDIT = credit_cluster_data["K_CREDIT"]
+
+credit_sense_names = {0: "Epistemic", 1: "Social", 2: "Financial"}
+
+
+# CROSS-TABULATION: Document Cluster × Credit Sense
+
+cross_tab = defaultdict(int)
+
+for i, meta in enumerate(credit_metadata):
+    fn = meta["filename"]
+    credit_sense = credit_cluster_labels[i]
+    doc_cluster = filename_to_doc_cluster.get(fn, -1)
+    cross_tab[(doc_cluster, credit_sense)] += 1
+
+print("=" * 75)
+print("CROSS-TABULATION: Document Cluster x Credit Sense (k=3)")
+print("=" * 75)
+print()
+
+# Header
+print(f"{'Doc Cluster':<15}", end="")
+for cs in range(K_CREDIT):
+    print(f"  {credit_sense_names[cs]:>12}", end="")
+print(f"  {'Total':>8}")
+print("-" * 75)
+
+# Rows
+doc_cluster_totals = defaultdict(int)
+sense_totals = defaultdict(int)
+
+for dc in range(K_DOC):
+    print(f"Cluster {dc:<7}", end="")
+    row_total = 0
+    for cs in range(K_CREDIT):
+        count = cross_tab.get((dc, cs), 0)
+        row_total += count
+        doc_cluster_totals[dc] += count
+        sense_totals[cs] += count
+        print(f"  {count:>12}", end="")
+    print(f"  {row_total:>8}")
+
+# Totals row
+print("-" * 75)
+print(f"{'Total':<15}", end="")
+grand_total = 0
+for cs in range(K_CREDIT):
+    print(f"  {sense_totals[cs]:>12}", end="")
+    grand_total += sense_totals[cs]
+print(f"  {grand_total:>8}")
+
+# Handle unmatched documents
+unmatched = sum(cross_tab.get((-1, cs), 0) for cs in range(K_CREDIT))
+if unmatched > 0:
+    print(f"\n({unmatched} occurrences in documents not in the embedding set)")
+
+
+# PROPORTIONAL VIEW: What % of each document cluster's "credit"
+# usage falls into each sense?
+
+print("\n\n" + "=" * 75)
+print("PROPORTIONAL VIEW: % of each document cluster's 'credit' by sense")
+print("=" * 75)
+print()
+
+print(f"{'Doc Cluster':<15}", end="")
+for cs in range(K_CREDIT):
+    print(f"  {credit_sense_names[cs]:>12}", end="")
+print(f"  {'N':>8}")
+print("-" * 75)
+
+for dc in range(K_DOC):
+    total = doc_cluster_totals[dc]
+    if total == 0:
+        continue
+    print(f"Cluster {dc:<7}", end="")
+    for cs in range(K_CREDIT):
+        count = cross_tab.get((dc, cs), 0)
+        pct = count / total * 100
+        print(f"  {pct:>10.1f}%", end="")
+    print(f"  {total:>8}")
+
+
+# WHICH DOCUMENTS USE "CREDIT" MOST, AND IN WHICH SENSE?
+
+print("\n\n" + "=" * 75)
+print("TOP DOCUMENTS BY 'CREDIT' FREQUENCY")
+print("=" * 75)
+print()
+
+# Count per document
+doc_credit_counts = defaultdict(lambda: defaultdict(int))
+doc_credit_total = defaultdict(int)
+
+for i, meta in enumerate(credit_metadata):
+    fn = meta["filename"]
+    sense = credit_cluster_labels[i]
+    doc_credit_counts[fn][sense] += 1
+    doc_credit_total[fn] += 1
+
+# Sort by total count
+top_docs = sorted(doc_credit_total.items(), key=lambda x: x[1], reverse=True)[:15]
+
+print(f"{'Filename':<30} {'Total':>6}", end="")
+for cs in range(K_CREDIT):
+    print(f"  {credit_sense_names[cs]:>12}", end="")
+print(f"  {'Doc Cluster':>12}")
+print("-" * 100)
+
+for fn, total in top_docs:
+    dc = filename_to_doc_cluster.get(fn, -1)
+    print(f"{fn:<30} {total:>6}", end="")
+    for cs in range(K_CREDIT):
+        count = doc_credit_counts[fn].get(cs, 0)
+        print(f"  {count:>12}", end="")
+    print(f"  {dc:>12}")
+
+
+# DOCUMENTS WITH PREDOMINANTLY ONE SENSE
+
+print("\n\n" + "=" * 75)
+print("DOCUMENTS DOMINATED BY A SINGLE SENSE (>75% of uses)")
+print("=" * 75)
+
+for cs in range(K_CREDIT):
+    print(f"\n--- Predominantly {credit_sense_names[cs]} ---")
+    dominated = []
+    for fn, total in doc_credit_total.items():
+        if total < 3:  # Skip documents with very few occurrences
+            continue
+        sense_count = doc_credit_counts[fn].get(cs, 0)
+        pct = sense_count / total
+        if pct >= 0.75:
+            dominated.append((fn, total, sense_count, pct))
+
+    dominated.sort(key=lambda x: x[1], reverse=True)
+    if not dominated:
+        print("  (none)")
+    for fn, total, sense_count, pct in dominated[:5]:
+        dc = filename_to_doc_cluster.get(fn, -1)
+        print(f"  {fn:<30} {sense_count}/{total} ({pct:.0%})  [Doc Cluster {dc}]")
+```
+
+-   Let's start with the **proportional view**: [document cluster 0]{.underline} and [document cluster 1]{.underline} have almost the same epistemic/social ratio (38% vs 43% epistemic, 48% vs 51% social), but they differ sharply on the financial sense, 13.2% in Cluster 0 vs only 5.7% in Cluster 1. The documents in Cluster 0 are more than twice as likely to use "credit" in a financial sense. That is, the financial meaning of "credit" is not evenly distributed across the archive. Meanwhile, the epistemic and social senses are pervasive everywhere in roughly the same proportions. This supports the idea that the epistemic/social fusion is a feature of the language itself in this period, not a property of particular types of documents.
+
+Now, I have to come clean with you and tell you what the documents actually are!
+
+-   **Top documents:** A10821.txt and A06786.txt each use "credit" over 100 times, and in both cases the financial sense dominates (85/113 and 81/108). These are, respectively, *The Merchants Mappe of Commerce* by Lewes Roberts (A10821) and *Consuetudo, vel Lex Mercatoria, or The Ancient Law-Merchant* by Gerard Malynes (A06786).
+
+    *The Merchants Mappe of Commerce* covers the "universall manner and matter of trade," including currencies, coins, exchanges, commodities, weights, and measures across all trading cities, oriented to the practice of commerce in London. This perfectly explains why 85 out of 113 uses of "credit" in this text are financial; it's essentially a merchant's reference manual. *Lex Mercatoria*, by our old friend Gerard Malynes, is described in the title page as "necessarie for all statesmen, iudges, magistrates, temporall and ciuile lawyers, mint-men, merchants, marriners, and all others negotiating in all places of the world." And, as you might remember from early on in the term, Malynes was one of the most important early modern writers on trade and exchange. It's not surprising that we find 81/108 financial-related meanings of "credit."
+
+    At the other end, A10357.txt (59/86 epistemic) and A07466.txt (51/69 epistemic) are heavily epistemic. The first one, A10357.txt, is Walter Raleigh's *The History of the Word* (1614) and the second one, A07466.text, is Pedro Mexia, *The Imperiall Historie* (1623). Both are histories and use "credit" as a way to indicate trust (or lack of) in a source. Raleigh's *History of the World*, in particular, constantly mentions and evaluates ancient authorities.
+
+    A09800.txt skews strongly social (88/136). It is a work translated from Plutarch, *The philosophie, commonlie called, the morals vvritten by the learned philosopher Plutarch of Chæronea* (1603). Plutarch's *Moralia* is a collection of essays on ethics, conduct, and practical wisdom — how to behave at a banquet, how to distinguish a flatterer from a friend, how to manage anger, how to raise children, how to conduct oneself in public life. It is essentially a handbook for living honorably in a community.
+
+    OK, here we go, I "cooked" my corpus: I have three copies of the *Wealth of Nations.* They show 84 out of 95 uses as financial, confirming what the borderline analysis already told us earlier, that is, by Smith's time, "credit" had become a predominantly financial term. This is where I get to see who has been paying attention! Bring this up in class or email me for brownie points.
+
+-   **Documents dominated by one sense or another:** here we are looking at the documents where a single sense accounts for 75%+ of uses represent texts where the word has effectively already resolved into one meaning:
+
+    First, the predominantly epistemic texts (A09833, A08545, A02361) are all translations! The first in another history, Polybius, *The History*, translated by Edward Grimeston (A09833). Like Raleigh's and Mexia's works, this is a classical history where the translator and the original author are constantly evaluating sources. The second one, A08545, *The Myrrour of Knighthood*, translated by R.P., is a chivalric romance. Romances are constantly framing themselves in terms of believability–they have to convince you that the unbelievable events they narrate should actually be believed ("I slayed a dragon THIS big!"). The narrator keeps asking you to believe what you're reading, precisely because the content is fantastical. The last one, A02361, Guillemard, *A Combat Betwixt Man and Death*, translated by Grimeston, is a treatise arguing against the excessive fear of death and also relies on authorities (scripture, classical philosophy. Grimeston is the translator of this work as well, so this use of "credit" to render "believe this authority" is consistent across works.
+
+    The predominantly social texts (A09990, A17385) are these are both "Puritan" sermons and biblical commentaries. The first one, A09990, is by a very interesting preacher, John Preston, *The New Covenant, or the Saints Portion*. Preston was one of the most influential Puritan preachers of the early seventeenth century. At 94% social, this is the most semantically concentrated text in your entire corpus. The second one, A17385, is by Nicholas Byfield, *A Commentary upon the First Epistle of St. Peter*. I Peter is an epistle specifically about conduct under persecution. Both use the vocabulary of social "credit" as reputation, good name, and honorable conduct.
+
+Overall, the cross-tabulation and document identification reveal that the three senses of "credit" are not randomly distributed across the corpus. They are organized by genre, and each genre represents a distinct institutional context for managing trust.
+
+## Step 9: Comparing Base BERT and Fine-Tuned BERT on "Credit"
+
+This is the last step: we are going to see whether fine-tuning actually made a difference for the "credit" analysis. So, does fine-tuning on the Geneva Bible actually improve how well BERT distinguishes different senses of "credit" in mercantile documents?
+
+Create a new file, `step9_base_vs_finetuned.py`, and run it.
+
+``` python
+import torch
+import json
+import numpy as np
+from pathlib import Path
+from transformers import BertTokenizer, BertModel
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.rcParams["figure.dpi"] = 150
+
+# Load credit metadata 
+with open(Path("data") / "credit_embeddings.json", "r", encoding="utf-8") as f:
+    data = json.load(f)
+
+credit_metadata = data["metadata"]
+ft_credit_embeddings = np.array(data["embeddings"])
+
+print(f"Loaded {len(ft_credit_embeddings)} fine-tuned BERT embeddings for 'credit'.")
+
+# Load base BERT and re-extract embeddings
+print("Loading base BERT...")
+tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+base_model = BertModel.from_pretrained("bert-base-uncased")
+base_model.eval()
+device = "cuda" if torch.cuda.is_available() else "cpu"
+base_model.to(device)
+
+
+def get_word_embedding(sentence, target_word, tokenizer, model):
+    """Extract contextual embedding for a specific word."""
+    inputs = tokenizer(sentence, return_tensors="pt", truncation=True, max_length=512)
+    inputs = {k: v.to(device) for k, v in inputs.items()}
+    tokens = tokenizer.convert_ids_to_tokens(inputs["input_ids"][0].cpu())
+
+    target_lower = target_word.lower()
+    target_indices = []
+    current_word = ""
+    current_indices = []
+
+    for idx, token in enumerate(tokens):
+        if token in ["[CLS]", "[SEP]", "[PAD]"]:
+            if current_word == target_lower and current_indices:
+                target_indices = current_indices
+                break
+            current_word = ""
+            current_indices = []
+            continue
+
+        if token.startswith("##"):
+            current_word += token[2:]
+            current_indices.append(idx)
+        else:
+            if current_word == target_lower and current_indices:
+                target_indices = current_indices
+                break
+            current_word = token
+            current_indices = [idx]
+
+    if not target_indices and current_word == target_lower and current_indices:
+        target_indices = current_indices
+
+    if not target_indices:
+        return None
+
+    with torch.no_grad():
+        outputs = model(**inputs)
+
+    hidden_states = outputs.last_hidden_state[0].cpu()
+    return hidden_states[target_indices].mean(dim=0).numpy()
+
+
+# Extract with base BERT
+print("Extracting 'credit' embeddings with base BERT...\n")
+
+base_credit_embeddings = []
+base_indices = []
+
+for i, meta in enumerate(credit_metadata):
+    emb = get_word_embedding(meta["sentence"], "credit", tokenizer, base_model)
+    if emb is not None:
+        base_credit_embeddings.append(emb)
+        base_indices.append(i)
+
+    if (i + 1) % 100 == 0:
+        print(f"  Processed {i + 1}/{len(credit_metadata)}...")
+
+base_credit_embeddings = np.array(base_credit_embeddings)
+print(f"\nExtracted {len(base_credit_embeddings)} base BERT embeddings.")
+
+
+# COMPARE CLUSTERING QUALITY (k=3)
+
+K = 3
+sense_names = {0: "Epistemic", 1: "Social", 2: "Financial"}
+
+if len(base_credit_embeddings) >= 6 and len(ft_credit_embeddings) >= 6:
+    # Use only the overlapping subset
+    ft_subset = ft_credit_embeddings[base_indices]
+
+    km_base = KMeans(n_clusters=K, random_state=42, n_init=10)
+    km_ft = KMeans(n_clusters=K, random_state=42, n_init=10)
+
+    base_labels = km_base.fit_predict(base_credit_embeddings)
+    ft_labels = km_ft.fit_predict(ft_subset)
+
+    base_sil = silhouette_score(base_credit_embeddings, base_labels)
+    ft_sil = silhouette_score(ft_subset, ft_labels)
+
+    print(f"\n{'='*60}")
+    print(f"CLUSTERING QUALITY COMPARISON (k={K})")
+    print(f"{'='*60}")
+    print(f"\nSilhouette score (base BERT):      {base_sil:.4f}")
+    print(f"Silhouette score (fine-tuned BERT): {ft_sil:.4f}")
+
+    if ft_sil > base_sil:
+        improvement = ((ft_sil - base_sil) / base_sil) * 100
+        print(f"\nFine-tuned model produces BETTER-separated clusters.")
+        print(f"Improvement: {improvement:.1f}%")
+    elif ft_sil < base_sil:
+        print(f"\nBase model produces better-separated clusters.")
+    else:
+        print(f"\nBoth models produce similarly separated clusters.")
+
+    #Cluster size comparison:
+    
+    print(f"\n{'='*60}")
+    print(f"CLUSTER SIZE COMPARISON")
+    print(f"{'='*60}")
+    print(f"\n{'Cluster':<20} {'Base BERT':>12} {'Fine-tuned':>12}")
+    print("-" * 44)
+    for c in range(K):
+        base_count = (base_labels == c).sum()
+        ft_count = (ft_labels == c).sum()
+        print(f"Cluster {c:<12} {base_count:>12} {ft_count:>12}")
+
+    
+    # SIDE-BY-SIDE VISUALIZATION
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7))
+    colors = ["#E74C3C", "#3498DB", "#2ECC71"]
+
+    # Base BERT
+    pca_base = PCA(n_components=2)
+    base_2d = pca_base.fit_transform(base_credit_embeddings)
+
+    for c in range(K):
+        mask = base_labels == c
+        ax1.scatter(
+            base_2d[mask, 0], base_2d[mask, 1],
+            c=colors[c], s=30, alpha=0.5,
+            label=f"Cluster {c} (n={mask.sum()})",
+            edgecolors="black", linewidths=0.2,
+        )
+    ax1.set_title(f"Base BERT — 'Credit' (k={K}, sil={base_sil:.3f})")
+    ax1.set_xlabel("PC1")
+    ax1.set_ylabel("PC2")
+    ax1.legend(fontsize=8)
+    ax1.grid(True, alpha=0.2)
+
+    # Fine-tuned BERT
+    pca_ft = PCA(n_components=2)
+    ft_2d = pca_ft.fit_transform(ft_subset)
+
+    for c in range(K):
+        mask = ft_labels == c
+        ax2.scatter(
+            ft_2d[mask, 0], ft_2d[mask, 1],
+            c=colors[c], s=30, alpha=0.5,
+            label=f"Cluster {c} (n={mask.sum()})",
+            edgecolors="black", linewidths=0.2,
+        )
+    ax2.set_title(f"Fine-Tuned BERT — 'Credit' (k={K}, sil={ft_sil:.3f})")
+    ax2.set_xlabel("PC1")
+    ax2.set_ylabel("PC2")
+    ax2.legend(fontsize=8)
+    ax2.grid(True, alpha=0.2)
+
+    plt.tight_layout()
+    plt.savefig("credit_base_vs_finetuned_k3.png", dpi=150, bbox_inches="tight")
+    plt.show()
+
+    print("\nSaved plot to credit_base_vs_finetuned_k3.png")
+
+    ######################
+    # AMBIGUITY COMPARISON: 
+    # Compare how ambiguous the clustering is under each model
+
+    base_distances = np.array([
+        [np.linalg.norm(emb - c) for c in km_base.cluster_centers_]
+        for emb in base_credit_embeddings
+    ])
+    ft_distances = np.array([
+        [np.linalg.norm(emb - c) for c in km_ft.cluster_centers_]
+        for emb in ft_subset
+    ])
+
+    base_sorted = np.sort(base_distances, axis=1)
+    ft_sorted = np.sort(ft_distances, axis=1)
+
+    base_ambiguity = base_sorted[:, 1] - base_sorted[:, 0]
+    ft_ambiguity = ft_sorted[:, 1] - ft_sorted[:, 0]
+
+    print(f"\n{'='*60}")
+    print(f"AMBIGUITY COMPARISON")
+    print(f"{'='*60}")
+    print(f"\n{'Metric':<35} {'Base BERT':>12} {'Fine-tuned':>12}")
+    print("-" * 59)
+    print(f"{'Mean ambiguity gap':<35} {base_ambiguity.mean():>12.4f} {ft_ambiguity.mean():>12.4f}")
+    print(f"{'Median ambiguity gap':<35} {np.median(base_ambiguity):>12.4f} {np.median(ft_ambiguity):>12.4f}")
+    print(f"{'% highly ambiguous (gap < 0.1)':<35} "
+          f"{(base_ambiguity < 0.1).mean()*100:>11.1f}% "
+          f"{(ft_ambiguity < 0.1).mean()*100:>11.1f}%")
+    print(f"{'% clear-cut (gap > 1.0)':<35} "
+          f"{(base_ambiguity > 1.0).mean()*100:>11.1f}% "
+          f"{(ft_ambiguity > 1.0).mean()*100:>11.1f}%")
+
+    # --- Ambiguity distribution plot ---
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.hist(base_ambiguity, bins=50, alpha=0.5, label=f"Base BERT (mean={base_ambiguity.mean():.3f})",
+            color="gray", edgecolor="black", linewidth=0.3)
+    ax.hist(ft_ambiguity, bins=50, alpha=0.5, label=f"Fine-tuned (mean={ft_ambiguity.mean():.3f})",
+            color="steelblue", edgecolor="black", linewidth=0.3)
+    ax.set_xlabel("Ambiguity Gap (distance to nearest - distance to second nearest centroid)")
+    ax.set_ylabel("Count")
+    ax.set_title("Distribution of Ambiguity: Base BERT vs Fine-Tuned")
+    ax.legend()
+    ax.grid(True, alpha=0.2)
+
+    plt.tight_layout()
+    plt.savefig("ambiguity_comparison.png", dpi=150, bbox_inches="tight")
+    plt.show()
+
+    print("\nSaved plot to ambiguity_comparison.png")
+
+else:
+    print("Not enough embeddings for comparison.")
+```
+
+**\[1\] Ambiguity:** The ambiguity gap measures how confident the clustering is about each individual assignment. This is how it's computed:
+
+-   For every occurrence of "credit," we have its embedding (a 768-dimensional vector) and three cluster centroids (also 768-dimensional vectors, each representing the average of one cluster). We compute the **Euclidean distance** from that occurrence's embedding to each of the three centroids. Then we sort those three distances from smallest to largest. The ambiguity gap is the difference between the smallest distance and the second-smallest distance. That is, how much closer is this point to its assigned cluster than to the next-closest cluster? If the gap is large, the point is far from any competing centroid. If the gap is small, the point is almost exactly equidistant from two centroids.
+
+When I compare the clusters between base and fine tuned BERT, my output gives me:
+
+### **Clustering Quality Comparison (k = 3)**
+
+To evaluate whether domain adaptation improves clustering, we compare silhouette scores for the base BERT embeddings and the fine-tuned model.
+
+| Model           | Silhouette Score |
+|:----------------|-----------------:|
+| Base BERT       |           0.0655 |
+| Fine-tuned BERT |           0.0716 |
+
+-   The **fine-tuned BERT** model produces better-separated clusters, suggesting that fine-tuning helps the embeddings better capture distinctions in this historical corpus. This corresponds to a **9.4% improvement** in silhouette score.
+
+### **Cluster Size Comparison**
+
+To better understand how fine-tuning reshapes the semantic space, we compare the number of documents assigned to each cluster before and after domain adaptation.
+
+| Cluster   | Base BERT | Fine-tuned BERT |
+|:----------|----------:|----------------:|
+| Cluster 0 |      2676 |            1962 |
+| Cluster 1 |       578 |            2455 |
+| Cluster 2 |      1774 |             611 |
+
+The cluster distribution changes substantially after fine-tuning. This suggests that the fine-tuned model is grouping documents according to different semantic relationships than the base model.
+
+Most notably, Cluster 1 expanded quite a bit. This may indicate that the fine-tuned model is better capturing a historically meaningful discourse pattern that was previously dispersed across multiple clusters.
+
+![](Week_13_Fine_tuned_BASE.png)
+
+**Note:** because the silhouette score improves **and** the cluster sizes change substantially, the fine-tuned model is not simply sharpening the same grouping structure. Instead, it is reorganizing the corpus into a different partition, meaning that many documents are now considered semantically closer to different neighbors than before.
+
+### **Ambiguity Comparison**
+
+To evaluate how confidently each model assigns documents to clusters, we compare the **ambiguity gap**, defined as the difference between a document’s distance to its closest cluster centroid and its second-closest centroid.
+
+| Metric                           | Base BERT | Fine-tuned BERT |
+|:---------------------------------|----------:|----------------:|
+| Mean ambiguity gap               |    0.9090 |          1.0012 |
+| Median ambiguity gap             |    0.7970 |          0.9066 |
+| \% highly ambiguous (gap \< 0.1) |      5.8% |            5.2% |
+| \% clear-cut (gap \> 1.0)        |     38.9% |           45.5% |
+
+The fine-tuned model produces larger ambiguity gaps on average, which means documents are assigned to their nearest clusters with greater confidence. Most importantly, the proportion of clear-cut documents increases from **38.9%** to **45.5%**, suggesting that fine-tuning creates a semantic space in which more documents fall decisively into one cluster rather than lying near a boundary.
+
+![](Week_13_Ambiguity_Gap.png)
