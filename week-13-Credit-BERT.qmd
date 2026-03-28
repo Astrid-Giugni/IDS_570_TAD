@@ -1975,3 +1975,9 @@ To evaluate how confidently each model assigns documents to clusters, we compare
 The fine-tuned model produces larger ambiguity gaps on average, which means documents are assigned to their nearest clusters with greater confidence. Most importantly, the proportion of clear-cut documents increases from **38.9%** to **45.5%**, suggesting that fine-tuning creates a semantic space in which more documents fall decisively into one cluster rather than lying near a boundary.
 
 ![](Week_13_Ambiguity_Gap.png)
+
+## Final comparison:
+
+In Week 12, we tested fine-tuning by asking BERT to predict specific masked words in Early Modern sentences. The results were modest: top-5 accuracy improved from 19% to 21%, with only two new correct predictions. This was ... somewhat disappointing. In Week 13, however, we tested the same fine-tuned model from a different angle: instead of asking it to predict words, we asked whether it produces better *representations* of meaning. Here the results were more substantial. The fine-tuned model was 9.4% better at separating the three senses of "credit" (silhouette score), and the proportion of occurrences where the model confidently assigned "credit" to a single sense increased from 39% to 46% (this level of improvement is worth my while!). This is because organizing a semantic space so that related meanings cluster together is a broader capability that draws on the model's overall understanding of language. Fine-tuning on the Geneva Bible improved BERT's general comprehension of Early Modern English more than it improved its ability to guess individual words and that's absolutely fine by me!
+
+These two results are not contradictory; they just measure different things. This is something that we need to keep in mind when making decisions about fine-tuning.
