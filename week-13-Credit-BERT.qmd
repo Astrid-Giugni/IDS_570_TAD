@@ -19,7 +19,7 @@ py_config()
 
 ## Week 13 goals:
 
-To recap what we have been doing for this sequence of tutorails: first, we learned how BERT produces contextual embeddings (Week 11); and, second, we fine-tuned BERT on the Geneva Bible to teach it Early Modern English (Week 12). With this last tutorial, we will put that toolkit to use on a real historical archive.
+To recap what we have been doing for this sequence of tutorials: first, we learned how BERT produces contextual embeddings (Week 11); and, second, we fine-tuned BERT on the Geneva Bible to teach it Early Modern English (Week 12). With this last tutorial, we will put that toolkit to use on a real historical archive.
 
 We (well, I) have 626 mercantile documents from the early modern period. We are going to:
 
@@ -116,11 +116,11 @@ To cluster the documents, we need to represent each one as a single vector. Sinc
 1.  Split each document into [overlapping]{.underline} chunks of \~512 tokens
 2.  Embed each chunk separately
 3.  We then use [mean pooling](https://arxiv.org/html/2411.14654v1) within each chunk (over token embeddings)
-4.  ength-weighted averaging across chunks: length-weighting means that longer chunks contribute more to the final document embedding than very short leftover chunks at the end.
+4.  Length-weighted averaging across chunks: length-weighting means that longer chunks contribute more to the final document embedding than very short leftover chunks at the end.
 
 **Some details:** Within each chunk, we use mean pooling over the token embeddings in the final hidden layer. This gives us a single vector that summarizes that [chunk’s contextual meaning]{.underline}. We exclude the special `[CLS]` and `[SEP]` tokens before averaging, since our goal is to represent the actual chunk text rather than those structural markers.To create one embedding for the full document, we then combine the chunk embeddings using a length-weighted average.
 
-**Why overlap?** Chunk boundaries are created in token space, which means that important phrases or sentences can fall near the edge of a chunk and lose some context if they are split. By overlappin, we reduce that risk: material near the end of one chunk reappears near the beginning of the next, making it more likely that meaningful passages are represented with adequate context in at least one chunk.
+**Why overlap?** Chunk boundaries are created in token space, which means that important phrases or sentences can fall near the edge of a chunk and lose some context if they are split. By overlapping, we reduce that risk: material near the end of one chunk reappears near the beginning of the next, making it more likely that meaningful passages are represented with adequate context in at least one chunk.
 
 Create a new file, `step1_embed_documents.py`, and run it. This step takes [**longer**]{.underline} since we are embedding our full corpus (go ahead grab a snack or even consider running it while you are doing homework for another class or, if you are like me, while you make dinner...).
 
@@ -352,7 +352,7 @@ We will try several values of k and use the **elbow method** and [**silhouette s
 
 -   The **elbow plot** should help us decide how many clusters to use by showing how much we improve as we add more clusters. On the x-axis, we will plot the number of clusters (k) and on the y-axis we will plot *inertia.* Inertia measures how tightly grouped the points are inside each cluster. This means that lower inertia = tighter, more compact clusters. You are looking for a bend (“elbow”) in the curve. The idea is that, at first, adding clusters gives big improvements in how compact the clusters are. However, the improvements slow down after a certain number of clusters. The point where this change happens is called the “elbow.” The problem is that sometimes the curve will look fairly smooth, without a clear elbow. The elbow method does not measure separation between clusters — only compactness.
 
--   The **silhoutte score** tells us how well-separated and well-formed the clusters are. When we plot it, on the x-axis, we will have the number of clusters (k), while on the y-axis we will have the silhouette score. For each point *p*, it compare how close *p* is to points in its own cluster vs. how close *p* is to points in other clusters. Unlike the elbow method, silhouette explicitly measures cluster separation, not just compactness. The image below (created with the help of Claude), show you how to understand the Silhouette score. While I added the formula too, you want to focus on the image to develop your understanding ([wikipedia](https://en.wikipedia.org/wiki/Silhouette_(clustering)) has clear explanation too):
+-   The **silhouette score** tells us how well-separated and well-formed the clusters are. When we plot it, on the x-axis, we will have the number of clusters (k), while on the y-axis we will have the silhouette score. For each point *p*, it compare how close *p* is to points in its own cluster vs. how close *p* is to points in other clusters. Unlike the elbow method, silhouette explicitly measures cluster separation, not just compactness. The image below (created with the help of Claude), show you how to understand the Silhouette score. While I added the formula too, you want to focus on the image to develop your understanding ([wikipedia](https://en.wikipedia.org/wiki/Silhouette_(clustering)) has clear explanation too):
 
     ![](silhouette_score(2).png)
 
@@ -484,7 +484,7 @@ As we discussed in class, we can use UMAP to visualize the clusters. We use UMAP
 
 ## Step 3: Interpreting the Clusters
 
-To understand what each cluster "is about," we look at the most representative documents and extract key terms. To interpret the clusters, we are going to create an exploratory script. That will look at the top TF-IDF terms
+To understand what each cluster "is about," we look at the most representative documents and extract key terms. To interpret the clusters, we are going to create an exploratory script. That will look at the top TF-IDF terms.
 
 It does three good things:
 
@@ -679,9 +679,9 @@ My output looks like this (remember, my corpus is slightly different from yours)
 >
 > Sample files: \['A00169.txt', 'A00183.txt', 'A00188.txt', 'A00206.txt', 'A00250.txt'\] Sample snippets: - article to be inquire of in the diocese of chester in the ordinary visitation hold 1605. titul i. article concern religion prayer and sacrament first whether there be any abide in heretical opinion or... - article to BEE enqvire of within the archdeaconry of the diocese of Gloucester in the visitation to be hold in the year of our lord God 1618. article concern the clergy whether have your minister read...
 
-I am particularly interested in the **top terms**. For [cluster 0]{.underline}, these terms clearly indicate theological texts (and the sample snippets of text confirm this). For [cluster 1]{.underline}, the terms are much more administrative and they indicate that the documents are institutional/governance oriented (also confirmed by the snippets, which are about ecclesiastic administrative visits to various dioceses). This is reassuring: the clustering separates theological discourse from administrative and institutional documents, showing a genre-based division in the corpus. (This is also correct given that I baked the texts this way.)
+I am particularly interested in the **top terms**. For [cluster 0]{.underline}, these terms lean towards devotional prose (and the sample snippets of text indicates this). For [cluster 1]{.underline}, the terms are much more administrative and they indicate that the documents are institutional/governance oriented (the snippets lean that way, which are about ecclesiastic administrative visits to various dioceses). This is reassuring: the clustering separates theological discourse from administrative and institutional documents, showing a genre-based division in the corpus. (This is also correct given that I baked the texts this way.)
 
-**Note:** you may be surprised that we have a theological cluster in our corpus. However, in the 17th century, sermons and other texts that we may describe as theological were used a vehicles for discussions of colonial and mercantile concepts.
+**Note:** you may be surprised that we have a theological cluster in our corpus. However, in the 17th century, sermons and other texts that we may describe as theological were used as vehicles for discussions of colonial and mercantile concepts.
 
 ## Step 4: Finding "Credit" in the Corpus
 
@@ -785,7 +785,7 @@ When you run this, you will get something like this:
 
 ### What do you notice?
 
-First of all, this seems promising! We have found 5749 occurrences across 424 documents (from a total of 622 documents). Clearly the term "credit" is central to our corpus. So far so good, but you should also note that in the *sample* text snippets, credit is not showing up all that much. This **could** be a sign of a problem with the code. **Or** it could be a due to the vagaries of Early Modern texts.
+First of all, this seems promising! We have found 5749 occurrences across 424 documents (from a total of 622 documents). Clearly the term "credit" is widespread in our corpus. So far so good, but you should also note that in the *sample* text snippets, credit is not showing up all that much. This **could** be a sign of a problem with the code. **Or** it could be a due to the vagaries of Early Modern texts.
 
 Our script prints only the first 200 characters of each sentence, but these texts often use semicolons or colons much in the way that we would use a period at the end of a sentence, which means our sentence splitter often produces very long segments. The word "credit" might appear 300 or 500 characters into the sentence, so well past the preview window. Let's investigate by searching for the target word within each extracted sentence and printing the surrounding context. Create a `step_4_sanity.py` file and run it:
 
@@ -945,7 +945,7 @@ credit_embeddings = []
 credit_metadata = []
 
 for i, occ in enumerate(credit_occurrences):
-    emb = get_word_embedding(occ["sentence"], "credit", tokenizer, model)
+    emb = get_word_embedding(occ["sentence"], occ["credit"], tokenizer, model)
 
     if emb is not None:
         credit_embeddings.append(emb.tolist())
@@ -969,109 +969,7 @@ print("Saved to data/credit_embeddings.json")
 
 1.  At this step, we extract the contextual embedding for a specific word in a sentence. Recall the discussion in Week 11 of **WordPiece** (BERT's tokenizer): if the word is split into multiple subword tokens by BERT's tokenizer, we average their embeddings to get a single word-level representation.
 
-Let's take a look at our results from step 5. The process created **4,681** embeddignsout of 5,749 occurrences of the word "credit": about 1,068 occurrences were skipped. This happens when the `get_word_embedding` function can't find the "credit" token after BERT's subword tokenization. The most common cause is that the sentence is longer than 512 tokens, so BERT truncates it and "credit" falls past the cutoff. With your very long semicolon-delimited "sentences," this is expected. Now, 81% extraction is a healthy rate, and 4,681 embeddings is more than enough for clustering.
-
-### But suppose that we wanted to improve on this, what can we do?
-
-The main fix would be back in Step 4, where we define what a "sentence" is. Right now we split on \[.;!?\], which produces very long segments. Many of those segments exceed BERT's 512-token limit, and when "credit" happens to appear late in a long segment, it gets truncated away. The most straight forwad approach is to use a smaller context window around "credit."
-
-Instead of extracting the full "sentence," we can extract a fixed window: 200 characters on either side of the word would give us a rich context since 200 characters are approximately 60-80 words in English. This approach guarantees "credit" is always near the center of the passage and well within the 512-token limit.
-
-The trade-off is that you might cut off some useful surrounding context, but for word-level embedding extraction, BERT really only needs a few clauses of context to produce a good representation. But again, I would be surprised given that we are creating a 60-80 words window on each side of "credit."
-
-In any case, here's the alternative code, create a file named `step4-alt.py` and run it:
-
-``` python
-import re
-import json
-from pathlib import Path
-
-# Load documents
-TEXT_DIR = Path("texts")
-documents = []
-for path in sorted(TEXT_DIR.glob("*.txt")):
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        text = f.read().strip()
-    if len(text) > 50:
-        documents.append({"filename": path.name, "text": text})
-
-print(f"Loaded {len(documents)} documents.\n")
-
-# Search for "credit" and spelling variants:
-credit_pattern = re.compile(
-    r"\b(credit|creditt|creditte|credite|creditts?|credits?|creddit)\b", re.IGNORECASE
-)
-
-# Context window: 200 characters on each side
-
-CONTEXT_CHARS = 200
-
-credit_occurrences = []
-
-for i, doc in enumerate(documents):
-    for match in credit_pattern.finditer(doc["text"]):
-        # Extract a window around the match
-        start = max(0, match.start() - CONTEXT_CHARS)
-        end = min(len(doc["text"]), match.end() + CONTEXT_CHARS)
-        context = doc["text"][start:end].strip()
-
-        # Clean up whitespace
-        context = re.sub(r"\s+", " ", context)
-
-        if len(context.split()) < 5:
-            continue
-
-        credit_occurrences.append({
-            "doc_index": i,
-            "filename": doc["filename"],
-            "sentence": context,
-            "match": match.group().lower(),
-            "match_position": match.start(),
-        })
-
-# Report
-unique_docs = len(set(o["doc_index"] for o in credit_occurrences))
-print(f"Found {len(credit_occurrences)} occurrences of 'credit'")
-print(f"across {unique_docs} documents.\n")
-
-# Check "credit" is visible in every extracted passage
-visible = sum(1 for o in credit_occurrences if "credit" in o["sentence"].lower())
-print(f"Verification: 'credit' visible in {visible}/{len(credit_occurrences)} passages "
-      f"({visible/len(credit_occurrences):.0%})\n")
-
-# --- Examples with "credit"
-print("=== Sample 'Credit' Occurrences ===\n")
-for occ in credit_occurrences[:10]:
-    sent = occ["sentence"]
-    # Find "credit" in the passage and show surrounding context
-    idx = sent.lower().index("credit")
-    highlight_start = max(0, idx - 60)
-    highlight_end = min(len(sent), idx + 70)
-    snippet = sent[highlight_start:highlight_end]
-
-    print(f"[{occ['filename']}]")
-    print(f"  ...{snippet}...")
-    print()
-
-# Save for step 5
-Path("data").mkdir(exist_ok=True)
-with open(Path("data") / "credit_occurrences.json", "w", encoding="utf-8") as f:
-    json.dump(credit_occurrences, f, ensure_ascii=False, indent=2)
-
-print(f"Saved {len(credit_occurrences)} occurrences to data/credit_occurrences.json")
-```
-
-Note that we went from 5,749 to 5,955 occurrences of credit (the window approach catches matches that the sentence splitter was breaking apart), and 5,952 out of 5,955 have "credit" visible.
-
-This isn't 100%, though it's close: This is because the verification check searches for "credit" in o\["sentence"\].lower(), which will find "credit," "creditt," "credite," and "credits" because they all contain "credit" as a substring. But "creddit" does not contain "credit" (the "dd" doesn't match). So if our corpus has 3 instances of "creddit," the regex matches them correctly, but the simple substring check "credit" in the verification code misses them. It's a quirk of the verification code, not of the extraction.
-
--   **Now re-run Step 5**.
-
-The output will look like: `Extracted 5028 embeddings for 'credit'`.
-
-Great, we went from 4,681 to 5,028 extracted embeddings, recovering about 350 additional occurrences. The extraction rate is now 84%, up from 81%. The remaining 927 misses are cases where the get_word_embedding function can't match "credit" after BERT's subword tokenization. Because we are working with Early Modern texts that contain unusual characters, BERT's tokenizer splits the text differently than expected, and the word-reconstruction logic doesn't find a match.
-
-However, with 5,028 embeddings, we have a very robust dataset for clustering, so this is a good place to proceed to **step 6** as far as the tutorial goes. For research, I would want to push this further and try to recover the last 16%. The fix would be in step 5's `get_word_embedding` function: there I would want to use a looser matching strategy that searches for any subword token starting with "credit" rather than requiring exact full-word reconstruction. I would also want to attempt a normalizing strategy in pre-processing that targets "credit."
+Let's take a look at our results from step 5. The process created **5949** embeddigns out of 5,955 occurrences of the word "credit": we missed 6 occurrences (again, your numbers may be slightly different). This happens when the `get_word_embedding` function can't find the "credit" token after BERT's subword tokenization. The most common cause is that the sentence is longer than 512 tokens, so BERT truncates it and "credit" falls past the cutoff. This is good enough coverage. It isn't 100%, though it's close: we have a very robust dataset for clustering, so this is a good place to proceed to **step 6** as far as the tutorial goes.
 
 ## Step 6: Clustering the Meanings of "Credit"
 
@@ -1188,9 +1086,11 @@ print("Saved cluster labels to data/credit_cluster_labels.json")
 
 -   The silhouette scores are very low: 0.070 to 0.072. This means means that the clusters are not well separated. On a scale from -1 to 1, anything below 0.25 is generally considered weak clustering structure.
 
--   How can we intepret this result? If the social and economic senses of "credit" were clearly distinct in this period, BERT would find clean clusters. The fact that it can't cleanly separate them is evidence that the two meanings were still deeply entangled in how writers in our corpus actually used the word. A merchant's financial credit was closely connected to social reputation. The two meanings hadn't yet become separate concepts the way they are in modern English. The roughly even split (2,887 vs. 2,141) suggests BERT is finding some structure, but the low silhouette score tells us there's massive overlap between the groups. This interpreation is in line with Craig Muldrew's argument about Early Modern credit culture in *The Economy of Obligation: The Culture of Credit and Social Relations in Early Modern England* (1998), which reassures me that we are picking up on something real. **Note:** since this is a class exercise, I set up the analysis to work with a well-known concept, such as the role of "credit." If this were a "real" research question, we wouldn't want to simply reproduce, computationally and at scale, a well-established historical point. But it's good to know that the method *works* with complex, historical concepts and data.
+-   How can we interpret this result? If the social and economic senses of "credit" were clearly distinct in this period, BERT would find clean clusters. The fact that it can't cleanly separate them is consistent with well-established historical research the two meanings were still deeply entangled in how writers in our corpus actually used the word. A merchant's financial credit was closely connected to social reputation. The two meanings hadn't yet become separate concepts the way they are in modern English. The roughly even split (2,887 vs. 2,141) suggests BERT is finding some structure, but the low silhouette score tells us there's massive overlap between the groups. This interpretion is in line with Craig Muldrew's argument about Early Modern credit culture in *The Economy of Obligation: The Culture of Credit and Social Relations in Early Modern England* (1998), which reassures me that we are picking up on something real.
 
-**\[2\]** Cluster with k= 2:
+    **Note:** since this is a class exercise, I set up the analysis to work with a well-known concept, such as the role of "credit." If this were a "real" research question, we wouldn't want to simply reproduce, computationally and at scale, a well-established historical point. We would also have to be careful with the silhouette score. Low silhouette can also come from noisy OCR, imperfect context windows, subword mismatch, or BERT simply not separating the senses well. But it's good to know that the method *works* with complex, historical concepts and data.
+
+**\[2\]** Cluster with k= 2. Although the silhouette score is (marginally) better at `k = 3`, we also inspect `k = 2` since this matches the assumption we had going in (two broad meanings of "credit": social and economic).
 
 ![](Week_13_Clusters_Credit.png)
 
