@@ -757,7 +757,7 @@ When you run this, you will get something like this:
 
 `Loaded 622 documents.`
 
-`Found 5749 occurrences of 'credit' across 424 documents.`
+`Found 5949 occurrences of 'credit' across 424 documents.`
 
 > === Sample 'Credit' Occurrences ===
 >
@@ -945,7 +945,7 @@ credit_embeddings = []
 credit_metadata = []
 
 for i, occ in enumerate(credit_occurrences):
-    emb = get_word_embedding(occ["sentence"], occ["credit"], tokenizer, model)
+    emb = get_word_embedding(occ["sentence"], occ["match"], tokenizer, model)
 
     if emb is not None:
         credit_embeddings.append(emb.tolist())
@@ -1847,6 +1847,8 @@ To evaluate whether domain adaptation improves clustering, we compare silhouette
 
 To better understand how fine-tuning reshapes the semantic space, we compare the number of documents assigned to each cluster before and after domain adaptation.
 
+-   **A note on cluster alignment:** When we run K-Means independently on the base BERT embeddings and the fine-tuned embeddings, the algorithm assigns cluster labels (0, 1, 2) arbitrarily each time. There is no guarantee that "Cluster 0" in the base model captures the same sense of "credit" as "Cluster 0" in the fine-tuned model. The labels are just names the algorithm selects during that particular run. This means that comparing cluster sizes across models by label can be misleading (be careful when you look at the table below). The silhouette score comparison is unaffected by this problem, since silhouette measures how well-separated the clusters are regardless of which label each cluster gets. So it's still true that fine-tuning improves cluster separation. But when reading the cluster size table, treat it as showing that the two models partition the data differently, [rather than]{.underline} assuming that a row labeled "Cluster 1" refers to the same semantic group in both columns.
+
 | Cluster   | Base BERT | Fine-tuned BERT |
 |:----------|----------:|----------------:|
 | Cluster 0 |      2676 |            1962 |
@@ -1854,8 +1856,6 @@ To better understand how fine-tuning reshapes the semantic space, we compare the
 | Cluster 2 |      1774 |             611 |
 
 The cluster distribution changes substantially after fine-tuning. This suggests that the fine-tuned model is grouping documents according to different semantic relationships than the base model.
-
-Most notably, Cluster 1 expanded quite a bit. This may indicate that the fine-tuned model is better capturing a historically meaningful discourse pattern that was previously dispersed across multiple clusters.
 
 ![](Week_13_Fine_tuned_BASE.png)
 
