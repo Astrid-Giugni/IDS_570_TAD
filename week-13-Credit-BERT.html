@@ -1010,7 +1010,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Saved </span><span class="sc">{</span><span class="bu">len</span>(credit_occurrences)<span class="sc">}</span><span class="ss"> occurrences to data/credit_occurrences.json"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>When you run this, you will get something like this:</p>
 <p><code>Loaded 622 documents.</code></p>
-<p><code>Found 5749 occurrences of 'credit' across 424 documents.</code></p>
+<p><code>Found 5949 occurrences of 'credit' across 424 documents.</code></p>
 <blockquote class="blockquote">
 <p>=== Sample ‘Credit’ Occurrences ===</p>
 <p>[A00169.txt] …have any adultery fornication or incest or any other offence commit within your parish be conceal for favour fear or any other respect by the churchwarden and sideman or quest-man or by any other pers…</p>
@@ -1160,7 +1160,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a>credit_metadata <span class="op">=</span> []</span>
 <span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, occ <span class="kw">in</span> <span class="bu">enumerate</span>(credit_occurrences):</span>
-<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a>    emb <span class="op">=</span> get_word_embedding(occ[<span class="st">"sentence"</span>], occ[<span class="st">"credit"</span>], tokenizer, model)</span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a>    emb <span class="op">=</span> get_word_embedding(occ[<span class="st">"sentence"</span>], occ[<span class="st">"match"</span>], tokenizer, model)</span>
 <span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> emb <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
 <span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a>        credit_embeddings.append(emb.tolist())</span>
@@ -2029,6 +2029,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="cluster-size-comparison" class="level3">
 <h3 class="anchored" data-anchor-id="cluster-size-comparison"><strong>Cluster Size Comparison</strong></h3>
 <p>To better understand how fine-tuning reshapes the semantic space, we compare the number of documents assigned to each cluster before and after domain adaptation.</p>
+<ul>
+<li><strong>A note on cluster alignment:</strong> When we run K-Means independently on the base BERT embeddings and the fine-tuned embeddings, the algorithm assigns cluster labels (0, 1, 2) arbitrarily each time. There is no guarantee that “Cluster 0” in the base model captures the same sense of “credit” as “Cluster 0” in the fine-tuned model. The labels are just names the algorithm selects during that particular run. This means that comparing cluster sizes across models by label can be misleading (be careful when you look at the table below). The silhouette score comparison is unaffected by this problem, since silhouette measures how well-separated the clusters are regardless of which label each cluster gets. So it’s still true that fine-tuning improves cluster separation. But when reading the cluster size table, treat it as showing that the two models partition the data differently, <u>rather than</u> assuming that a row labeled “Cluster 1” refers to the same semantic group in both columns.</li>
+</ul>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -2056,7 +2059,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 <p>The cluster distribution changes substantially after fine-tuning. This suggests that the fine-tuned model is grouping documents according to different semantic relationships than the base model.</p>
-<p>Most notably, Cluster 1 expanded quite a bit. This may indicate that the fine-tuned model is better capturing a historically meaningful discourse pattern that was previously dispersed across multiple clusters.</p>
 <p><img src="Week_13_Fine_tuned_BASE.png" class="img-fluid"></p>
 <p><strong>Note:</strong> because the silhouette score improves <strong>and</strong> the cluster sizes change substantially, the fine-tuned model is not simply sharpening the same grouping structure. Instead, it is reorganizing the corpus into a different partition, meaning that many documents are now considered semantically closer to different neighbors than before.</p>
 </section>
