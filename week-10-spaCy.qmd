@@ -25,9 +25,9 @@ This week's plan: our goal is to use our classifier from Week 9 to learn how to 
 
 You should feel free to experiment with both, but I will use spaCy for this tutorial as it tends to be more widely used outside of academia. I do want to emphasize that spaCy is not always superior:
 
--   I tend to work with NLTK in early stages of research as it tends to be used more often in academic contexts, making it easier to compare results. If you are planning to stay in academia, do look into NLTK. But NLTK doesn't have native word vector support at all, which is one of the meaningful gaps between it and more modern libraries.
+- I tend to work with NLTK in early stages of research as it tends to be used more often in academic contexts, making it easier to compare results. If you are planning to stay in academia, do look into NLTK. But NLTK doesn't have native word vector support at all, which is one of the meaningful gaps between it and more modern libraries.
 
--   In general spaCy ships with pre-trained pipelines that (can) include word vectors, so when you call `token.vector` on spaCy, you are not training your own model, but you're getting a pre-trained word vector. Compare this with what we did with word2vec last week in order to expand on our seed term "merchant." SpaCy loads vectors that were trained externally and baked into the pipeline. So you can't easily swap in "custom" vectors the way `Gensim` lets you. **Importantly for this tutorial**: `en_core_web_sm` (which is what we install below) doesn't include real word vectors. It relies on contextual representations rather than static word vectors. This distinction doesn't matter for our NER workflow at all (NER uses the `tok2vec` representations regardless). If you want full word vectors, you can install `en_core_web_md` or `en_core_web_lg`.
+- In general spaCy ships with pre-trained pipelines that (can) include word vectors, so when you call `token.vector` on spaCy, you are not training your own model, but you're getting a pre-trained word vector. Compare this with what we did with word2vec last week in order to expand on our seed term "merchant." SpaCy loads vectors that were trained externally and baked into the pipeline. So you can't easily swap in "custom" vectors the way `Gensim` lets you. **Importantly for this tutorial**: `en_core_web_sm` (which is what we install below) doesn't include real word vectors. It relies on contextual representations rather than static word vectors. This distinction doesn't matter for our NER workflow at all (NER uses the `tok2vec` representations regardless). If you want full word vectors, you can install `en_core_web_md` or `en_core_web_lg`.
 
 You need to think through your corpus and your research questions to make meaningful choices here.
 
@@ -43,7 +43,7 @@ You need to think through your corpus and your research questions to make meanin
 
 So far, we have been working with folders of .txt files. This was fine while we were working with one folder of texts and with only a few of them. Now that our corpus is growing, we want to find a better way to organize our data. Enter JSON (JavaScript Object Notation)! This is a structured text format that stores data as key-value pairs, similar to a Python dictionary. Instead of managing hundreds of separate .txt files scattered across folders, JSON lets us bundle all our texts together in a single, organized file where each text has a unique identifier and associated metadata (like filename, author, date, printer, publisher, location of publication...). This makes our life a lot easier: we can load everything with one command, texts can't accidentally get separated from their metadata, and we can easily add new information fields without reorganizing our entire file system.
 
-This is the format that I (and pretty much everyone else in my line of work) uses. So, how do we do this? First of all, download the folder named "Post_Spring_Break_Texts" from **Canvas** (it should contain 147 files).
+This is the format that I (and pretty much everyone else in my line of work) uses. So, how do we do this? First of all, download the folder named "Post_Midterms_Texts" from **Canvas** (it should contain 147 files).
 
 Start by creating a new python file (I named it `text_store.py`, we won't reuse it, so it doesn't matter all that much). Now we can read each .txt file, store it in JSON format, and save:
 
@@ -51,8 +51,8 @@ Start by creating a new python file (I named it `text_store.py`, we won't reuse 
 import json
 from pathlib import Path
 
-# Point to the folder with our new Post Spring Break Texts (or whatever you named it)
-NEW_TEXTS_DIR = Path.cwd() / "Post_Spring_Break_Texts"
+# Point to the folder with our new Post Midterms Texts (or whatever you named it)
+NEW_TEXTS_DIR = Path.cwd() / "Post_Midterms_Texts"
 
 
 # Read all .txt files
@@ -178,11 +178,11 @@ print("Predicted merchant (threshold .50):", sum(preds))
 
 From this process, you should be seeing that:
 
--   You found and loaded **147** `.txt` files.
+- You found and loaded **147** `.txt` files.
 
--   The JSON serialization worked `new_texts.json`
+- The JSON serialization worked `new_texts.json`
 
--   You successfully loaded **both** classifier artifacts (vectorizer + logreg) from last week.
+- You successfully loaded **both** classifier artifacts (vectorizer + logreg) from last week.
 
 In my case, I classified all documents, and at threshold **0.50**, I got **36 “merchant”** predictions. You *might* have something slightly different (I am genuinely curious) because I changed the training set before loading it on Canvas for Weeks 08 and 09.
 
@@ -242,19 +242,19 @@ Just to be safe, we can take a quick look at a couple of the results to double c
 
 Going from 0.50 threshold to 0.70 decreased our subset of text from 36 to 23, so we "lost" 13 documents. Does this matter? Maybe or maybe not! It's hard to know at this stage. My approach to a problem like this is the following:
 
--   work with the smaller, "high-confidence" subset
+- work with the smaller, "high-confidence" subset
 
--   look at the results of the NER task and evaluate how well the model is performing
+- look at the results of the NER task and evaluate how well the model is performing
 
--   manually examine a few (2-3) of the "lost" 13 documents and see if I want to include them for a second analysis
+- manually examine a few (2-3) of the "lost" 13 documents and see if I want to include them for a second analysis
 
 ## Steps 2 and 3:
 
 Now we are ready to move [from classification to linguistic annotation]{.underline}: we will run spaCy on our corpus in order to perform NER and extract entities that we want to analyze. We are going to do this *slowly* so as to make our reasoning explicit.
 
--   First, we will load one document into spaCy and inspect it
+- First, we will load one document into spaCy and inspect it
 
--   Then, we will extract entities from that one document
+- Then, we will extract entities from that one document
 
 Once we understand what the process looks like for one document, we can loop over all 23 documents and export a structured entity table (we will do JSON, but CSV is also a common choice).
 
@@ -310,31 +310,31 @@ print("Number of tokens:", len(doc))
 
 \[1\] The line `doc = nlp (sample_text)` passes raw text into a processing pipeline that:
 
--   tokenizes the text
+- tokenizes the text
 
--   splits sentences
+- splits sentences
 
--   assigns part-of-speech tag
+- assigns part-of-speech tag
 
--   computes syntactic dependencies
+- computes syntactic dependencies
 
--   identifies named entities
+- identifies named entities
 
 The result of this pipeline is a structured [spaCy Doc](https://spacy.io/api/doc) object that contains:
 
--   The original text
+- The original text
 
--   A sequence of tokens
+- A sequence of tokens
 
--   Sentence boundaries
+- Sentence boundaries
 
--   POS tags
+- POS tags
 
--   Dependency relations
+- Dependency relations
 
--   Named entities: see the [**spaCy documentation**](https://spacy.io/usage/linguistic-features#named-entities). We are going to be interested in LOC: "location" and GPE: Geopolitical entities such as countries, cities, states, etc.
+- Named entities: see the [**spaCy documentation**](https://spacy.io/usage/linguistic-features#named-entities). We are going to be interested in LOC: "location" and GPE: Geopolitical entities such as countries, cities, states, etc.
 
--   Character offsets
+- Character offsets
 
 Imagine you have a small, sample sentence: "John went to London in 1605." It's now going to be in a data structure:
 
@@ -416,11 +416,11 @@ The problem that we are running into is that one of our texts is very long: 1,10
 
 When we split a long text into pieces for spaCy, we have to decide where to cut. There are [three reasonable approaches]{.underline} that fit our needs and you will encounter all of them in this tutorial (that way you have options to choose from in the future). Here's what we will do:
 
--   Fixed-size chunks (what we'll use in this step): Cut every 50,000 characters, no matter what. This is simple and fast. The risk is that we might slice through the middle of a word or even a multi-word entity like "the Virginia Company of London."
+- Fixed-size chunks (what we'll use in this step): Cut every 50,000 characters, no matter what. This is simple and fast. The risk is that we might slice through the middle of a word or even a multi-word entity like "the Virginia Company of London."
 
--   Boundary-aware chunks (the "aside" code below that we won't run): After reaching \~50,000 characters, look ahead for the next sentence-ending punctuation mark (. ! ? ;) and cut there. This is more linguistically principled, but Early Modern punctuation is so inconsistent that it can create as many problems as it solves for our texts.
+- Boundary-aware chunks (the "aside" code below that we won't run): After reaching \~50,000 characters, look ahead for the next sentence-ending punctuation mark (. ! ? ;) and cut there. This is more linguistically principled, but Early Modern punctuation is so inconsistent that it can create as many problems as it solves for our texts.
 
--   Whitespace-safe chunks (what we'll use in Step 5): After reaching \~50,000 characters, back up to the nearest space so we never split a word in half. This is a pragmatic middle ground—it doesn't guarantee we won't split a multi-word entity, but it does guarantee every individual token is intact, which is what spaCy's NER model cares about most.
+- Whitespace-safe chunks (what we'll use in Step 5): After reaching \~50,000 characters, back up to the nearest space so we never split a word in half. This is a pragmatic middle ground—it doesn't guarantee we won't split a multi-word entity, but it does guarantee every individual token is intact, which is what spaCy's NER model cares about most.
 
 For now, approach #1 is fine for getting our baseline counts. When we run the fine-tuned model in Step 5, we'll upgrade to approach #3.
 
@@ -500,11 +500,11 @@ This isn't without risks. There is a real possibility that an entity might split
 
 We can improve on this (at least a bit!) by doing the following instead:
 
--   Cut at \~50,000 characters.
+- Cut at \~50,000 characters.
 
--   Look forward a limited distance (a “lookahead window”) for the first boundary mark among: `. ! ? ; :` (and optionally a newline if this makes sense for your type of text).
+- Look forward a limited distance (a “lookahead window”) for the first boundary mark among: `. ! ? ; :` (and optionally a newline if this makes sense for your type of text).
 
--   Extend the chunk to that boundary.
+- Extend the chunk to that boundary.
 
 We are **not** going to implement this code, but it would look like this:
 
@@ -815,23 +815,23 @@ More details about the code:
 
 3.  When we load `nlp = spacy.load(BASE_MODEL)`, we get a whole sequence of processing components that text flows through:
 
-    -   Tokenizer — splits raw text into individual tokens (words, punctuation)
+    - Tokenizer — splits raw text into individual tokens (words, punctuation)
 
-    -   tok2vec — converts each token into a numerical vector that captures its meaning in context
+    - tok2vec — converts each token into a numerical vector that captures its meaning in context
 
-    -   Tagger — assigns part-of-speech tags (noun, verb, adjective, etc.)
+    - Tagger — assigns part-of-speech tags (noun, verb, adjective, etc.)
 
-    -   Parser — determines syntactic dependencies (which words modify which)
+    - Parser — determines syntactic dependencies (which words modify which)
 
-    -   NER — identifies named entities and classifies them (person, place, organisation, etc.)
+    - NER — identifies named entities and classifies them (person, place, organisation, etc.)
 
 4.  The [[**optimizer**]{.underline}](https://thinc.ai/docs/api-optimizers) is the algorithm that decides how to adjust the model's weights after each training example. The optimizer used by spaCy is called Adam and you can use the link I just gave you to learn about the details of how it works if you are so inclined. The other key choice in this section of the code is [`resume_training()`](https://spacy.io/api/language#resume_training) \[`instead of initialize()`\]. By calling `nlp.resume_training()`, the optimizer is configured with a smaller learning rate appropriate for fine-tuning, where we only want small adjustments. If we had called `nlp.initialize()`, the optimizer would use a larger learning rate because it would assume that the weights are random and need big moves to get anywhere useful. To use `nlp.initialize()`, we would need a much, much larger training set (in the order of thousands)!
 
 5.  Here we are setting up our training loop. An epoch is one complete pass through the entire training set. If we have 31 training examples, one epoch means the model has seen and learned from all 31 of them once. When we set N_EPOCHS = 20, the model goes through that full set of 31 examples twenty times. Each pass gives the model another chance to refine its weights: the first time through it makes rough adjustments, and subsequent passes let it fine-tune those adjustments based on what it's learned so far.
 
-    -   `random.shuffle(TRAIN)`: Before each epoch, the training examples are put in a new random order. This matters because the model updates its weights after every single example, and those updates accumulate.
+    - `random.shuffle(TRAIN)`: Before each epoch, the training examples are put in a new random order. This matters because the model updates its weights after every single example, and those updates accumulate.
 
-    -   [Step b in the code]{.underline}: Four things happen for each of the 31 examples: First, `nlp.make_doc(text)` creates a blank spaCy `Doc` from the raw text (it tokenizes the words at this step). Second, `Example.from_dict(doc, annots)` pairs that blank doc with the gold-standard annotations I labelled. Third, [`nlp.update()`](https://spacy.io/api/language#update) does the actual learning. Fourth, `drop=DROP_RATE` applies dropout during this update, randomly disabling 30% of neurons so the model doesn't over-rely on any single pathway (see \[1\] above). After all 31 examples, the model's weights have been adjusted 31 times. That completes one epoch of training.
+    - [Step b in the code]{.underline}: Four things happen for each of the 31 examples: First, `nlp.make_doc(text)` creates a blank spaCy `Doc` from the raw text (it tokenizes the words at this step). Second, `Example.from_dict(doc, annots)` pairs that blank doc with the gold-standard annotations I labelled. Third, [`nlp.update()`](https://spacy.io/api/language#update) does the actual learning. Fourth, `drop=DROP_RATE` applies dropout during this update, randomly disabling 30% of neurons so the model doesn't over-rely on any single pathway (see \[1\] above). After all 31 examples, the model's weights have been adjusted 31 times. That completes one epoch of training.
 
 ## Step 5: Rerun NER with the fine-tuned model
 
