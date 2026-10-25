@@ -43,7 +43,7 @@ You need to think through your corpus and your research questions to make meanin
 
 So far, we have been working with folders of .txt files. This was fine while we were working with one folder of texts and with only a few of them. Now that our corpus is growing, we want to find a better way to organize our data. Enter JSON (JavaScript Object Notation)! This is a structured text format that stores data as key-value pairs, similar to a Python dictionary. Instead of managing hundreds of separate .txt files scattered across folders, JSON lets us bundle all our texts together in a single, organized file where each text has a unique identifier and associated metadata (like filename, author, date, printer, publisher, location of publication...). This makes our life a lot easier: we can load everything with one command, texts can't accidentally get separated from their metadata, and we can easily add new information fields without reorganizing our entire file system.
 
-This is the format that I (and pretty much everyone else in my line of work) uses. So, how do we do this? First of all, download the folder named "Post_Midterms_Texts" from **Canvas** (it should contain 147 files).
+This is the format that I (and pretty much everyone else in my line of work) uses. So, how do we do this? First of all, download the folder named "Post_Midterms_Texts" from **Canvas** (it contains 147 files).
 
 Start by creating a new python file (I named it `text_store.py`, we won't reuse it, so it doesn't matter all that much). Now we can read each .txt file, store it in JSON format, and save:
 
