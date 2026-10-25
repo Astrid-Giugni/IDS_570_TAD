@@ -2,17 +2,23 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Week 07: Word2Vec and LDA introduction – Text as Data: Language Models, AI, and NLP Techniques for Historical and Literary Texts</title>
 <style>
-code{white-space: pre-wrap;}
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -67,15 +73,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-b57d1312aa7c10f38068bb8d7c282b76.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-c84caa23ed1b667d234790a4b01eaaee.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -105,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -143,8 +148,6 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="./index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">Text as Data</span>
     </a>
@@ -183,10 +186,6 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header">
-      <a href="./index.html" class="sidebar-logo-link">
-      </a>
-      </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
         <div class="sidebar-search">
         <div id="quarto-search" class="" title="Search"></div>
@@ -641,8 +640,7 @@ Top 25 tokens after cleaning:</code></pre>
 <span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>    sg<span class="op">=</span><span class="dv">1</span>                    <span class="co"># 1=skip-gram, 0=CBOW</span></span>
 <span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'
-Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'</code></pre>
+<pre><code>Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Vocabulary size:"</span>, <span class="bu">len</span>(w2v.wv.key_to_index))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -677,64 +675,64 @@ Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Nearest neighbors for 'trade':
-    carrying  0.855
-       round  0.832
-advantageous  0.823
-     carried  0.800
-     returns  0.792
-      forced  0.788
-    branches  0.788
-       carry  0.786
-  mercantile  0.786
-      direct  0.781
+    carrying  0.888
+       round  0.856
+    branches  0.833
+advantageous  0.832
+     carried  0.822
+      branch  0.819
+    shipping  0.817
+      direct  0.817
+  mercantile  0.815
+       carry  0.805
 
 Nearest neighbors for 'labor':
-     laborer  0.852
-        puts  0.849
-      motion  0.842
-        adds  0.835
-        vary  0.810
- distributed  0.806
-       sinks  0.805
-  diminishes  0.798
-   producing  0.797
-       tools  0.796
+        puts  0.845
+        adds  0.845
+      motion  0.844
+     laborer  0.844
+   increases  0.811
+       tools  0.803
+ constitutes  0.800
+   furnishes  0.798
+ distributed  0.796
+      powers  0.796
 
 Nearest neighbors for 'price':
-       rises  0.839
-         low  0.812
-      barley  0.811
-       lower  0.810
-        sink  0.806
-      prices  0.794
-       bread  0.791
-        meat  0.786
-   cheapness  0.785
-     butcher  0.782
+       rises  0.859
+      barley  0.828
+         low  0.822
+       bread  0.818
+        sink  0.807
+        meat  0.802
+        rise  0.800
+       raise  0.797
+      prices  0.797
+       risen  0.791
 
 Nearest neighbors for 'capital':
-    capitals  0.881
-    employed  0.835
-   withdrawn  0.833
-    replaces  0.833
-     employs  0.824
-     replace  0.818
-   regularly  0.816
-   wholesale  0.815
-     hinders  0.814
-       fixed  0.812
+    capitals  0.883
+       stock  0.861
+    employed  0.857
+    replaces  0.844
+   withdrawn  0.838
+     employs  0.837
+        bear  0.829
+      unless  0.825
+     replace  0.821
+   wholesale  0.820
 
 Nearest neighbors for 'market':
-    supplied  0.819
-   effectual  0.816
-     thither  0.800
-     cheaper  0.794
-      dearer  0.790
-     markets  0.790
-       bring  0.782
-   supplying  0.777
-    bringing  0.777
-     brought  0.769</code></pre>
+    supplied  0.833
+     brought  0.810
+   effectual  0.802
+     thither  0.801
+      dearer  0.785
+     markets  0.783
+      import  0.777
+        come  0.776
+       bring  0.773
+      demand  0.768</code></pre>
 </div>
 </div>
 <p>For <strong>trade</strong>: the terms that we are getting indicate that Smith is using structural and institutional language in conjunction with this term. We have verbs like carrying, carried, and shipping (possibly used as a noun…), as well as structural qualifiers such as branches, returns, and direct. Some words are perhaps more surprising and would require more investigation (such as round).</p>
@@ -1048,7 +1046,7 @@ manufactures  0.007</code></pre>
 <span id="cb66-18"><a href="#cb66-18" aria-hidden="true" tabindex="-1"></a>plt.bar(<span class="bu">range</span>(K), topic_share)</span>
 <span id="cb66-19"><a href="#cb66-19" aria-hidden="true" tabindex="-1"></a>plt.xticks(<span class="bu">range</span>(K), [<span class="ss">f"T</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>([&lt;matplotlib.axis.XTick object at 0x00000282CF847090&gt;, &lt;matplotlib.axis.XTick object at 0x00000282CBE7E5D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000282CF84F5D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000282CF8BA190&gt;, &lt;matplotlib.axis.XTick object at 0x00000282CF8B9710&gt;, &lt;matplotlib.axis.XTick object at 0x00000282CF8C1AD0&gt;, &lt;matplotlib.axis.XTick object at 0x00000282CF8C3E50&gt;, &lt;matplotlib.axis.XTick object at 0x00000282CF8AE210&gt;], [Text(0, 0, 'T0'), Text(1, 0, 'T1'), Text(2, 0, 'T2'), Text(3, 0, 'T3'), Text(4, 0, 'T4'), Text(5, 0, 'T5'), Text(6, 0, 'T6'), Text(7, 0, 'T7')])</code></pre>
+<pre><code>([&lt;matplotlib.axis.XTick object at 0x000001E99FDA9D50&gt;, &lt;matplotlib.axis.XTick object at 0x000001E99FDE3B10&gt;, &lt;matplotlib.axis.XTick object at 0x000001E99FDE6DD0&gt;, &lt;matplotlib.axis.XTick object at 0x000001E99FDF9E10&gt;, &lt;matplotlib.axis.XTick object at 0x000001E99FDFA590&gt;, &lt;matplotlib.axis.XTick object at 0x000001E99FDF1810&gt;, &lt;matplotlib.axis.XTick object at 0x000001E99FDF3C90&gt;, &lt;matplotlib.axis.XTick object at 0x000001E99FE02250&gt;], [Text(0, 0, 'T0'), Text(1, 0, 'T1'), Text(2, 0, 'T2'), Text(3, 0, 'T3'), Text(4, 0, 'T4'), Text(5, 0, 'T5'), Text(6, 0, 'T6'), Text(7, 0, 'T7')])</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Share of topic mass (across segments)"</span>)</span>
 <span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Topic"</span>)</span>
@@ -1193,7 +1191,7 @@ Topic 7: 0.173</code></pre>
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/Astrid-Giugni\.github\.io\/IDS_570_TAD\/");
+        var filterRegex = new RegExp('/' + window.location.host + '/');
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
