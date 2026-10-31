@@ -1570,7 +1570,7 @@ P(y =1 \mid x)
 <h3 class="anchored" data-anchor-id="coming-back-to-threshold-choice">Coming back to threshold choice:</h3>
 <p>Remember that I mentioned that we could change the threshold for the classification task if we had a good reason to do so. We now want to go back and think through this issue.</p>
 <p>First of all, you might want to ask: Does high ROC-AUC mean that our 0.5 threshold performed well? We want to be careful with this question:</p>
-<p>Our high ROC-AUC (0.996) tells us the model is excellent at ranking texts. It consistently assigns higher probabilities to CORE than NEG. This means that if you sorted all chunks by their probability scores, true CORE chunks would appear near the top and true NEG chunks near the bottom 99.6% of the time, regardless of where you draw the threshold line.</p>
+<p>Our high ROC-AUC (0.996) tells us the model is excellent at separating the chunks our rule labelled as CORE from those labelled NEG. Note that this does guarantee that the passages capture “merchant discourse”! We would have to manually check some of the passages and interpret them as humans, but it is surfacing good candidates. This means that if you sorted all chunks by their probability scores, true CORE chunks would appear near the top and true NEG chunks near the bottom 99.6% of the time, regardless of where you draw the</p>
 <ul>
 <li>True CORE chunks get higher probability scores than true NEG chunks (ranking). Whether they cross the 0.5 threshold is a separate question (classification)</li>
 </ul>
